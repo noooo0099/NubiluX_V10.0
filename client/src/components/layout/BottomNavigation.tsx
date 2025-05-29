@@ -40,13 +40,17 @@ export default function BottomNavigation() {
             <Button
               key={item.path}
               onClick={() => setLocation(item.path)}
-              className={`flex flex-col items-center p-2 transition-colors duration-200 hover:bg-transparent ${
-                isActive ? "text-nxe-primary" : "text-gray-400 hover:text-white"
-              }`}
+              className="flex flex-col items-center p-2 transition-colors duration-200 hover:bg-transparent"
               variant="ghost"
             >
-              <Icon className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <div className={`p-2 rounded-full transition-colors ${
+                isActive ? "bg-nxe-primary text-white" : "text-gray-400 hover:text-white"
+              }`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className={`text-xs font-medium mt-1 ${
+                isActive ? "text-nxe-primary" : "text-gray-400"
+              }`}>{item.label}</span>
             </Button>
           );
         })}
