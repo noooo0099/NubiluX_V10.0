@@ -4,9 +4,13 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertProductSchema, insertChatSchema, insertMessageSchema, insertUserSchema, insertPosterGenerationSchema } from "@shared/schema";
 import { generatePoster } from "./openai";
+import { seedDatabase } from "./seed";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // Seed database on startup
+  await seedDatabase();
 
   // WebSocket setup for real-time chat
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

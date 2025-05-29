@@ -40,7 +40,9 @@ export default function BottomNavigation() {
             <Button
               key={item.path}
               onClick={() => setLocation(item.path)}
-              className={`nxe-nav-item ${isActive ? "active" : ""}`}
+              className={`flex flex-col items-center p-2 transition-colors duration-200 hover:bg-transparent ${
+                isActive ? "text-nxe-primary" : "text-gray-400 hover:text-white"
+              }`}
               variant="ghost"
             >
               <Icon className="h-5 w-5 mb-1" />

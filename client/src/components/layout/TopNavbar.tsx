@@ -45,17 +45,17 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-1">
           {/* Search */}
           <div className="relative flex items-center">
             {searchExpanded && (
-              <form onSubmit={handleSearch} className="mr-2">
+              <form onSubmit={handleSearch} className="absolute right-12 top-1/2 transform -translate-y-1/2">
                 <Input
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary animate-search-expand"
+                  className="w-56 bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary"
                   autoFocus
                 />
               </form>
@@ -64,12 +64,12 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleSearch}
-              className="p-2 rounded-full hover:bg-nxe-surface"
+              className="p-2 hover:bg-transparent"
             >
               {searchExpanded ? (
-                <X className="h-4 w-4 text-gray-300" />
+                <X className="h-5 w-5 text-gray-300" />
               ) : (
-                <Search className="h-4 w-4 text-gray-300" />
+                <Search className="h-5 w-5 text-gray-300" />
               )}
             </Button>
           </div>
@@ -79,9 +79,9 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             variant="ghost"
             size="sm"
             onClick={onShowNotifications}
-            className="relative p-2 rounded-full hover:bg-nxe-surface"
+            className="relative p-2 hover:bg-transparent"
           >
-            <Bell className="h-4 w-4 text-gray-300" />
+            <Bell className="h-5 w-5 text-gray-300" />
             <Badge 
               variant="destructive" 
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
@@ -95,9 +95,9 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             variant="ghost"
             size="sm"
             onClick={() => setLocation("/chat")}
-            className="p-2 rounded-full hover:bg-nxe-surface"
+            className="p-2 hover:bg-transparent"
           >
-            <MessageCircle className="h-4 w-4 text-gray-300" />
+            <MessageCircle className="h-5 w-5 text-gray-300" />
           </Button>
 
           {/* Profile */}
@@ -105,7 +105,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             variant="ghost"
             size="sm"
             onClick={() => setLocation("/profile/1")}
-            className="p-0 rounded-full"
+            className="p-0 hover:bg-transparent"
           >
             <Avatar className="w-8 h-8 border-2 border-nxe-primary">
               <AvatarImage 

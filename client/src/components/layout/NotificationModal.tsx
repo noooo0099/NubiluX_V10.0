@@ -1,4 +1,4 @@
-import { X, ShoppingCart, MessageCircle, AlertTriangle } from "lucide-react";
+import { X, ShoppingCart, MessageCircle, AlertTriangle, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
