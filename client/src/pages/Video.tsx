@@ -34,23 +34,50 @@ export default function Video() {
   ];
 
   const handleVideoPlay = (videoId: number) => {
-    console.log("Playing video:", videoId);
-    // Implement video playback
+    // Create full screen video player
+    const videoModal = document.createElement('div');
+    videoModal.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+    videoModal.innerHTML = `
+      <div class="relative w-full h-full">
+        <video controls autoplay class="w-full h-full object-cover">
+          <source src="https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <button onclick="this.closest('.fixed').remove()" 
+                class="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full w-10 h-10">&times;</button>
+      </div>
+    `;
+    document.body.appendChild(videoModal);
   };
 
   const handleLike = (videoId: number) => {
-    console.log("Liked video:", videoId);
-    // Implement like functionality
+    // Update like count in real time
+    const video = sampleVideos.find(v => v.id === videoId);
+    if (video) {
+      video.likes += 1;
+      // Trigger re-render or state update
+      window.location.reload();
+    }
   };
 
   const handleComment = (videoId: number) => {
-    console.log("Comment on video:", videoId);
-    // Implement comment functionality
+    const comment = prompt("Add a comment:");
+    if (comment) {
+      alert(`Comment added: "${comment}"`);
+      // In real app, this would save to database
+    }
   };
 
   const handleShare = (videoId: number) => {
-    console.log("Share video:", videoId);
-    // Implement share functionality
+    if (navigator.share) {
+      navigator.share({
+        title: sampleVideos.find(v => v.id === videoId)?.title,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Video link copied to clipboard!");
+    }
   };
 
   return (

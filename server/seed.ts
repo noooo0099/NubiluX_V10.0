@@ -1,9 +1,17 @@
 import { db } from "./db";
 import { users, products, chats, messages, statusUpdates, notifications } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export async function seedDatabase() {
   try {
     console.log("Seeding database...");
+
+    // Check if data already exists
+    const existingUsers = await db.select().from(users).limit(1);
+    if (existingUsers.length > 0) {
+      console.log("Database already seeded, skipping...");
+      return;
+    }
 
     // Create sample users
     const sampleUsers = await db.insert(users).values([

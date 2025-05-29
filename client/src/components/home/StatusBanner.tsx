@@ -28,13 +28,23 @@ export default function StatusBanner() {
   ];
 
   const handleStatusClick = (statusId: number) => {
-    console.log("Viewing status:", statusId);
-    // Implement status view modal
+    // Show status in full screen modal
+    const statusModal = document.createElement('div');
+    statusModal.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+    statusModal.innerHTML = `
+      <div class="relative w-full h-full">
+        <img src="${sampleStatuses.find(s => s.id === statusId)?.media}" 
+             class="w-full h-full object-cover" />
+        <button onclick="this.closest('.fixed').remove()" 
+                class="absolute top-4 right-4 text-white text-2xl">&times;</button>
+      </div>
+    `;
+    document.body.appendChild(statusModal);
   };
 
   const handleAddStatus = () => {
-    console.log("Add status clicked");
-    // Implement add status functionality
+    // Navigate to upload page with status tab
+    window.location.href = '/upload';
   };
 
   return (

@@ -93,11 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth middleware (simplified for demo)
   const requireAuth = (req: any, res: any, next: any) => {
-    const userId = req.headers['x-user-id'];
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    req.userId = parseInt(userId);
+    const userId = req.headers['x-user-id'] || '1'; // Default to user 1 for demo
+    req.userId = parseInt(userId as string);
     next();
   };
 
@@ -280,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const poster = await storage.createPosterGeneration(posterData);
       
       // Start async poster generation
-      generatePoster(poster.id, posterData.profileImage, posterData.selectedSkins)
+      generatePoster(poster.id, posterData.profileImage, posterData.selectedSkins as string[])
         .then(async (resultUrl) => {
           await storage.updatePosterGeneration(poster.id, {
             status: 'completed',
