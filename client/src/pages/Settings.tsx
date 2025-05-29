@@ -1,67 +1,64 @@
-import { useState } from "react";
 import { 
   User, Shield, Bell, Moon, Sun, LogOut, 
-  CreditCard, HelpCircle, Star, ToggleLeft, ToggleRight 
+  CreditCard, HelpCircle, Star, ChevronRight,
+  UserCheck, Palette, Database, MessageSquare, Globe
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function Settings() {
-  const [currentRole, setCurrentRole] = useState<"buyer" | "seller">("buyer");
-  const [notifications, setNotifications] = useState({
-    orders: true,
-    messages: true,
-    payments: false,
-    marketing: false,
-  });
-  const [darkMode, setDarkMode] = useState(true);
-  const { toast } = useToast();
-
-  const handleRoleSwitch = () => {
-    const newRole = currentRole === "buyer" ? "seller" : "buyer";
-    setCurrentRole(newRole);
-    toast({
-      title: "Role switched successfully",
-      description: `You are now a ${newRole}`,
-    });
-  };
-
-  const handleNotificationChange = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+  const [, setLocation] = useLocation();
 
   const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
+    if (confirm("Yakin ingin keluar dari akun?")) {
+      localStorage.clear();
+      setLocation("/");
+      window.location.reload();
+    }
   };
 
   const settingSections = [
     {
-      title: "Account",
+      title: "Akun",
       items: [
         {
           icon: <User className="h-5 w-5" />,
           label: "Edit Profile",
-          action: () => console.log("Edit profile"),
+          description: "Update informasi profil Anda",
+          action: () => setLocation("/profile"),
+        },
+        {
+          icon: <UserCheck className="h-5 w-5" />,
+          label: "User Role",
+          description: "Kelola peran sebagai pembeli atau penjual",
+          action: () => setLocation("/settings/user-role"),
         },
         {
           icon: <Shield className="h-5 w-5" />,
-          label: "Privacy & Security",
-          action: () => console.log("Privacy settings"),
+          label: "Privacy Settings",
+          description: "Kelola pengaturan privasi",
+          action: () => setLocation("/settings/privacy"),
         },
+      ]
+    },
+    {
+      title: "Notifikasi",
+      items: [
+        {
+          icon: <Bell className="h-5 w-5" />,
+          label: "Notification Preferences",
+          description: "Atur preferensi notifikasi",
+          action: () => setLocation("/settings/notifications"),
+        },
+      ]
+    },
+    {
+      title: "Pembayaran",
+      items: [
         {
           icon: <CreditCard className="h-5 w-5" />,
           label: "Payment Methods",
-          action: () => console.log("Payment methods"),
+          description: "Kelola metode pembayaran",
+          action: () => setLocation("/settings/payment"),
         },
       ]
     },
@@ -69,16 +66,22 @@ export default function Settings() {
       title: "App Settings",
       items: [
         {
-          icon: <Bell className="h-5 w-5" />,
-          label: "Notifications",
-          action: () => console.log("Notification settings"),
+          icon: <Palette className="h-5 w-5" />,
+          label: "Theme Settings",
+          description: "Kustomisasi tampilan aplikasi",
+          action: () => setLocation("/settings/theme"),
         },
         {
-          icon: darkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />,
-          label: "Dark Mode",
-          toggle: true,
-          value: darkMode,
-          action: () => setDarkMode(!darkMode),
+          icon: <Globe className="h-5 w-5" />,
+          label: "Language",
+          description: "Ubah bahasa aplikasi",
+          action: () => setLocation("/settings/language"),
+        },
+        {
+          icon: <Database className="h-5 w-5" />,
+          label: "Data & Storage",
+          description: "Kelola data dan penyimpanan",
+          action: () => setLocation("/settings/data"),
         },
       ]
     },
@@ -87,13 +90,15 @@ export default function Settings() {
       items: [
         {
           icon: <HelpCircle className="h-5 w-5" />,
-          label: "Help Center",
-          action: () => console.log("Help center"),
+          label: "Help & Support",
+          description: "Dapatkan bantuan dan hubungi support",
+          action: () => setLocation("/settings/support"),
         },
         {
-          icon: <Star className="h-5 w-5" />,
-          label: "Rate App",
-          action: () => console.log("Rate app"),
+          icon: <MessageSquare className="h-5 w-5" />,
+          label: "Feedback",
+          description: "Berikan masukan untuk aplikasi",
+          action: () => setLocation("/settings/feedback"),
         },
       ]
     }
@@ -103,130 +108,41 @@ export default function Settings() {
     <div className="min-h-screen bg-nxe-dark px-4 py-6">
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
-      {/* Role Switcher */}
-      <Card className="bg-nxe-card border-nxe-surface mb-6">
-        <CardHeader>
-          <CardTitle className="text-white">User Role</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Current Role</p>
-              <div className="flex items-center space-x-2 mt-1">
-                <Badge 
-                  variant={currentRole === "seller" ? "default" : "secondary"}
-                  className={currentRole === "seller" ? "bg-nxe-primary" : ""}
-                >
-                  {currentRole === "seller" ? "Seller" : "Buyer"}
-                </Badge>
-                <span className="text-gray-400 text-sm">
-                  {currentRole === "seller" 
-                    ? "You can sell products" 
-                    : "You can buy products"
-                  }
-                </span>
-              </div>
-            </div>
-            <Button
-              onClick={handleRoleSwitch}
-              className="bg-nxe-accent hover:bg-nxe-accent/80"
-            >
-              Switch to {currentRole === "buyer" ? "Seller" : "Buyer"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notification Settings */}
-      <Card className="bg-nxe-card border-nxe-surface mb-6">
-        <CardHeader>
-          <CardTitle className="text-white">Notification Preferences</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="orders" className="text-white">Order Updates</Label>
-            <Switch
-              id="orders"
-              checked={notifications.orders}
-              onCheckedChange={() => handleNotificationChange("orders")}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Label htmlFor="messages" className="text-white">New Messages</Label>
-            <Switch
-              id="messages"
-              checked={notifications.messages}
-              onCheckedChange={() => handleNotificationChange("messages")}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Label htmlFor="payments" className="text-white">Payment Alerts</Label>
-            <Switch
-              id="payments"
-              checked={notifications.payments}
-              onCheckedChange={() => handleNotificationChange("payments")}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Label htmlFor="marketing" className="text-white">Marketing Updates</Label>
-            <Switch
-              id="marketing"
-              checked={notifications.marketing}
-              onCheckedChange={() => handleNotificationChange("marketing")}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Settings Sections */}
       {settingSections.map((section) => (
-        <Card key={section.title} className="bg-nxe-card border-nxe-surface mb-4">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">{section.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <div key={section.title} className="mb-6">
+          <h2 className="text-lg font-semibold text-nxe-text mb-3 px-2">{section.title}</h2>
+          <div className="bg-nxe-card rounded-xl overflow-hidden">
             {section.items.map((item, index) => (
-              <Button
+              <button
                 key={index}
                 onClick={item.action}
-                variant="ghost"
-                className="w-full justify-between p-3 h-auto hover:bg-nxe-surface"
+                className="w-full p-4 flex items-center justify-between hover:bg-nxe-surface transition-colors border-b border-nxe-border last:border-b-0"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="text-gray-400">{item.icon}</div>
-                  <span className="text-white">{item.label}</span>
+                <div className="flex items-center space-x-4">
+                  <div className="text-nxe-primary">{item.icon}</div>
+                  <div className="text-left">
+                    <h3 className="text-nxe-text font-medium">{item.label}</h3>
+                    <p className="text-nxe-text-secondary text-sm">{item.description}</p>
+                  </div>
                 </div>
-                {item.toggle ? (
-                  item.value ? (
-                    <ToggleRight className="h-5 w-5 text-nxe-primary" />
-                  ) : (
-                    <ToggleLeft className="h-5 w-5 text-gray-400" />
-                  )
-                ) : (
-                  <div className="w-2 h-2 rounded-full bg-gray-600" />
-                )}
-              </Button>
+                <ChevronRight className="w-5 h-5 text-nxe-text-secondary" />
+              </button>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
 
       {/* Logout */}
-      <Card className="bg-red-900/20 border-red-700/30">
-        <CardContent className="p-4">
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            className="w-full justify-center text-red-400 hover:text-red-300 hover:bg-red-900/30"
-          >
-            <LogOut className="h-5 w-5 mr-2" />
-            Logout
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="bg-red-900/20 border border-red-700/30 rounded-xl overflow-hidden">
+        <button
+          onClick={handleLogout}
+          className="w-full p-4 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-colors"
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          <span className="font-medium">Keluar dari Akun</span>
+        </button>
+      </div>
     </div>
   );
 }
