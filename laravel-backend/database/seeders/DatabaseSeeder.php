@@ -2,167 +2,81 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\StatusUpdate;
-use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
-        // Create users
-        $users = [
-            [
-                'username' => 'admin',
-                'email' => 'admin@nubiluxchange.com',
-                'password' => Hash::make('admin123'),
-                'display_name' => 'Admin NXE',
-                'bio' => 'Administrator NubiluXchange',
-                'role' => 'seller',
-                'is_verified' => true,
-                'wallet_balance' => 0.00,
-            ],
-            [
-                'username' => 'gamer_pro',
-                'email' => 'gamer@example.com',
-                'password' => Hash::make('password123'),
-                'display_name' => 'Pro Gamer',
-                'bio' => 'Jual akun game terpercaya dengan rating tinggi',
-                'role' => 'seller',
-                'is_verified' => true,
-                'wallet_balance' => 2500000.00,
-            ],
-            [
-                'username' => 'ml_legend',
-                'email' => 'mllegend@example.com',
-                'password' => Hash::make('password123'),
-                'display_name' => 'ML Legend',
-                'bio' => 'Spesialis akun Mobile Legends rank Mythical Glory',
-                'role' => 'seller',
-                'is_verified' => false,
-                'wallet_balance' => 1800000.00,
-            ],
-            [
-                'username' => 'buyer123',
-                'email' => 'buyer@example.com',
-                'password' => Hash::make('password123'),
-                'display_name' => 'Gaming Enthusiast',
-                'bio' => 'Suka koleksi akun game berkualitas',
-                'role' => 'buyer',
-                'is_verified' => false,
-                'wallet_balance' => 500000.00,
-            ]
-        ];
+        // Create test users
+        $gamer = User::create([
+            'username' => 'gamer123',
+            'name' => 'Pro Gamer',
+            'email' => 'gamer@example.com',
+            'password' => bcrypt('password123'),
+            'display_name' => 'Pro Gamer',
+            'role' => 'seller',
+            'wallet_balance' => 50000,
+            'is_verified' => true,
+        ]);
 
-        foreach ($users as $userData) {
-            User::create($userData);
-        }
+        $buyer = User::create([
+            'username' => 'buyer001',
+            'name' => 'Gaming Enthusiast',
+            'email' => 'buyer@example.com',
+            'password' => bcrypt('password123'),
+            'display_name' => 'Gaming Enthusiast',
+            'role' => 'buyer',
+            'wallet_balance' => 25000,
+        ]);
 
-        // Create products
-        $products = [
-            [
-                'seller_id' => 2,
-                'title' => 'Mobile Legends Mythical Glory - 850 Diamonds',
-                'description' => 'Akun Mobile Legends dengan rank Mythical Glory 600+ poin. Sudah memiliki 850 diamonds dan 15+ skin epic. Hero lengkap dengan build emblem sempurna.',
-                'category' => 'mobile_legends',
-                'price' => 750000.00,
-                'thumbnail' => 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
-                'images' => [
-                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
-                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400'
-                ],
-                'game_data' => [
-                    'rank' => 'Mythical Glory',
-                    'points' => 650,
-                    'diamonds' => 850,
-                    'skins' => 15,
-                    'heroes' => 'All Heroes Unlocked'
-                ],
-                'status' => 'active',
-                'is_premium' => true,
-                'rating' => 4.8,
-                'review_count' => 24,
-                'views' => 156,
+        // Create sample products
+        Product::create([
+            'seller_id' => $gamer->id,
+            'title' => 'ML Mythic Account - 50 Skins',
+            'description' => 'Akun Mobile Legends rank Mythic dengan 50+ skin hero premium. Semua hero sudah unlock.',
+            'category' => 'MOBA',
+            'price' => 150000,
+            'thumbnail' => 'https://via.placeholder.com/300x200',
+            'images' => ['https://via.placeholder.com/600x400'],
+            'game_data' => [
+                'rank' => 'Mythic',
+                'level' => 45,
+                'heroes' => 50,
+                'skins' => 53
             ],
-            [
-                'seller_id' => 3,
-                'title' => 'PUBG Mobile Conqueror Season 30',
-                'description' => 'Akun PUBG Mobile rank Conqueror dengan KD ratio 4.2. Banyak skin rare dan senjata upgrade max level.',
-                'category' => 'pubg',
-                'price' => 950000.00,
-                'thumbnail' => 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400',
-                'images' => [
-                    'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400'
-                ],
-                'game_data' => [
-                    'rank' => 'Conqueror',
-                    'kd_ratio' => 4.2,
-                    'tier_points' => 4850,
-                    'skins' => 'Mythic + Legendary skins',
-                    'level' => 85
-                ],
-                'status' => 'active',
-                'is_premium' => true,
-                'rating' => 4.9,
-                'review_count' => 18,
-                'views' => 203,
-            ],
-            [
-                'seller_id' => 2,
-                'title' => 'Free Fire Grandmaster + Diamond 12000',
-                'description' => 'Akun Free Fire rank Grandmaster dengan 12000 diamond. Koleksi bundle lengkap dan pet legendary.',
-                'category' => 'free_fire',
-                'price' => 650000.00,
-                'thumbnail' => 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400',
-                'images' => [
-                    'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400'
-                ],
-                'game_data' => [
-                    'rank' => 'Grandmaster',
-                    'diamonds' => 12000,
-                    'level' => 76,
-                    'pets' => 'All Legendary Pets',
-                    'bundles' => 25
-                ],
-                'status' => 'active',
-                'is_premium' => false,
-                'rating' => 4.6,
-                'review_count' => 31,
-                'views' => 89,
-            ]
-        ];
+            'is_premium' => true,
+            'rating' => 4.8
+        ]);
 
-        foreach ($products as $productData) {
-            Product::create($productData);
-        }
-
-        // Create status updates
-        $statusUpdates = [
-            [
-                'user_id' => 2,
-                'content' => 'Just got Mythical Glory! Selling this beast account 🔥',
-                'expires_at' => Carbon::now()->addHours(24),
-                'is_active' => true,
+        Product::create([
+            'seller_id' => $gamer->id,
+            'title' => 'PUBG Mobile Conqueror Account',
+            'description' => 'Akun PUBG Mobile rank Conqueror season ini. Banyak outfit rare dan weapon skin.',
+            'category' => 'Battle Royale',
+            'price' => 200000,
+            'thumbnail' => 'https://via.placeholder.com/300x200',
+            'game_data' => [
+                'rank' => 'Conqueror',
+                'tier_points' => 4500,
+                'outfits' => 25,
+                'weapon_skins' => 15
             ],
-            [
-                'user_id' => 3,
-                'content' => 'New PUBG Conqueror account available! Limited time offer',
-                'expires_at' => Carbon::now()->addHours(20),
-                'is_active' => true,
-            ],
-            [
-                'user_id' => 1,
-                'content' => 'Welcome to NubiluXchange! Marketplace gaming terpercaya 🎮',
-                'expires_at' => Carbon::now()->addHours(48),
-                'is_active' => true,
-            ]
-        ];
+            'rating' => 4.9
+        ]);
 
-        foreach ($statusUpdates as $statusData) {
-            StatusUpdate::create($statusData);
-        }
+        // Create sample status update
+        StatusUpdate::create([
+            'user_id' => $gamer->id,
+            'content' => 'Baru saja mendapat savage di ranked match! 🔥',
+            'expires_at' => now()->addHours(24),
+        ]);
     }
 }

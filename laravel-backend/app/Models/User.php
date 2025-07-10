@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,8 +9,11 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'username',
         'email',
@@ -23,71 +25,82 @@ class User extends Authenticatable
         'role',
         'is_verified',
         'wallet_balance',
-        'phone_number',
-        'location',
-        'created_at'
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'is_verified' => 'boolean',
-        'wallet_balance' => 'decimal:2',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_verified' => 'boolean',
+            'wallet_balance' => 'decimal:2',
+        ];
+    }
 
-    // Relationships
+    /**
+     * Get the products for the user (as seller).
+     */
     public function products()
     {
         return $this->hasMany(Product::class, 'seller_id');
     }
 
-    public function chats()
+    /**
+     * Get the chats where user is buyer.
+     */
+    public function buyerChats()
     {
-        return $this->hasMany(Chat::class, 'user_id');
+        return $this->hasMany(Chat::class, 'buyer_id');
     }
 
+    /**
+     * Get the chats where user is seller.
+     */
+    public function sellerChats()
+    {
+        return $this->hasMany(Chat::class, 'seller_id');
+    }
+
+    /**
+     * Get all chats for the user.
+     */
+    public function chats()
+    {
+        return $this->buyerChats()->union($this->sellerChats());
+    }
+
+    /**
+     * Get the messages sent by the user.
+     */
     public function messages()
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
+    /**
+     * Get the transactions for the user.
+     */
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'user_id');
+        return $this->hasMany(Transaction::class);
     }
 
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'user_id');
-    }
-
+    /**
+     * Get the status updates for the user.
+     */
     public function statusUpdates()
     {
-        return $this->hasMany(StatusUpdate::class, 'user_id');
-    }
-
-    public function posterGenerations()
-    {
-        return $this->hasMany(PosterGeneration::class, 'user_id');
-    }
-
-    // Scopes
-    public function scopeVerified($query)
-    {
-        return $query->where('is_verified', true);
-    }
-
-    public function scopeSellers($query)
-    {
-        return $query->where('role', 'seller');
-    }
-
-    public function scopeBuyers($query)
-    {
-        return $query->where('role', 'buyer');
+        return $this->hasMany(StatusUpdate::class);
     }
 }

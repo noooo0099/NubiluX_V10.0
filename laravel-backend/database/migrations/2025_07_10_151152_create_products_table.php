@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
@@ -13,20 +16,22 @@ return new class extends Migration
             $table->foreignId('seller_id')->constrained('users')->onDelete('cascade');
             $table->string('title');
             $table->text('description');
-            $table->enum('category', ['mobile_legends', 'pubg', 'free_fire', 'valorant', 'genshin', 'minecraft', 'other']);
-            $table->decimal('price', 10, 2);
+            $table->string('category');
+            $table->decimal('price', 15, 2);
             $table->string('thumbnail')->nullable();
             $table->json('images')->nullable();
             $table->json('game_data')->nullable();
-            $table->enum('status', ['active', 'sold', 'pending', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'sold', 'draft'])->default('active');
             $table->boolean('is_premium')->default(false);
-            $table->decimal('rating', 3, 2)->default(0.00);
+            $table->decimal('rating', 3, 2)->default(0);
             $table->integer('review_count')->default(0);
-            $table->integer('views')->default(0);
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('products');

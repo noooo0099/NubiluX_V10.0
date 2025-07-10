@@ -1,214 +1,61 @@
-# NubiluXchange Laravel Backend
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Backend Laravel untuk marketplace gaming NubiluXchange yang kompatibel dengan XAMPP dan phpMyAdmin.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## Quick Start dengan XAMPP
+## About Laravel
 
-### 1. Persiapan Environment
-```bash
-# Download dan install XAMPP
-# Jalankan Apache dan MySQL dari XAMPP Control Panel
-```
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-### 2. Setup Database
-1. Buka phpMyAdmin: http://localhost/phpmyadmin
-2. Buat database baru: `nubiluxchange`
-3. Setel collation: `utf8mb4_unicode_ci`
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-### 3. Install Dependencies
-```bash
-cd laravel-backend
-composer install
-```
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-### 4. Environment Configuration
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+## Learning Laravel
 
-Edit file `.env`:
-```env
-APP_NAME=NubiluXchange
-APP_URL=http://localhost:8000
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nubiluxchange
-DB_USERNAME=root
-DB_PASSWORD=
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-# Untuk AI features (opsional)
-OPENAI_API_KEY=your_openai_key_here
-```
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-### 5. Database Migration & Seeding
-```bash
-php artisan migrate
-php artisan db:seed
-```
+## Laravel Sponsors
 
-### 6. Jalankan Server
-```bash
-php artisan serve --port=8000
-```
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-API akan tersedia di: http://localhost:8000/api
+### Premium Partners
 
-## Struktur Database
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
-### Users
-- User authentication dan profil
-- Role: buyer/seller
-- Wallet balance dalam IDR
+## Contributing
 
-### Products
-- Listing produk gaming
-- Kategori: Mobile Legends, PUBG, Free Fire, Valorant, Genshin, Minecraft
-- Game metadata (rank, level, items, dll)
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-### Chats & Messages
-- Sistem chat WhatsApp-style
-- Real-time messaging antara buyer-seller
-- Message types: text, image, system, ai_admin
+## Code of Conduct
 
-### Transactions
-- Riwayat transaksi wallet
-- Deposit, withdrawal, purchase, sale
-- Integrasi payment gateway
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-### Status Updates
-- Status 24 jam seperti WhatsApp/Instagram
-- Auto-expire setelah 24 jam
+## Security Vulnerabilities
 
-## API Endpoints
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-### Authentication
-```
-POST /api/register    # Daftar akun baru
-POST /api/login       # Masuk ke akun
-POST /api/logout      # Keluar dari akun
-GET  /api/user        # Info user saat ini
-```
+## License
 
-### Products
-```
-GET    /api/products           # List semua produk
-GET    /api/products/featured  # Produk unggulan
-GET    /api/products/{id}      # Detail produk
-POST   /api/products           # Upload produk baru
-PUT    /api/products/{id}      # Update produk
-DELETE /api/products/{id}      # Hapus produk
-```
-
-### Chat System
-```
-GET  /api/chats              # List chat user
-GET  /api/chats/{id}         # Detail chat
-POST /api/chats              # Buat chat baru
-GET  /api/chats/{id}/messages # History pesan
-POST /api/chats/{id}/messages # Kirim pesan
-```
-
-### Wallet
-```
-GET  /api/wallet/balance      # Cek saldo
-POST /api/wallet/deposit      # Top up saldo
-POST /api/wallet/withdraw     # Tarik dana
-GET  /api/wallet/transactions # History transaksi
-```
-
-### Status Updates
-```
-GET  /api/status    # List status aktif
-POST /api/status    # Upload status baru
-```
-
-## Sample Data
-
-Setelah menjalankan seeder, tersedia data contoh:
-- 4 user dengan berbagai role
-- 3 produk gaming (ML, PUBG, Free Fire)
-- Status updates contoh
-
-### Test Accounts
-```
-Admin: admin@nubiluxchange.com / admin123
-Seller: gamer@example.com / password123
-Buyer: buyer@example.com / password123
-```
-
-## Development Tools
-
-### Artisan Commands
-```bash
-php artisan migrate:fresh --seed  # Reset database
-php artisan route:list            # List semua routes
-php artisan make:controller Name  # Buat controller baru
-php artisan make:model Name       # Buat model baru
-```
-
-### Database Management
-- Gunakan phpMyAdmin untuk GUI database
-- Laravel migrations untuk schema changes
-- Eloquent ORM untuk query database
-
-## Testing API
-
-Gunakan Postman atau curl untuk test endpoints:
-
-```bash
-# Login
-curl -X POST http://localhost:8000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"gamer@example.com","password":"password123"}'
-
-# Get products (dengan token)
-curl -X GET http://localhost:8000/api/products \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-```
-
-## Deployment
-
-### Shared Hosting
-1. Upload files ke public_html
-2. Setup database di cPanel
-3. Update .env dengan kredensial hosting
-4. Jalankan migration melalui SSH/terminal
-
-### VPS/Dedicated Server
-1. Install PHP 8.1+, MySQL, Apache/Nginx
-2. Setup virtual host
-3. Install Composer dependencies
-4. Setup SSL certificate
-5. Configure cron jobs untuk queue
-
-## Troubleshooting
-
-### Database Connection Error
-- Pastikan MySQL berjalan di XAMPP
-- Cek kredensial database di .env
-- Pastikan database `nubiluxchange` sudah dibuat
-
-### Composer Issues
-```bash
-composer clear-cache
-composer install --no-cache
-```
-
-### Permission Issues
-```bash
-chmod -R 775 storage/
-chmod -R 775 bootstrap/cache/
-```
-
-## Next Steps
-
-1. Setup frontend React untuk konsumsi API Laravel
-2. Implementasi upload gambar dengan Laravel Storage
-3. Setup real-time notifications dengan Pusher
-4. Integrasi payment gateway (Midtrans/Xendit)
-5. Setup email notifications dengan Mailtrap/SendGrid
-
-Laravel backend sudah siap digunakan dengan XAMPP dan phpMyAdmin!
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

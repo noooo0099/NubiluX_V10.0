@@ -8,9 +8,6 @@ use App\Http\Controllers\{
     ProductController,
     ChatController,
     WalletController,
-    StatusController,
-    NotificationController,
-    PosterController
 };
 
 // Public routes
@@ -54,23 +51,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/deposit', [WalletController::class, 'deposit']);
         Route::post('/withdraw', [WalletController::class, 'withdraw']);
         Route::get('/transactions', [WalletController::class, 'transactions']);
-    });
-    
-    // Status routes
-    Route::prefix('status')->group(function () {
-        Route::get('/', [StatusController::class, 'index']);
-        Route::post('/', [StatusController::class, 'store']);
-    });
-    
-    // Notification routes
-    Route::prefix('notifications')->group(function () {
-        Route::get('/', [NotificationController::class, 'index']);
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
-    });
-    
-    // Poster generation routes
-    Route::prefix('posters')->group(function () {
-        Route::post('/generate', [PosterController::class, 'generate']);
-        Route::get('/{id}', [PosterController::class, 'show']);
     });
 });
