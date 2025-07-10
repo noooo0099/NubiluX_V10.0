@@ -64,7 +64,28 @@ function Router() {
           <Route path="/chat" component={Chat} />
           <Route path="/chat/:id" component={Chat} />
           <Route path="/profile/:id" component={Profile} />
+          <Route path="/profile" component={Profile} />
           <Route path="/product/:id" component={ProductDetail} />
+          <Route path="/settings/user-role">
+            {() => {
+              const UserRole = lazy(() => import("./pages/settings/UserRole"));
+              return (
+                <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                  <UserRole />
+                </Suspense>
+              );
+            }}
+          </Route>
+          <Route path="/settings/notifications">
+            {() => {
+              const NotificationPreferences = lazy(() => import("./pages/settings/NotificationPreferences"));
+              return (
+                <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                  <NotificationPreferences />
+                </Suspense>
+              );
+            }}
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </main>
