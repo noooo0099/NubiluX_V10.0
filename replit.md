@@ -2,52 +2,57 @@
 
 ## Overview
 
-NubiluXchange is a modern gaming marketplace application built with React and Express, designed specifically for trading gaming accounts and in-game items. The platform features a TikTok-inspired mobile-first design with real-time chat, video content, and secure transactions.
+NubiluXchange is a modern gaming marketplace application untuk jual-beli akun gaming. Platform ini telah dimigrasikan dari Node.js ke Laravel/PHP untuk kemudahan development dengan XAMPP dan phpMyAdmin, sambil mempertahankan frontend React yang mobile-first dengan desain terinspirasi TikTok.
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language (Bahasa Indonesia)
+- Development environment: PHP/Laravel dengan XAMPP
+- Database management: phpMyAdmin untuk GUI database
+- Familiar with PHP syntax dan Laravel ecosystem
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend Architecture (Tetap React)
 - **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with custom design system
+- **Styling**: Tailwind CSS with custom design system (dark theme + green accent #134D37)
 - **UI Components**: Radix UI primitives with shadcn/ui components
 - **State Management**: TanStack Query for server state, React hooks for local state
 - **Routing**: Wouter for client-side routing
-- **Real-time Communication**: WebSocket integration for live chat
+- **Mobile-first**: WhatsApp-style status, TikTok-style video feed
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js
-- **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: Neon Database (serverless PostgreSQL)
-- **Authentication**: Session-based authentication
-- **Real-time**: WebSocket server for chat functionality
-- **AI Integration**: OpenAI API for poster generation and admin chat processing
+### Backend Architecture (Migrated to Laravel)
+- **Framework**: Laravel 10+ with PHP 8.2
+- **Database**: MySQL dengan XAMPP
+- **Database GUI**: phpMyAdmin untuk management
+- **Authentication**: Laravel Sanctum (API tokens)
+- **ORM**: Eloquent ORM (familiar PHP patterns)
+- **API**: RESTful API endpoints
+- **AI Integration**: OpenAI API untuk poster generation dan admin chat
 
-### Mobile-First Design
-- **Responsive**: Mobile-optimized with bottom navigation
-- **Progressive Web App**: Configured for mobile installation
-- **Dark Theme**: Gaming-focused dark color scheme
-- **Touch-Friendly**: Optimized for mobile interactions
+### Migration to Laravel (January 2025)
+- **Database**: Migrated from PostgreSQL to MySQL untuk kompatibilitas XAMPP
+- **Backend**: Migrated dari Node.js/Express ke Laravel/PHP
+- **Development**: Setup untuk XAMPP + phpMyAdmin workflow
+- **API**: RESTful Laravel API dengan Sanctum authentication
 
 ## Key Components
 
-### Core Features
-1. **Gaming Account Marketplace**: Buy/sell gaming accounts with detailed listings
-2. **Real-time Chat**: WebSocket-powered messaging between buyers and sellers
-3. **Video Content**: TikTok-style video feed for promotional content
-4. **Digital Wallet**: In-app currency system for secure transactions
-5. **AI-Powered Features**: Automated poster generation and admin assistance
+### Core Features (Migrated to Laravel)
+1. **Gaming Account Marketplace**: Laravel models untuk Product management
+2. **WhatsApp-style Chat**: Eloquent relationships untuk Chat & Messages
+3. **TikTok-style Video**: Video feed dengan like/comment overlays  
+4. **Digital Wallet**: Laravel transactions dengan IDR currency
+5. **Status Updates**: WhatsApp-style 24-hour stories
+6. **AI-Powered Features**: OpenAI integration untuk poster generation
 
-### Database Schema
-- **Users**: Authentication, profiles, wallet balances, verification status
-- **Products**: Gaming account listings with metadata and pricing
-- **Chats**: Real-time messaging between users
-- **Messages**: Chat history with support for different message types
-- **Transactions**: Purchase history and payment tracking
-- **Notifications**: System alerts and user communications
+### Database Schema (MySQL dengan Laravel Migrations)
+- **Users**: Laravel User model dengan role (buyer/seller), wallet balance
+- **Products**: Gaming account listings dengan game_data JSON, categories
+- **Chats**: WhatsApp-style chat rooms antara buyer-seller
+- **Messages**: Chat messages dengan message_type (text/image/ai_admin)
+- **Transactions**: Wallet transactions (deposit/withdraw/purchase)
+- **Status Updates**: 24-hour expiring status dengan image support
 
 ### UI Components
 - **Layout**: Top navigation, bottom navigation, and floating action buttons
