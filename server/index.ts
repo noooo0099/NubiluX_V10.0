@@ -60,11 +60,20 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
+  console.log("⚠️  Node.js server is deprecated. Please use Laravel backend instead:");
+  console.log("   cd laravel-backend && php artisan serve --port=8000");
+  console.log("");
+  console.log("🚀 Starting React frontend only...");
+  
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`⚛️  React frontend serving on port ${port}`);
+    log(`📱 Access the app at: http://localhost:${port}`);
+    log("");
+    log("⚠️  Remember to start Laravel backend:");
+    log("   cd laravel-backend && php artisan serve --port=8000");
   });
 })();

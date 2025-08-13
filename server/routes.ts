@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
@@ -6,11 +6,20 @@ import { insertProductSchema, insertChatSchema, insertMessageSchema, insertUserS
 import { generatePoster } from "./openai";
 import { seedDatabase } from "./seed";
 
+// Extend Express Request type to include userId
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: number;
+    }
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
-  // Seed database on startup
-  await seedDatabase();
+  // Skip seeding - Laravel handles this now
+  console.log("🔄 Skipping Node.js database seeding - Laravel handles this now");
 
   // WebSocket setup for real-time chat
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

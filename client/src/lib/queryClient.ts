@@ -1,7 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getFallbackResponse } from "./api-fallback";
 
-// Laravel API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+// Laravel API base URL - fallback to Vite dev server if Laravel not available
+const API_BASE_URL = import.meta.env.PROD 
   ? '/api' 
   : 'http://localhost:8000/api';
 
@@ -44,28 +45,39 @@ export async function apiRequest(
   url: string,
   options: RequestInit = {}
 ): Promise<any> {
-  const token = getAuthToken();
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-  
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...options.headers as Record<string, string>,
-  };
+  try {
+    const token = getAuthToken();
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...options.headers as Record<string, string>,
+    };
 
-  // Add authorization header if token exists
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    // Add authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(fullUrl, {
+      ...options,
+      headers,
+    });
+    
+    await throwIfResNotOk(res);
+    
+    return res.json();
+  } catch (error: any) {
+    console.error('API Request Error:', error);
+    
+    // If Laravel backend is not available, show user-friendly error
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Laravel backend not running. Please start: cd laravel-backend && php artisan serve --port=8000');
+    }
+    
+    throw error;
   }
-
-  const res = await fetch(fullUrl, {
-    ...options,
-    headers,
-  });
-  
-  await throwIfResNotOk(res);
-  
-  return res.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -102,6 +114,14 @@ export const getQueryFn: <T>(options: {
       if (error.message === "Unauthorized" && unauthorizedBehavior === "returnNull") {
         return null;
       }
+      
+      // If Laravel backend is not available, return fallback data
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        console.warn('Laravel backend not available, using fallback data');
+        const endpoint = queryKey[0] as string;
+        return getFallbackResponse(endpoint);
+      }
+      
       throw error;
     }
   };
