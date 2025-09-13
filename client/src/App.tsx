@@ -19,6 +19,8 @@ import Settings from "@/pages/Settings";
 import Chat from "@/pages/Chat";
 import Profile from "@/pages/Profile";
 import ProductDetail from "@/pages/ProductDetail";
+import AdminPanel from "@/pages/AdminPanel";
+import AIEscrowSystem from "@/pages/AIEscrowSystem";
 import NotFound from "@/pages/not-found";
 
 // Theme provider
@@ -66,6 +68,8 @@ function Router() {
           <Route path="/profile/:id" component={Profile} />
           <Route path="/profile" component={Profile} />
           <Route path="/product/:id" component={ProductDetail} />
+          <Route path="/admin" component={AdminPanel} />
+          <Route path="/admin/escrow" component={AIEscrowSystem} />
           <Route path="/settings/user-role">
             {() => {
               const UserRole = lazy(() => import("./pages/settings/UserRole"));

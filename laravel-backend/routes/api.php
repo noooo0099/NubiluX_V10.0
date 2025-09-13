@@ -9,6 +9,7 @@ use App\Http\Controllers\{
     ChatController,
     WalletController,
     AdminManagementController,
+    EscrowController,
 };
 
 // Public routes
@@ -57,15 +58,33 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/transactions', [WalletController::class, 'transactions']);
     });
     
+    // Admin management routes (Owner and approved Admins)
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminManagementController::class, 'getAllUsers']);
+        Route::get('/stats', [AdminManagementController::class, 'getAdminStats']);
+    });
+
     // Owner-only admin management routes
     Route::middleware('owner')->prefix('admin')->group(function () {
-        Route::get('/users', [AdminManagementController::class, 'getAllUsers']);
         Route::get('/requests', [AdminManagementController::class, 'getPendingRequests']);
         Route::post('/approve', [AdminManagementController::class, 'approveAdminRequest']);
         Route::post('/deny', [AdminManagementController::class, 'denyAdminRequest']);
         Route::post('/promote', [AdminManagementController::class, 'promoteToAdmin']);
         Route::post('/revoke', [AdminManagementController::class, 'revokeAdmin']);
-        Route::get('/stats', [AdminManagementController::class, 'getAdminStats']);
+    });
+
+    // Escrow system routes (Owner and Admin access)
+    Route::middleware('admin')->prefix('escrow')->group(function () {
+        Route::get('/stats', [EscrowController::class, 'getStats']);
+        Route::get('/transactions', [EscrowController::class, 'getTransactions']);
+        Route::post('/process', [EscrowController::class, 'processTransaction']);
+        Route::post('/reanalyze', [EscrowController::class, 'reAnalyze']);
+    });
+
+    // Escrow transaction routes (all authenticated users)
+    Route::prefix('escrow')->group(function () {
+        Route::post('/create', [EscrowController::class, 'createTransaction']);
+        Route::post('/complete', [EscrowController::class, 'completeTransaction']);
     });
     
     // Admin panel routes (owner + approved admins)

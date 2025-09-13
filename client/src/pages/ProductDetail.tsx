@@ -53,9 +53,12 @@ export default function ProductDetail() {
   const createChatMutation = useMutation({
     mutationFn: async () => {
       if (!product) throw new Error("Product not found");
-      return apiRequest('POST', '/api/chats', {
-        productId: product.id,
-        sellerId: product.sellerId
+      return apiRequest('/api/chats', {
+        method: 'POST',
+        body: JSON.stringify({
+          productId: product.id,
+          sellerId: product.sellerId
+        })
       });
     },
     onSuccess: (response) => {
@@ -143,7 +146,7 @@ export default function ProductDetail() {
     );
   }
 
-  const allImages = product.images.length > 0 ? product.images : [
+  const allImages = (product.images && product.images.length > 0) ? product.images : [
     product.thumbnail || `https://images.unsplash.com/photo-${1400 + product.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600`
   ];
 

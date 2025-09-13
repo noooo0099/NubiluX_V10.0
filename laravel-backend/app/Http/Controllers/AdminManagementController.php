@@ -14,15 +14,12 @@ class AdminManagementController extends Controller
      */
     public function getAllUsers(Request $request)
     {
-        $users = User::select(['id', 'username', 'email', 'display_name', 'role', 'is_admin_approved', 'admin_approved_at', 'approved_by_owner_id', 'created_at'])
+        $users = User::select(['id', 'username', 'email', 'display_name', 'role', 'is_verified', 'wallet_balance', 'is_admin_approved', 'admin_approved_at', 'approved_by_owner_id', 'admin_request_pending', 'created_at'])
             ->with('approvedByOwner:id,username')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
-        return response()->json([
-            'message' => 'Users retrieved successfully',
-            'users' => $users
-        ]);
+        return response()->json($users);
     }
 
     /**
@@ -143,10 +140,7 @@ class AdminManagementController extends Controller
             ->orderBy('admin_request_at', 'asc')
             ->get();
 
-        return response()->json([
-            'message' => 'Pending admin requests retrieved successfully',
-            'requests' => $pendingRequests
-        ]);
+        return response()->json($pendingRequests);
     }
 
     /**
@@ -297,10 +291,7 @@ class AdminManagementController extends Controller
                 ->count()
         ];
 
-        return response()->json([
-            'message' => 'Admin statistics retrieved successfully',
-            'stats' => $stats
-        ]);
+        return response()->json($stats);
     }
 
     /**
