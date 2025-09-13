@@ -21,7 +21,12 @@ import Profile from "@/pages/Profile";
 import ProductDetail from "@/pages/ProductDetail";
 import AdminPanel from "@/pages/AdminPanel";
 import AIEscrowSystem from "@/pages/AIEscrowSystem";
+import Auth from "@/pages/Auth";
 import NotFound from "@/pages/not-found";
+
+// Auth components
+import { AuthProvider } from "@/contexts/AuthContext";
+import { RequireAuth } from "@/components/auth/ProtectedRoute";
 
 // Theme provider
 function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -58,25 +63,94 @@ function Router() {
       
       <main className="pb-20 min-h-screen">
         <Switch>
+          {/* Public routes - Guest dapat akses */}
           <Route path="/" component={Home} />
-          <Route path="/video" component={Video} />
-          <Route path="/upload" component={Upload} />
-          <Route path="/wallet" component={Wallet} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/chat" component={Chat} />
-          <Route path="/chat/:id" component={Chat} />
-          <Route path="/profile/:id" component={Profile} />
-          <Route path="/profile" component={Profile} />
+          <Route path="/auth" component={Auth} />
           <Route path="/product/:id" component={ProductDetail} />
-          <Route path="/admin" component={AdminPanel} />
-          <Route path="/admin/escrow" component={AIEscrowSystem} />
+          
+          {/* Protected routes - Memerlukan login */}
+          <Route path="/video">
+            {() => (
+              <RequireAuth>
+                <Video />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/upload">
+            {() => (
+              <RequireAuth>
+                <Upload />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/wallet">
+            {() => (
+              <RequireAuth>
+                <Wallet />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/settings">
+            {() => (
+              <RequireAuth>
+                <Settings />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/chat">
+            {() => (
+              <RequireAuth>
+                <Chat />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/chat/:id">
+            {() => (
+              <RequireAuth>
+                <Chat />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/profile/:id">
+            {() => (
+              <RequireAuth>
+                <Profile />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/profile">
+            {() => (
+              <RequireAuth>
+                <Profile />
+              </RequireAuth>
+            )}
+          </Route>
+          
+          {/* Admin routes - Memerlukan role admin atau owner */}
+          <Route path="/admin">
+            {() => (
+              <RequireAuth requiredRole="admin">
+                <AdminPanel />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/admin/escrow">
+            {() => (
+              <RequireAuth requiredRole="admin">
+                <AIEscrowSystem />
+              </RequireAuth>
+            )}
+          </Route>
+          
           <Route path="/settings/user-role">
             {() => {
               const UserRole = lazy(() => import("./pages/settings/UserRole"));
               return (
-                <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
-                  <UserRole />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                    <UserRole />
+                  </Suspense>
+                </RequireAuth>
               );
             }}
           </Route>
@@ -84,9 +158,11 @@ function Router() {
             {() => {
               const NotificationPreferences = lazy(() => import("./pages/settings/NotificationPreferences"));
               return (
-                <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
-                  <NotificationPreferences />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                    <NotificationPreferences />
+                  </Suspense>
+                </RequireAuth>
               );
             }}
           </Route>
@@ -107,12 +183,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ThemeProvider>
-          <Toaster />
-          <Router />
-        </ThemeProvider>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <ThemeProvider>
+            <Toaster />
+            <Router />
+          </ThemeProvider>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

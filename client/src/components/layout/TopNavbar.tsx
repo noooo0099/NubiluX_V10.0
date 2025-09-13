@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Search, Bell, MessageCircle, X } from "lucide-react";
+import { Search, Bell, MessageCircle, X, LogIn, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TopNavbarProps {
   onShowNotifications: () => void;
@@ -14,6 +15,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
+  const { isAuthenticated, user } = useAuth();
 
   const toggleSearch = () => {
     setSearchExpanded(!searchExpanded);
@@ -57,6 +59,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-56 bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary"
                   autoFocus
+                  data-testid="input-search"
                 />
               </form>
             )}
@@ -65,6 +68,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
               size="sm"
               onClick={toggleSearch}
               className="p-2 hover:bg-transparent"
+              data-testid="button-search-toggle"
             >
               {searchExpanded ? (
                 <X className="h-5 w-5 text-gray-300" />
@@ -74,47 +78,68 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             </Button>
           </div>
 
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onShowNotifications}
-            className="relative p-2 hover:bg-transparent"
-          >
-            <Bell className="h-5 w-5 text-gray-300" />
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
+          {isAuthenticated ? (
+            <>
+              {/* Notifications - Authenticated Only */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onShowNotifications}
+                className="relative p-2 hover:bg-transparent"
+                data-testid="button-notifications"
+              >
+                <Bell className="h-5 w-5 text-gray-300" />
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
+                >
+                  3
+                </Badge>
+              </Button>
+
+              {/* Chat - Authenticated Only */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/chat")}
+                className="p-2 hover:bg-transparent"
+                data-testid="button-chat"
+              >
+                <MessageCircle className="h-5 w-5 text-gray-300" />
+              </Button>
+
+              {/* Profile - Authenticated Only */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/profile")}
+                className="p-0 hover:bg-transparent"
+                data-testid="button-profile"
+              >
+                <Avatar className="w-8 h-8 border-2 border-nxe-primary">
+                  <AvatarImage 
+                    src={user?.profilePicture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"} 
+                    alt={user?.displayName || user?.username || "Profile"} 
+                  />
+                  <AvatarFallback>
+                    {user?.displayName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </>
+          ) : (
+            /* Guest Mode - Login Button */
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setLocation("/auth")}
+              className="bg-nxe-primary hover:bg-nxe-primary/80 text-white px-3"
+              data-testid="button-login"
             >
-              3
-            </Badge>
-          </Button>
-
-          {/* Chat */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/chat")}
-            className="p-2 hover:bg-transparent"
-          >
-            <MessageCircle className="h-5 w-5 text-gray-300" />
-          </Button>
-
-          {/* Profile */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/profile/1")}
-            className="p-0 hover:bg-transparent"
-          >
-            <Avatar className="w-8 h-8 border-2 border-nxe-primary">
-              <AvatarImage 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" 
-                alt="Profile" 
-              />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-          </Button>
+              <LogIn className="h-4 w-4 mr-1" />
+              Login
+            </Button>
+          )}
         </div>
       </div>
     </header>
