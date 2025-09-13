@@ -1,17 +1,28 @@
-import { Home, Play, Plus, Wallet, Settings } from "lucide-react";
+import { Home, Play, Plus, Wallet, Settings, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
+  const { isAuthenticated } = useAuth();
 
-  const navItems = [
+  // Guest navigation items (public access)
+  const guestNavItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/auth", icon: LogIn, label: "Login", isSpecial: true },
+  ];
+
+  // Authenticated user navigation items
+  const authNavItems = [
     { path: "/", icon: Home, label: "Home" },
     { path: "/video", icon: Play, label: "Video" },
     { path: "/upload", icon: Plus, label: "Upload", isSpecial: true },
     { path: "/wallet", icon: Wallet, label: "Wallet" },
     { path: "/settings", icon: Settings, label: "Settings" },
   ];
+
+  const navItems = isAuthenticated ? authNavItems : guestNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 nxe-glass border-t border-nxe-surface z-50">
@@ -27,6 +38,7 @@ export default function BottomNavigation() {
                 onClick={() => setLocation(item.path)}
                 className="flex flex-col items-center p-1"
                 variant="ghost"
+                data-testid={`nav-${item.label.toLowerCase()}`}
               >
                 <div className="w-12 h-12 bg-gradient-to-r from-nxe-primary to-nxe-accent rounded-full flex items-center justify-center mb-1 hover:scale-110 transition-transform">
                   <Icon className="h-6 w-6 text-white" />
@@ -42,6 +54,7 @@ export default function BottomNavigation() {
               onClick={() => setLocation(item.path)}
               className="flex flex-col items-center p-2 transition-colors duration-200 hover:bg-transparent"
               variant="ghost"
+              data-testid={`nav-${item.label.toLowerCase()}`}
             >
               <div className={`p-2 rounded-full transition-colors ${
                 isActive ? "bg-nxe-primary text-white" : "text-gray-400 hover:text-white"
