@@ -71,9 +71,10 @@ export async function apiRequest(
   } catch (error: any) {
     console.error('API Request Error:', error);
     
-    // If Laravel backend is not available, show user-friendly error
+    // If Laravel backend is not available, return fallback data for auth endpoints
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Laravel backend not running. Please start: cd laravel-backend && php artisan serve --port=8000');
+      console.warn('Laravel backend not available, using fallback data');
+      return getFallbackResponse(url, options?.method || 'GET', options?.body);
     }
     
     throw error;
@@ -119,7 +120,7 @@ export const getQueryFn: <T>(options: {
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         console.warn('Laravel backend not available, using fallback data');
         const endpoint = queryKey[0] as string;
-        return getFallbackResponse(endpoint);
+        return getFallbackResponse(endpoint, 'GET');
       }
       
       throw error;

@@ -22,6 +22,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import AdminPanel from "@/pages/AdminPanel";
 import AIEscrowSystem from "@/pages/AIEscrowSystem";
 import Auth from "@/pages/Auth";
+import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/not-found";
 
 // Auth components
@@ -66,6 +67,7 @@ function Router() {
           {/* Public routes - Guest dapat akses */}
           <Route path="/" component={Home} />
           <Route path="/auth" component={Auth} />
+          <Route path="/unauthorized" component={Unauthorized} />
           <Route path="/product/:id" component={ProductDetail} />
           
           {/* Protected routes - Memerlukan login */}
