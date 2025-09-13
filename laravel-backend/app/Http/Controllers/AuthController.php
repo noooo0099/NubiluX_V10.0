@@ -20,7 +20,6 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'display_name' => 'nullable|string|max:255',
-            'role' => 'in:buyer,seller',
         ]);
 
         if ($validator->fails()) {
@@ -30,13 +29,19 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // Public users can only create regular user accounts
+        // Admin and Owner accounts must be created/approved differently
         $user = User::create([
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'display_name' => $request->display_name ?? $request->username,
-            'role' => $request->role ?? 'buyer',
         ]);
+        
+        // Explicitly set role for security (no mass assignment of sensitive fields)
+        $user->role = 'user'; // Always 'user' for public registration
+        $user->is_admin_approved = false;
+        $user->save();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

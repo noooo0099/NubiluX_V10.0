@@ -8,11 +8,15 @@ use App\Http\Controllers\{
     ProductController,
     ChatController,
     WalletController,
+    AdminManagementController,
 };
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Owner setup route (protected by setup key and throttling)
+Route::post('/setup/owner', [AdminManagementController::class, 'createOwner'])->middleware('throttle:3,1');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -23,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/profile/{id}', [UserController::class, 'profile']);
         Route::post('/profile/update', [UserController::class, 'updateProfile']);
-        Route::post('/switch-role', [UserController::class, 'switchRole']);
+        Route::post('/request-admin', [AdminManagementController::class, 'requestAdminAccess']);
     });
     
     // Product routes
@@ -51,5 +55,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/deposit', [WalletController::class, 'deposit']);
         Route::post('/withdraw', [WalletController::class, 'withdraw']);
         Route::get('/transactions', [WalletController::class, 'transactions']);
+    });
+    
+    // Owner-only admin management routes
+    Route::middleware('owner')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminManagementController::class, 'getAllUsers']);
+        Route::get('/requests', [AdminManagementController::class, 'getPendingRequests']);
+        Route::post('/approve', [AdminManagementController::class, 'approveAdminRequest']);
+        Route::post('/deny', [AdminManagementController::class, 'denyAdminRequest']);
+        Route::post('/promote', [AdminManagementController::class, 'promoteToAdmin']);
+        Route::post('/revoke', [AdminManagementController::class, 'revokeAdmin']);
+        Route::get('/stats', [AdminManagementController::class, 'getAdminStats']);
+    });
+    
+    // Admin panel routes (owner + approved admins)
+    Route::middleware('admin')->prefix('panel')->group(function () {
+        // Admin panel routes will be added here
+        Route::get('/dashboard', function () {
+            return response()->json(['message' => 'Admin panel access granted']);
+        });
     });
 });

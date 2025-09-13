@@ -22,9 +22,22 @@ class User extends Authenticatable
         'bio',
         'profile_picture',
         'banner_image',
-        'role',
         'is_verified',
         'wallet_balance',
+    ];
+
+    /**
+     * Fields that are sensitive for authorization and should never be mass-assigned.
+     * These can only be updated through explicit owner-controlled methods.
+     */
+    protected $guarded_authorization_fields = [
+        'role',
+        'is_admin_approved',
+        'admin_approved_at',
+        'approved_by_owner_id',
+        'admin_request_pending',
+        'admin_request_reason',
+        'admin_request_at',
     ];
 
     /**
@@ -45,6 +58,10 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_verified' => 'boolean',
             'wallet_balance' => 'decimal:2',
+            'is_admin_approved' => 'boolean',
+            'admin_approved_at' => 'datetime',
+            'admin_request_pending' => 'boolean',
+            'admin_request_at' => 'datetime',
         ];
     }
 
@@ -102,5 +119,45 @@ class User extends Authenticatable
     public function statusUpdates()
     {
         return $this->hasMany(StatusUpdate::class);
+    }
+
+    /**
+     * Check if user is owner
+     */
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    /**
+     * Check if user is admin (and approved)
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' && $this->is_admin_approved;
+    }
+
+    /**
+     * Check if user has admin access (owner or approved admin)
+     */
+    public function hasAdminAccess(): bool
+    {
+        return $this->isOwner() || $this->isAdmin();
+    }
+
+    /**
+     * Get the owner who approved this admin
+     */
+    public function approvedByOwner()
+    {
+        return $this->belongsTo(User::class, 'approved_by_owner_id');
+    }
+
+    /**
+     * Get admins approved by this owner
+     */
+    public function approvedAdmins()
+    {
+        return $this->hasMany(User::class, 'approved_by_owner_id');
     }
 }
