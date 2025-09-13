@@ -60,7 +60,10 @@ export default function Profile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (updates: Partial<UserProfile>) => {
-      return apiRequest('PUT', '/api/users/profile', updates);
+      return apiRequest('/api/users/profile/update', {
+        method: 'POST',
+        body: JSON.stringify(updates)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/users/profile/${profileId}`] });
@@ -150,7 +153,7 @@ export default function Profile() {
                   alt={profile.username}
                 />
                 <AvatarFallback className="text-2xl">
-                  {profile.username.charAt(0).toUpperCase()}
+                  {profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
               {isOwnProfile && (
