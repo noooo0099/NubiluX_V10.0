@@ -5,16 +5,25 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
   const { logout } = useAuth();
+  const { toast } = useToast();
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
       logout();
       setLocation("/");
     }
+  };
+
+  const handleComingSoon = (featureName: string) => {
+    toast({
+      title: "Coming Soon",
+      description: `${featureName} sedang dalam pengembangan dan akan tersedia segera.`,
+    });
   };
 
   const settingSections = [
@@ -31,13 +40,13 @@ export default function Settings() {
           icon: <UserCheck className="h-5 w-5" />,
           label: "User Role",
           description: "Kelola peran sebagai pembeli atau penjual",
-          action: () => setLocation("/settings/user-role"),
+          action: () => handleComingSoon("User Role Management"),
         },
         {
           icon: <Shield className="h-5 w-5" />,
           label: "Privacy Settings",
           description: "Kelola pengaturan privasi",
-          action: () => setLocation("/settings/privacy"),
+          action: () => handleComingSoon("Privacy Settings"),
         },
       ]
     },
@@ -48,7 +57,7 @@ export default function Settings() {
           icon: <Bell className="h-5 w-5" />,
           label: "Notification Preferences",
           description: "Atur preferensi notifikasi",
-          action: () => setLocation("/settings/notifications"),
+          action: () => handleComingSoon("Notification Preferences"),
         },
       ]
     },
@@ -57,9 +66,9 @@ export default function Settings() {
       items: [
         {
           icon: <CreditCard className="h-5 w-5" />,
-          label: "Payment Methods",
+          label: "Payment Methods", 
           description: "Kelola metode pembayaran",
-          action: () => setLocation("/settings/payment"),
+          action: () => handleComingSoon("Payment Methods"),
         },
       ]
     },
@@ -70,19 +79,19 @@ export default function Settings() {
           icon: <Palette className="h-5 w-5" />,
           label: "Theme Settings",
           description: "Kustomisasi tampilan aplikasi",
-          action: () => setLocation("/settings/theme"),
+          action: () => handleComingSoon("Theme Settings"),
         },
         {
           icon: <Globe className="h-5 w-5" />,
           label: "Language",
           description: "Ubah bahasa aplikasi",
-          action: () => setLocation("/settings/language"),
+          action: () => handleComingSoon("Language Settings"),
         },
         {
           icon: <Database className="h-5 w-5" />,
           label: "Data & Storage",
           description: "Kelola data dan penyimpanan",
-          action: () => setLocation("/settings/data"),
+          action: () => handleComingSoon("Data & Storage"),
         },
       ]
     },
@@ -93,13 +102,13 @@ export default function Settings() {
           icon: <HelpCircle className="h-5 w-5" />,
           label: "Help & Support",
           description: "Dapatkan bantuan dan hubungi support",
-          action: () => setLocation("/settings/support"),
+          action: () => handleComingSoon("Help & Support"),
         },
         {
           icon: <MessageSquare className="h-5 w-5" />,
           label: "Feedback",
           description: "Berikan masukan untuk aplikasi",
-          action: () => setLocation("/settings/feedback"),
+          action: () => handleComingSoon("Feedback"),
         },
       ]
     }
@@ -119,6 +128,7 @@ export default function Settings() {
                 key={index}
                 onClick={item.action}
                 className="w-full p-4 flex items-center justify-between hover:bg-nxe-surface transition-colors border-b border-nxe-border last:border-b-0"
+                data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 <div className="flex items-center space-x-4">
                   <div className="text-nxe-primary">{item.icon}</div>
@@ -139,6 +149,7 @@ export default function Settings() {
         <button
           onClick={handleLogout}
           className="w-full p-4 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-colors"
+          data-testid="button-logout"
         >
           <LogOut className="h-5 w-5 mr-3" />
           <span className="font-medium">Keluar dari Akun</span>

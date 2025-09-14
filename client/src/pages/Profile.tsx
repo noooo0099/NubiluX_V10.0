@@ -45,18 +45,23 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   const currentUserId = user?.id || 0;
-  const isOwnProfile = parseInt(profileId!) === currentUserId || !profileId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Determine effective profile ID
+  const effectiveProfileId = profileId || String(currentUserId);
+  const isOwnProfile = parseInt(effectiveProfileId) === currentUserId;
+  
   // Fetch user profile
   const { data: profile, isLoading } = useQuery<UserProfile>({
-    queryKey: [`/api/users/profile/${profileId}`],
+    queryKey: [`/api/users/profile/${effectiveProfileId}`],
+    enabled: !!(effectiveProfileId && currentUserId > 0),
   });
 
   // Fetch user's products
   const { data: products = [] } = useQuery<Product[]>({
-    queryKey: [`/api/products`, { sellerId: profileId }],
+    queryKey: [`/api/products`, { sellerId: effectiveProfileId }],
+    enabled: !!(effectiveProfileId && currentUserId > 0),
   });
 
   // Update profile mutation
@@ -68,7 +73,7 @@ export default function Profile() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/profile/${profileId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/profile/${effectiveProfileId}`] });
       setIsEditing(false);
       toast({
         title: "Profile updated successfully",
