@@ -2,14 +2,14 @@
 
 ## Overview
 
-NubiluXchange is a modern gaming marketplace application untuk jual-beli akun gaming. Platform ini telah dimigrasikan dari Node.js ke Laravel/PHP untuk kemudahan development dengan XAMPP dan phpMyAdmin, sambil mempertahankan frontend React yang mobile-first dengan desain terinspirasi TikTok.
+NubiluXchange is a modern gaming marketplace application untuk jual-beli akun gaming. Platform ini diimplementasikan menggunakan TypeScript full-stack dengan Neon PostgreSQL untuk performance dan type safety, dengan frontend React yang mobile-first dan desain terinspirasi TikTok.
 
 ## User Preferences
 
 - Preferred communication style: Simple, everyday language (Bahasa Indonesia)
-- Development environment: PHP/Laravel dengan XAMPP
-- Database management: phpMyAdmin untuk GUI database
-- Familiar with PHP syntax dan Laravel ecosystem
+- Development environment: TypeScript full-stack dengan Neon PostgreSQL
+- Database management: Drizzle ORM untuk type-safe operations
+- Modern TypeScript development dengan React dan Express.js
 
 ## System Architecture
 
@@ -21,37 +21,37 @@ NubiluXchange is a modern gaming marketplace application untuk jual-beli akun ga
 - **Routing**: Wouter for client-side routing
 - **Mobile-first**: WhatsApp-style status, TikTok-style video feed
 
-### Backend Architecture (Migrated to Laravel)
-- **Framework**: Laravel 10+ with PHP 8.2
-- **Database**: MySQL dengan XAMPP
-- **Database GUI**: phpMyAdmin untuk management
-- **Authentication**: Laravel Sanctum (API tokens)
-- **ORM**: Eloquent ORM (familiar PHP patterns)
+### Backend Architecture (TypeScript + Express.js)
+- **Framework**: Express.js dengan TypeScript
+- **Database**: Neon PostgreSQL (serverless)
+- **Database ORM**: Drizzle ORM dengan type safety
+- **Authentication**: JWT dengan bcrypt hashing
+- **Sessions**: PostgreSQL-backed session store
 - **API**: RESTful API endpoints
 - **AI Integration**: OpenAI API untuk poster generation dan admin chat
 
-### Migration Status (January 2025)
-- **Database**: ✅ Successfully migrated to SQLite (untuk development) dengan rencana MySQL untuk production
-- **Backend**: ✅ Laravel 12 backend dengan API lengkap telah dibuat
+### Implementation Status (September 2025)
+- **Database**: ✅ Neon PostgreSQL dengan Drizzle ORM type-safe operations
+- **Backend**: ✅ Express.js TypeScript backend dengan API lengkap
 - **Models**: ✅ User, Product, Chat, Message, Transaction, StatusUpdate models
-- **Controllers**: ✅ AuthController, ProductController dengan full CRUD operations
-- **Authentication**: ✅ Laravel Sanctum untuk API token authentication
-- **Database Migration**: ✅ Semua table berhasil dibuat dengan relationships
-- **Sample Data**: ✅ Seeder dengan data contoh akun gaming sudah ready
+- **Controllers**: ✅ RESTful API routes dengan full CRUD operations
+- **Authentication**: ✅ JWT authentication dengan bcrypt password hashing
+- **Database Schema**: ✅ Semua table berhasil dibuat dengan relationships
+- **Session Store**: ✅ PostgreSQL-backed session management
 
 ## Key Components
 
-### Core Features (Migrated to Laravel)
-1. **Gaming Account Marketplace**: Laravel models untuk Product management
-2. **WhatsApp-style Chat**: Eloquent relationships untuk Chat & Messages
+### Core Features (TypeScript Implementation)
+1. **Gaming Account Marketplace**: Drizzle ORM models untuk Product management
+2. **WhatsApp-style Chat**: Type-safe relationships untuk Chat & Messages
 3. **TikTok-style Video**: Video feed dengan like/comment overlays  
-4. **Digital Wallet**: Laravel transactions dengan IDR currency
+4. **Digital Wallet**: TypeScript transactions dengan IDR currency
 5. **Status Updates**: WhatsApp-style 24-hour stories
 6. **AI-Powered Features**: OpenAI integration untuk poster generation
 
-### Database Schema (MySQL dengan Laravel Migrations)
-- **Users**: Laravel User model dengan role (buyer/seller), wallet balance
-- **Products**: Gaming account listings dengan game_data JSON, categories
+### Database Schema (PostgreSQL dengan Drizzle ORM)
+- **Users**: TypeScript User model dengan role (buyer/seller), wallet balance
+- **Products**: Gaming account listings dengan game_data JSONB, categories
 - **Chats**: WhatsApp-style chat rooms antara buyer-seller
 - **Messages**: Chat messages dengan message_type (text/image/ai_admin)
 - **Transactions**: Wallet transactions (deposit/withdraw/purchase)
@@ -125,26 +125,26 @@ NubiluXchange is a modern gaming marketplace application untuk jual-beli akun ga
 
 The application is designed for the Indonesian gaming market with support for local currency (IDR) and gaming-specific features like skin collections, rank boosting services, and account verification systems.
 
-## Recent Migration Progress (January 2025)
+## Development Progress (September 2025)
 
 ### ✅ Completed
-1. **Laravel Backend Setup**: Laravel 12 dengan SQLite database
-2. **Database Structure**: Semua table untuk users, products, chats, messages, transactions, status updates
-3. **API Endpoints**: RESTful API dengan authentication (register, login, products CRUD)
-4. **Models & Relationships**: Eloquent models dengan proper relationships
-5. **Sample Data**: Seeder dengan data contoh akun Mobile Legends dan PUBG
-6. **Frontend Ready**: queryClient.ts sudah diupdate untuk Laravel API endpoints
+1. **TypeScript Full-Stack**: Express.js backend dengan React frontend
+2. **Database Structure**: Neon PostgreSQL dengan Drizzle ORM type-safe operations
+3. **API Endpoints**: RESTful API dengan JWT authentication (register, login, products CRUD)
+4. **Models & Relationships**: TypeScript models dengan Drizzle relations
+5. **Session Management**: PostgreSQL-backed session store dengan connect-pg-simple
+6. **Type Safety**: End-to-end TypeScript dengan shared schema definitions
 
-### ✅ Bug Fixes Completed (January 2025)
-1. **Database Connection**: Fixed PostgreSQL errors, Laravel SQLite working perfectly
-2. **Promise Rejections**: Added proper error handling untuk API calls
-3. **Server Configuration**: Clear separation Laravel (8000) vs React (5000)
-4. **TypeScript Errors**: Fixed Express Request type extensions
-5. **Port Conflicts**: Resolved EADDRINUSE dengan proper port allocation
+### ✅ Bug Fixes & Improvements Completed
+1. **Database Connection**: Migrated to Neon PostgreSQL dengan connection pooling
+2. **Type Safety**: Full TypeScript implementation dengan strict checking
+3. **Server Configuration**: Single-port architecture pada port 5000
+4. **Authentication**: JWT dengan bcrypt password hashing
+5. **Development Experience**: Hot reload dengan Vite dan HMR
 
 ### 🎯 Next Phase (Ready for Development)
-1. **Real-time Features**: Implement WebSocket atau Pusher untuk chat real-time
-2. **File Upload**: Setup Laravel storage untuk gambar produk dan profile  
+1. **Real-time Features**: Implement WebSocket untuk chat real-time
+2. **File Upload**: Setup cloud storage untuk gambar produk dan profile  
 3. **Payment Gateway**: Integrate payment system untuk transactions
-4. **XAMPP Migration**: Move dari SQLite ke MySQL untuk production
+4. **Production Deployment**: Configure untuk deployment ke Replit
 5. **Advanced Features**: Search filters, admin dashboard, analytics

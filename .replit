@@ -30,6 +30,10 @@ externalPort = 3000
 localPort = 41205
 externalPort = 3003
 
+[[ports]]
+localPort = 44691
+externalPort = 4200
+
 [workflows]
 runButton = "Project"
 
@@ -56,4 +60,4 @@ outputType = "webview"
 
 [agent]
 expertMode = true
-integrations = ["javascript_auth_all_persistance:1.0.0"]
+integrations = ["javascript_auth_all_persistance:1.0.0", "javascript_database:1.0.0"]

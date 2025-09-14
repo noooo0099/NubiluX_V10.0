@@ -1,10 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getFallbackResponse } from "./api-fallback";
 
-// Laravel API base URL - fallback to Vite dev server if Laravel not available
-const API_BASE_URL = import.meta.env.PROD 
-  ? '/api' 
-  : 'http://localhost:8000/api';
+// API base URL - using same port (5000) for both frontend and backend
+const API_BASE_URL = '/api';
 
 // Get auth token from localStorage
 function getAuthToken(): string | null {
@@ -71,9 +69,9 @@ export async function apiRequest(
   } catch (error: any) {
     console.error('API Request Error:', error);
     
-    // If Laravel backend is not available, return fallback data for auth endpoints
+    // If backend is not available, return fallback data for auth endpoints
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      console.warn('Laravel backend not available, using fallback data');
+      console.warn('Backend not available, using fallback data');
       return getFallbackResponse(url, options?.method || 'GET', options?.body);
     }
     
@@ -116,9 +114,9 @@ export const getQueryFn: <T>(options: {
         return null;
       }
       
-      // If Laravel backend is not available, return fallback data
+      // If backend is not available, return fallback data
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.warn('Laravel backend not available, using fallback data');
+        console.warn('Backend not available, using fallback data');
         const endpoint = queryKey[0] as string;
         return getFallbackResponse(endpoint, 'GET');
       }

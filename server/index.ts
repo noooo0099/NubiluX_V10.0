@@ -72,6 +72,6 @@ app.use((req, res, next) => {
     log(`📱 Access the app at: http://localhost:${port}`);
     log(`🔗 API available at: http://localhost:${port}/api`);
     log("");
-    log("✅ Laravel migration complete - Node.js backend is now active!");
+    log("✅ TypeScript full-stack application is running!");
   });
 })();

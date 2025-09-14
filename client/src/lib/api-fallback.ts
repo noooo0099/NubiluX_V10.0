@@ -1,4 +1,4 @@
-// Fallback API responses for when Laravel backend is not available
+// Fallback API responses for when backend is not available
 // This prevents unhandled promise rejections during development
 
 // Mock users for authentication fallback
