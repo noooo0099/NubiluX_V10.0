@@ -1,4 +1,4 @@
-import { Store, Zap, Plus, MessageSquare, Wallet, LogIn } from "lucide-react";
+import { Store, Zap, Plus, MessageSquare, Wallet, LogIn, LogOut, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,12 +29,11 @@ export default function BottomNavigation() {
     enabled: isAuthenticated
   });
 
-  // Guest navigation items - focused on core discovery and login
+  // Guest navigation items - only Market and Logout with guest status
   const guestNavItems: NavItem[] = [
     { path: "/market", icon: Store, label: "Pasar" },
-    { path: "/auth", icon: LogIn, label: "Masuk", isSpecial: true },
-    { path: "/chat", icon: MessageSquare, label: "Chat", disabled: true },
-    { path: "/wallet", icon: Wallet, label: "Dompet", disabled: true },
+    { path: "/guest-status", icon: User, label: "Tamu" }, // Gray guest icon
+    { path: "/auth", icon: LogOut, label: "Keluar" },
   ];
 
   // Authenticated user navigation items - marketplace-first design
@@ -51,6 +50,10 @@ export default function BottomNavigation() {
   const handleNavClick = (path: string, disabled?: boolean) => {
     if (disabled) {
       // Show toast for disabled items
+      return;
+    }
+    // Handle guest status - don't navigate, it's just a status indicator
+    if (path === "/guest-status") {
       return;
     }
     setLocation(path);
@@ -94,31 +97,41 @@ export default function BottomNavigation() {
             }
 
             // Regular nav items
+            const isGuestStatus = item.path === "/guest-status";
             return (
               <div key={item.path} className="relative">
                 <Button
                   onClick={() => handleNavClick(item.path, item.disabled)}
-                  className={`flex flex-col items-center p-3 transition-all duration-200 hover:bg-transparent group ${
+                  className={`flex flex-col items-center p-3 transition-all duration-300 hover:bg-transparent group ${
                     item.disabled ? 'opacity-40 cursor-not-allowed' : ''
-                  }`}
+                  } ${isGuestStatus ? 'cursor-default' : ''}`}
                   variant="ghost"
-                  disabled={item.disabled}
+                  disabled={item.disabled || isGuestStatus}
                   data-testid={`nav-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                 >
                   <div className="relative">
-                    {/* Icon container with active state */}
-                    <div className={`relative p-2.5 rounded-full transition-all duration-300 ${
+                    {/* Icon container with enhanced active state animation */}
+                    <div className={`relative p-2.5 rounded-full transition-all duration-300 transform ${
                       isActive 
-                        ? "bg-nxe-primary/20 text-nxe-primary shadow-md" 
-                        : "text-gray-400 group-hover:text-nxe-primary group-hover:bg-nxe-primary/10"
+                        ? "bg-nxe-primary/20 text-nxe-primary shadow-lg scale-110" 
+                        : isGuestStatus 
+                        ? "text-gray-400 bg-gray-100 dark:bg-gray-800"
+                        : "text-gray-400 group-hover:text-nxe-primary group-hover:bg-nxe-primary/10 group-hover:scale-105"
                     }`}>
-                      <Icon className="h-5 w-5" />
+                      <Icon className={`h-5 w-5 transition-all duration-300 ${
+                        isActive ? "drop-shadow-sm" : ""
+                      }`} />
+                      
+                      {/* Active indicator dot */}
+                      {isActive && (
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-nxe-primary rounded-full animate-pulse" />
+                      )}
                       
                       {/* Notification badge */}
                       {hasNotificationBadge && (
                         <Badge 
                           variant="destructive" 
-                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border-2 border-nxe-surface"
+                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border-2 border-nxe-surface animate-bounce"
                         >
                           {typeof item.badge === 'number' && item.badge > 9 ? '9+' : item.badge === true ? '•' : item.badge}
                         </Badge>
@@ -126,11 +139,13 @@ export default function BottomNavigation() {
                     </div>
                   </div>
                   
-                  {/* Label */}
-                  <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${
+                  {/* Label with enhanced animations */}
+                  <span className={`text-xs font-medium mt-1 transition-all duration-300 ${
                     isActive 
-                      ? "text-nxe-primary" 
-                      : "text-gray-400 group-hover:text-nxe-primary"
+                      ? "text-nxe-primary font-semibold transform scale-105" 
+                      : isGuestStatus
+                      ? "text-gray-400"
+                      : "text-gray-400 group-hover:text-nxe-primary group-hover:font-medium"
                   }`}>
                     {item.label}
                   </span>
