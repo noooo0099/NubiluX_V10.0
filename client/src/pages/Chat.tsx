@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatListItem {
   id: number;
@@ -35,7 +36,8 @@ export default function Chat() {
   const { id: chatId } = useParams();
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
-  const [currentUserId] = useState(1); // This would come from auth context
+  const { user } = useAuth();
+  const currentUserId = user?.id || 0; // Get user ID from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -76,7 +78,10 @@ export default function Chat() {
 
       if (!sent) {
         // Fallback to HTTP if WebSocket fails
-        return apiRequest('POST', `/api/chats/${chatId}/messages`, { content });
+        return apiRequest(`/api/chats/${chatId}/messages`, { 
+          method: 'POST', 
+          body: JSON.stringify({ content }) 
+        });
       }
     },
     onSuccess: () => {

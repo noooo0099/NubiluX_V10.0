@@ -34,7 +34,7 @@ export async function generatePoster(
       quality: "hd",
     });
 
-    return response.data[0].url!;
+    return response.data?.[0]?.url || "";
   } catch (error) {
     console.error('Poster generation failed:', error);
     throw new Error('Failed to generate poster');

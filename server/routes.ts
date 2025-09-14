@@ -9,7 +9,7 @@ import {
   insertUserSchema, insertPosterGenerationSchema, userRegisterSchema,
   insertEscrowTransactionSchema, escrowPublicCreateSchema
 } from "@shared/schema";
-import { generatePoster } from "./openai";
+import { generatePoster, processAdminMention } from "./openai";
 import { seedDatabase } from "./seed";
 
 // Extend Express Request type to include userId
@@ -27,11 +27,11 @@ declare global {
   }
 }
 
-// JWT Secret (required in production, fallback for development)
+// JWT Secret (required in production, secure fallback for development)
 const JWT_SECRET = process.env.JWT_SECRET || (
   process.env.NODE_ENV === 'production' 
     ? (() => { console.error('FATAL: JWT_SECRET environment variable is required in production'); process.exit(1); })()
-    : 'dev-jwt-secret-change-in-production-' + Date.now()
+    : 'dev-secure-fallback-jwt-secret-at-least-32-chars-long-change-in-production'
 );
 
 // Authentication utilities
@@ -1581,9 +1581,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// AI Admin helper function
-async function processAdminMention(chatHistory: any[], chat: any): Promise<string> {
-  // This would use OpenAI to analyze chat and provide resolution
-  // For now, return a simple response
-  return "Hello! I'm the AI Admin. I've reviewed your conversation and I'm here to help resolve any issues. Please let me know what specific assistance you need.";
-}
