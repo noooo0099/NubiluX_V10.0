@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -55,14 +55,20 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 function Router() {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [location] = useLocation();
+  
+  // Hide TopNavbar on auth pages (login/register)
+  const hideTopNavbar = location === '/auth';
 
   return (
     <div className="min-h-screen bg-nxe-dark">
-      <TopNavbar 
-        onShowNotifications={() => setShowNotifications(true)}
-      />
+      {!hideTopNavbar && (
+        <TopNavbar 
+          onShowNotifications={() => setShowNotifications(true)}
+        />
+      )}
       
-      <main className="pb-20 min-h-screen">
+      <main className={hideTopNavbar ? "min-h-screen" : "pb-20 min-h-screen"}>
         <Switch>
           {/* Public routes - Guest dapat akses */}
           <Route path="/" component={Home} />

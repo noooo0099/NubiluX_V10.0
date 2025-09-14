@@ -59,23 +59,15 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
         <div className="h-full flex items-center justify-between">
           {/* Left - Logo */}
           <div className="flex items-center justify-start min-w-0">
-            <div 
-              className={`flex items-center space-x-1 nxe-logo transition-all duration-300 ease-out ${
-                searchExpanded ? "scale-90" : "scale-100"
-              }`}
-            >
-              <span className={`font-bold text-white transition-all duration-300 ${
-                searchExpanded ? "text-base" : "text-lg"
-              }`}>
+            <div className="flex items-center space-x-1 nxe-logo">
+              <span className="font-bold text-lg text-white">
                 Nubilu
               </span>
-              <span className={`font-bold text-nxe-primary mx-1 transition-all duration-300 ${
-                searchExpanded ? "text-base" : "text-lg"
-              }`}>
+              <span className="font-bold text-lg text-nxe-primary mx-1">
                 X
               </span>
-              <span className={`font-bold text-white transition-all duration-300 ${
-                searchExpanded ? "text-base sm:inline hidden" : "text-lg"
+              <span className={`font-bold text-lg text-white ${
+                searchExpanded ? "sm:inline hidden" : ""
               }`}>
                 change
               </span>
@@ -86,9 +78,9 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
           <div className="flex items-center space-x-1 min-w-0">
             {/* Search Section */}
             <div className="flex items-center">
-              {/* Search Input Container - always mounted for smooth animation */}
+              {/* Search Input Container - optimized for smooth animation */}
               <div 
-                className={`overflow-hidden transition-all duration-300 ease-out ${
+                className={`overflow-hidden transform transition-all duration-200 ease-out will-change-transform ${
                   searchExpanded ? 'w-32 sm:w-48 opacity-100 mr-2' : 'w-0 opacity-0'
                 }`}
               >
