@@ -72,26 +72,24 @@ export default function BottomNavigation() {
             const isActive = location === item.path;
             const hasNotificationBadge = item.badge && (typeof item.badge === 'number' ? item.badge > 0 : item.badge);
             
-            // Center FAB for special items (Jual/Masuk)
+            // Center FAB for special items (Posting)
             if (item.isSpecial) {
               return (
-                <div key={item.path} className="relative">
+                <div key={item.path} className="relative flex flex-col items-center">
                   <Button
                     onClick={() => handleNavClick(item.path)}
-                    className="relative group"
+                    className="relative group p-0 hover:bg-transparent"
                     variant="ghost"
                     data-testid={`nav-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                   >
-                    <div className="flex flex-col items-center">
-                      {/* Center FAB */}
-                      <div className="w-14 h-14 bg-gradient-to-br from-nxe-primary via-nxe-primary to-nxe-accent rounded-full flex items-center justify-center mb-1 shadow-lg group-hover:scale-110 group-active:scale-95 transition-all duration-200 animate-pulse">
-                        <Icon className="h-7 w-7 text-white" />
-                      </div>
-                      <span className="text-xs font-medium text-nxe-primary">
-                        {item.label}
-                      </span>
+                    {/* Center FAB optimized for mobile */}
+                    <div className="w-12 h-12 bg-gradient-to-br from-nxe-primary via-nxe-primary/90 to-nxe-accent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-active:scale-95 transition-all duration-200 group-hover:shadow-xl">
+                      <Icon className="h-6 w-6 text-white" />
                     </div>
                   </Button>
+                  <span className="text-xs font-medium text-nxe-primary mt-1">
+                    {item.label}
+                  </span>
                 </div>
               );
             }
@@ -99,10 +97,10 @@ export default function BottomNavigation() {
             // Regular nav items
             const isGuestStatus = item.path === "/guest-status";
             return (
-              <div key={item.path} className="relative">
+              <div key={item.path} className="relative flex flex-col items-center">
                 <Button
                   onClick={() => handleNavClick(item.path, item.disabled)}
-                  className={`flex flex-col items-center p-3 transition-all duration-300 hover:bg-transparent group ${
+                  className={`flex flex-col items-center p-2 transition-all duration-300 hover:bg-transparent group ${
                     item.disabled ? 'opacity-40 cursor-not-allowed' : ''
                   } ${isGuestStatus ? 'cursor-default' : ''}`}
                   variant="ghost"
@@ -110,46 +108,46 @@ export default function BottomNavigation() {
                   data-testid={`nav-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                 >
                   <div className="relative">
-                    {/* Icon container with enhanced active state animation */}
-                    <div className={`relative p-2.5 rounded-full transition-all duration-300 transform ${
+                    {/* Icon container optimized for mobile */}
+                    <div className={`relative p-2 rounded-full transition-all duration-300 transform ${
                       isActive 
-                        ? "bg-nxe-primary/20 text-nxe-primary shadow-lg scale-110" 
+                        ? "bg-nxe-primary/15 text-nxe-primary shadow-md scale-105" 
                         : isGuestStatus 
-                        ? "text-gray-400 bg-gray-100 dark:bg-gray-800"
+                        ? "text-gray-400 bg-gray-100/50 dark:bg-gray-800/50"
                         : "text-gray-400 group-hover:text-nxe-primary group-hover:bg-nxe-primary/10 group-hover:scale-105"
                     }`}>
                       <Icon className={`h-5 w-5 transition-all duration-300 ${
                         isActive ? "drop-shadow-sm" : ""
                       }`} />
                       
-                      {/* Active indicator dot */}
+                      {/* Active indicator */}
                       {isActive && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-nxe-primary rounded-full animate-pulse" />
+                        <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-nxe-primary rounded-full" />
                       )}
                       
                       {/* Notification badge */}
                       {hasNotificationBadge && (
                         <Badge 
                           variant="destructive" 
-                          className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border-2 border-nxe-surface animate-bounce"
+                          className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border border-nxe-surface"
                         >
                           {typeof item.badge === 'number' && item.badge > 9 ? '9+' : item.badge === true ? '•' : item.badge}
                         </Badge>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Label with enhanced animations */}
-                  <span className={`text-xs font-medium mt-1 transition-all duration-300 ${
-                    isActive 
-                      ? "text-nxe-primary font-semibold transform scale-105" 
-                      : isGuestStatus
-                      ? "text-gray-400"
-                      : "text-gray-400 group-hover:text-nxe-primary group-hover:font-medium"
-                  }`}>
-                    {item.label}
-                  </span>
                 </Button>
+                
+                {/* Label positioned outside button for better mobile UX */}
+                <span className={`text-xs font-medium mt-0.5 transition-all duration-300 ${
+                  isActive 
+                    ? "text-nxe-primary font-semibold" 
+                    : isGuestStatus
+                    ? "text-gray-400"
+                    : "text-gray-400"
+                }`}>
+                  {item.label}
+                </span>
               </div>
             );
           })}
