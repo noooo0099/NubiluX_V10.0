@@ -49,15 +49,16 @@ export class WebSocketManager {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws?userId=${this.userId}`;
       
-      this.ws = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl);
+      this.ws = ws;
 
-      this.ws.onopen = () => {
+      ws.onopen = () => {
         console.log('WebSocket connected');
         this.reconnectAttempts = 0;
         this.notifyHandlers('connect', { connected: true });
       };
 
-      this.ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
           this.handleMessage(message);
@@ -66,14 +67,14 @@ export class WebSocketManager {
         }
       };
 
-      this.ws.onclose = () => {
+      ws.onclose = () => {
         console.log('WebSocket disconnected');
         this.ws = null;
         this.notifyHandlers('disconnect', { connected: false });
         this.attemptReconnect();
       };
 
-      this.ws.onerror = (error) => {
+      ws.onerror = (error) => {
         console.error('WebSocket error:', error);
       };
 

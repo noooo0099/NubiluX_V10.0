@@ -2,6 +2,7 @@ import { db } from './db.js';
 import { sql } from 'drizzle-orm';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { seedDatabase } from './seed.js';
 
 const execAsync = promisify(exec);
 
@@ -56,6 +57,9 @@ export async function initializeDatabase(): Promise<void> {
     }
     
     console.log('✅ All critical database tables verified');
+    
+    // Seed the database with initial data if it's empty
+    await seedDatabase();
     
   } catch (error) {
     console.error('❌ Database initialization failed:', error);
