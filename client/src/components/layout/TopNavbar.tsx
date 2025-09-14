@@ -122,15 +122,15 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                       variant="ghost"
                       size="sm"
                       onClick={onShowNotifications}
-                      className={`relative p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
-                        searchExpanded ? "scale-90" : "scale-100"
+                      className={`relative p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out ${
+                        searchExpanded ? "scale-90 opacity-80" : "scale-100 opacity-100"
                       }`}
                       data-testid="button-notifications"
                     >
-                      <Bell className="h-5 w-5 text-gray-300" />
+                      <Bell className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                       <Badge 
                         variant="destructive" 
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs animate-pulse"
                       >
                         3
                       </Badge>
@@ -142,30 +142,35 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
-                            searchExpanded ? "scale-90" : "scale-100"
+                          className={`p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out ${
+                            searchExpanded ? "scale-90 opacity-80" : "scale-100 opacity-100"
                           }`}
                           data-testid="button-menu"
                         >
-                          <MoreVertical className="h-5 w-5 text-gray-300" />
+                          <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
-                        <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer">
-                          <span>Profile</span>
+                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                        <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <UserCircle className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Profile</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer">
-                          <span>Pengaturan</span>
+                        <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <Settings className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Pengaturan</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer">
-                          <span>Chat</span>
+                        <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <MessageCircle className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Chat</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                        <DropdownMenuItem className="cursor-pointer">
-                          <span>Bantuan</span>
+                        <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <HelpCircle className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Bantuan</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400">
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400 hover:bg-red-400/10 transition-colors duration-150">
+                          <LogOut className="mr-3 h-4 w-4 text-red-400" />
                           <span>Keluar</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -178,8 +183,8 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                       variant="ghost"
                       size="sm"
                       onClick={onShowNotifications}
-                      className={`relative p-2 hover:bg-transparent shrink-0 transition-all duration-300 opacity-50 ${
-                        searchExpanded ? "scale-90" : "scale-100"
+                      className={`relative p-2 hover:bg-transparent shrink-0 transition-all duration-200 ease-in-out opacity-50 ${
+                        searchExpanded ? "scale-90 opacity-30" : "scale-100 opacity-50"
                       }`}
                       disabled
                       data-testid="button-notifications-guest"
@@ -193,21 +198,23 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
-                            searchExpanded ? "scale-90" : "scale-100"
+                          className={`p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out ${
+                            searchExpanded ? "scale-90 opacity-80" : "scale-100 opacity-100"
                           }`}
                           data-testid="button-menu-guest"
                         >
-                          <MoreVertical className="h-5 w-5 text-gray-300" />
+                          <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
-                        <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer">
-                          <span>Masuk</span>
+                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                        <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <LogIn className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Masuk</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                        <DropdownMenuItem className="cursor-pointer">
-                          <span>Bantuan</span>
+                        <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                          <HelpCircle className="mr-3 h-4 w-4 text-gray-400" />
+                          <span className="text-white">Bantuan</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
