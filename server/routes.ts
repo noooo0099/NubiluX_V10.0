@@ -635,6 +635,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/chats/unread', requireAuth, async (req, res) => {
+    try {
+      // For now, return 0 as we don't have unread logic implemented yet
+      // TODO: Implement proper unread count logic based on last message read timestamp
+      res.json(0);
+    } catch (error) {
+      console.error('Get unread chats error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
   app.post('/api/chats', requireAuth, async (req, res) => {
     try {
       const chatData = insertChatSchema.parse({

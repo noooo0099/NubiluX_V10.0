@@ -34,6 +34,10 @@ export function useWebSocket(userId: number | null, options: UseWebSocketOptions
       return;
     }
 
+    // TODO: Implement WebSocket server on backend before enabling
+    console.log('WebSocket connection disabled - server not implemented yet');
+    return;
+
     try {
       setConnectionStatus('connecting');
       

@@ -41,6 +41,10 @@ export class WebSocketManager {
       return;
     }
 
+    // TODO: Implement WebSocket server on backend before enabling
+    console.log('WebSocketManager connection disabled - server not implemented yet');
+    return;
+
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws?userId=${this.userId}`;
