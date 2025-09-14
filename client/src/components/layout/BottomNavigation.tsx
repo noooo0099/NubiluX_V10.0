@@ -61,12 +61,12 @@ export default function BottomNavigation() {
 
   return (
     <nav 
-      className="bottom-nav-safe keyboard-smooth gpu-accelerated"
+      className="fixed bottom-0 left-0 right-0 z-40 bottom-nav-safe keyboard-smooth gpu-accelerated"
       role="navigation"
     >
       {/* Glassmorphism background dengan mobile optimization */}
-      <div className="nxe-glass backdrop-blur-xl bg-nxe-surface/90 border-t border-nxe-primary/20 shadow-2xl">
-        <div className="flex items-end justify-around px-2 py-3">
+      <div className="nxe-glass backdrop-blur-xl bg-nxe-surface/95 border-t border-nxe-primary/30 shadow-2xl">
+        <div className="flex items-center justify-around px-3 py-2 max-w-md mx-auto">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location === item.path;
