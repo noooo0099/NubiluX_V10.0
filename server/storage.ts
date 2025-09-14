@@ -7,7 +7,7 @@ import {
   type Notification, type InsertNotification, type PosterGeneration, type InsertPosterGeneration,
   type EscrowTransaction, type InsertEscrowTransaction
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, desc, and, or, gt, lt } from "drizzle-orm";
 import session, { SessionData, Store } from "express-session";
 import connectPg from "connect-pg-simple";
@@ -77,7 +77,7 @@ export class DatabaseStorage implements IStorage {
   
   constructor() {
     this.sessionStore = new PostgresSessionStore({ 
-      pool: (db as any).pool, 
+      pool, 
       createTableIfMissing: true 
     });
   }
