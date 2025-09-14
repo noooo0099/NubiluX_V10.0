@@ -1,8 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getFallbackResponse } from "./api-fallback";
 
-// API base URL - using same port (5000) for both frontend and backend
-const API_BASE_URL = '/api';
+// API base URL - server already includes /api prefix in routes
+const API_BASE_URL = '';
 
 // Get auth token from localStorage
 function getAuthToken(): string | null {
@@ -69,10 +69,15 @@ export async function apiRequest(
   } catch (error: any) {
     console.error('API Request Error:', error);
     
-    // If backend is not available, return fallback data for auth endpoints
+    // If backend is not available, return fallback data only in development
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      console.warn('Backend not available, using fallback data');
-      return getFallbackResponse(url, options?.method || 'GET', options?.body);
+      if (import.meta.env.DEV) {
+        console.warn('Backend not available, using fallback data');
+        return getFallbackResponse(url, options?.method || 'GET', options?.body);
+      } else {
+        console.error('Backend connection failed in production');
+        throw new Error('Backend service unavailable');
+      }
     }
     
     throw error;
@@ -114,11 +119,16 @@ export const getQueryFn: <T>(options: {
         return null;
       }
       
-      // If backend is not available, return fallback data
+      // If backend is not available, return fallback data only in development
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.warn('Backend not available, using fallback data');
-        const endpoint = queryKey[0] as string;
-        return getFallbackResponse(endpoint, 'GET');
+        if (import.meta.env.DEV) {
+          console.warn('Backend not available, using fallback data');
+          const endpoint = queryKey[0] as string;
+          return getFallbackResponse(endpoint, 'GET');
+        } else {
+          console.error('Backend connection failed in production');
+          throw new Error('Backend service unavailable');
+        }
       }
       
       throw error;

@@ -738,6 +738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const statuses = await storage.getActiveStatusUpdates();
       res.json(statuses);
     } catch (error) {
+      console.error('Status route error:', error);
       res.status(500).json({ error: 'Server error' });
     }
   });
@@ -1061,8 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const escrow = await storage.createEscrowTransaction({
         ...escrowData,
-        status: 'pending',
-        riskScore: 0
+        status: 'pending'
       });
       
       res.json(escrow);

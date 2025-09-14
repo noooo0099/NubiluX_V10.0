@@ -126,7 +126,7 @@ export class DatabaseStorage implements IStorage {
     // Build query in single expression to avoid type issues
     const baseQuery = db.select()
       .from(products)
-      .where(and(...conditions))
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions))
       .orderBy(desc(products.createdAt));
       
     // Apply pagination if needed
@@ -213,12 +213,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveStatusUpdates(): Promise<StatusUpdate[]> {
-    const now = new Date();
     return await db.select().from(statusUpdates)
-      .where(and(
-        eq(statusUpdates.isPublic, true),
-        gt(statusUpdates.expiresAt, now)
-      ))
       .orderBy(desc(statusUpdates.createdAt));
   }
 

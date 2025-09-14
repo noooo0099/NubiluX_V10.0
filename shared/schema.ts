@@ -15,7 +15,7 @@ export const users = pgTable("users", {
   bio: text("bio"),
   walletBalance: decimal("wallet_balance", { precision: 15, scale: 2 }).default("0"),
   isVerified: boolean("is_verified").default(false),
-  // Admin management fields from Laravel
+  // Admin management fields
   isAdminApproved: boolean("is_admin_approved").default(false),
   adminApprovedAt: timestamp("admin_approved_at"),
   approvedByOwnerId: integer("approved_by_owner_id"),
@@ -126,7 +126,7 @@ export const escrowTransactions = pgTable("escrow_transactions", {
   completionNote: text("completion_note"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
-  // Indexes from Laravel migration for better performance
+  // Database indexes for better performance
   buyerStatusIdx: index("escrow_buyer_status_idx").on(table.buyerId, table.status),
   sellerStatusIdx: index("escrow_seller_status_idx").on(table.sellerId, table.status),
   statusAiStatusIdx: index("escrow_status_ai_status_idx").on(table.status, table.aiStatus),
