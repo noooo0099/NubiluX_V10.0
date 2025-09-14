@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -8,13 +8,20 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").notNull().default("buyer"), // buyer, seller, admin
+  role: text("role").notNull().default("user"), // user, admin, owner
   profilePicture: text("profile_picture"),
   bannerImage: text("banner_image"),
   displayName: text("display_name"),
   bio: text("bio"),
   walletBalance: decimal("wallet_balance", { precision: 15, scale: 2 }).default("0"),
   isVerified: boolean("is_verified").default(false),
+  // Admin management fields from Laravel
+  isAdminApproved: boolean("is_admin_approved").default(false),
+  adminApprovedAt: timestamp("admin_approved_at"),
+  approvedByOwnerId: integer("approved_by_owner_id"),
+  adminRequestPending: boolean("admin_request_pending").default(false),
+  adminRequestReason: text("admin_request_reason"),
+  adminRequestAt: timestamp("admin_request_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -101,6 +108,31 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const escrowTransactions = pgTable("escrow_transactions", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sellerId: integer("seller_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"), // pending, active, completed, disputed, cancelled
+  aiStatus: text("ai_status").notNull().default("processing"), // processing, approved, flagged, manual_review
+  riskScore: integer("risk_score").default(0), // 0-100 risk score
+  aiDecision: jsonb("ai_decision").$type<Record<string, any>>(),
+  approvedBy: integer("approved_by").references(() => users.id, { onDelete: "set null" }),
+  approvedAt: timestamp("approved_at"),
+  adminNote: text("admin_note"),
+  completedBy: integer("completed_by").references(() => users.id, { onDelete: "set null" }),
+  completedAt: timestamp("completed_at"),
+  completionNote: text("completion_note"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  // Indexes from Laravel migration for better performance
+  buyerStatusIdx: index("escrow_buyer_status_idx").on(table.buyerId, table.status),
+  sellerStatusIdx: index("escrow_seller_status_idx").on(table.sellerId, table.status),
+  statusAiStatusIdx: index("escrow_status_ai_status_idx").on(table.status, table.aiStatus),
+  createdAtIdx: index("escrow_created_at_idx").on(table.createdAt),
+}));
+
 export const posterGenerations = pgTable("poster_generations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
@@ -114,7 +146,7 @@ export const posterGenerations = pgTable("poster_generations", {
 });
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   products: many(products),
   buyerChats: many(chats, { relationName: "buyer" }),
   sellerChats: many(chats, { relationName: "seller" }),
@@ -122,6 +154,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   statusUpdates: many(statusUpdates),
   notifications: many(notifications),
   walletTransactions: many(walletTransactions),
+  buyerEscrowTransactions: many(escrowTransactions, { relationName: "buyer" }),
+  sellerEscrowTransactions: many(escrowTransactions, { relationName: "seller" }),
+  approvedAdmins: many(users, { relationName: "approved_by_owner" }),
+  approvedByOwner: one(users, {
+    fields: [users.approvedByOwnerId],
+    references: [users.id],
+    relationName: "approved_by_owner",
+  }),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -131,6 +171,32 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   chats: many(chats),
   transactions: many(transactions),
+  escrowTransactions: many(escrowTransactions),
+}));
+
+export const escrowTransactionsRelations = relations(escrowTransactions, ({ one }) => ({
+  buyer: one(users, {
+    fields: [escrowTransactions.buyerId],
+    references: [users.id],
+    relationName: "buyer",
+  }),
+  seller: one(users, {
+    fields: [escrowTransactions.sellerId],
+    references: [users.id],
+    relationName: "seller",
+  }),
+  product: one(products, {
+    fields: [escrowTransactions.productId],
+    references: [products.id],
+  }),
+  approvedByUser: one(users, {
+    fields: [escrowTransactions.approvedBy],
+    references: [users.id],
+  }),
+  completedByUser: one(users, {
+    fields: [escrowTransactions.completedBy],
+    references: [users.id],
+  }),
 }));
 
 export const chatsRelations = relations(chats, ({ one, many }) => ({
@@ -163,9 +229,26 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 }));
 
 // Zod schemas
+// SECURITY: Original insertUserSchema is too permissive - kept for internal admin use only
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+});
+
+// SECURE: Safe user registration schema - only allows non-sensitive fields
+export const userRegisterSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  // Security: Exclude all sensitive fields that could lead to privilege escalation
+  role: true,
+  walletBalance: true,
+  isVerified: true,
+  isAdminApproved: true,
+  adminApprovedAt: true,
+  approvedByOwnerId: true,
+  adminRequestPending: true,
+  adminRequestReason: true,
+  adminRequestAt: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
@@ -201,6 +284,31 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+// SECURITY: Original insertEscrowTransactionSchema is too permissive - kept for internal admin use only
+export const insertEscrowTransactionSchema = createInsertSchema(escrowTransactions).omit({
+  id: true,
+  createdAt: true,
+  riskScore: true,
+  aiStatus: true,
+});
+
+// SECURE: Safe escrow creation schema - only allows public fields
+export const escrowPublicCreateSchema = createInsertSchema(escrowTransactions).omit({
+  id: true,
+  createdAt: true,
+  // Security: Exclude all admin-only fields
+  status: true,
+  aiStatus: true,
+  riskScore: true,
+  aiDecision: true,
+  approvedBy: true,
+  approvedAt: true,
+  adminNote: true,
+  completedBy: true,
+  completedAt: true,
+  completionNote: true,
+});
+
 export const insertPosterGenerationSchema = createInsertSchema(posterGenerations).omit({
   id: true,
   createdAt: true,
@@ -209,6 +317,7 @@ export const insertPosterGenerationSchema = createInsertSchema(posterGenerations
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserRegister = z.infer<typeof userRegisterSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Chat = typeof chats.$inferSelect;
@@ -217,6 +326,9 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type EscrowTransaction = typeof escrowTransactions.$inferSelect;
+export type InsertEscrowTransaction = z.infer<typeof insertEscrowTransactionSchema>;
+export type EscrowPublicCreate = z.infer<typeof escrowPublicCreateSchema>;
 export type StatusUpdate = typeof statusUpdates.$inferSelect;
 export type InsertStatusUpdate = z.infer<typeof insertStatusUpdateSchema>;
 export type Notification = typeof notifications.$inferSelect;
