@@ -1,4 +1,4 @@
-import { RotateCcw, MessageSquare, Plus, Wallet, Settings, LogIn, LogOut, User } from "lucide-react";
+import { RefreshCcw, MessageSquare, Plus, Wallet, Settings, LogIn, LogOut, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,16 +29,16 @@ export default function BottomNavigation() {
     enabled: isAuthenticated
   });
 
-  // Guest navigation items - only Market and Logout with guest status
+  // Guest navigation items - only Market and Login
   const guestNavItems: NavItem[] = [
-    { path: "/", icon: RotateCcw, label: "Pembaruan" },
+    { path: "/", icon: RefreshCcw, label: "Pembaruan" },
     { path: "/guest-status", icon: User, label: "Tamu" }, // Gray guest icon
-    { path: "/auth", icon: LogOut, label: "Keluar" },
+    { path: "/auth", icon: LogIn, label: "Masuk" },
   ];
 
   // Authenticated user navigation items - sesuai gambar
   const authNavItems: NavItem[] = [
-    { path: "/", icon: RotateCcw, label: "Pembaruan" },
+    { path: "/", icon: RefreshCcw, label: "Pembaruan" },
     { path: "/chat", icon: MessageSquare, label: "Chat", badge: unreadChats > 0 ? unreadChats : null },
     { path: "/upload", icon: Plus, label: "Posting", isSpecial: true },
     { path: "/wallet", icon: Wallet, label: "ewallet", badge: walletNotifications },
