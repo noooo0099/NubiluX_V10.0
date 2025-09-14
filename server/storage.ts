@@ -88,30 +88,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(filters?: { category?: string; sellerId?: number; limit?: number; offset?: number }): Promise<Product[]> {
-    let query = db.select().from(products).where(eq(products.status, "active")).orderBy(desc(products.createdAt));
+    // Build where conditions array
+    const conditions = [eq(products.status, "active")];
     
     if (filters?.category) {
-      query = query.where(and(eq(products.status, "active"), eq(products.category, filters.category)));
+      conditions.push(eq(products.category, filters.category));
     }
     
     if (filters?.sellerId) {
-      query = query.where(and(eq(products.status, "active"), eq(products.sellerId, filters.sellerId)));
+      conditions.push(eq(products.sellerId, filters.sellerId));
     }
     
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
+    // Build query in single expression to avoid type issues
+    const baseQuery = db.select()
+      .from(products)
+      .where(and(...conditions))
+      .orderBy(desc(products.createdAt));
+      
+    // Apply pagination if needed
+    if (filters?.limit && filters?.offset) {
+      return await baseQuery.limit(filters.limit).offset(filters.offset);
+    } else if (filters?.limit) {
+      return await baseQuery.limit(filters.limit);
     }
     
-    if (filters?.offset) {
-      query = query.offset(filters.offset);
-    }
-    
-    return await query;
+    return await baseQuery;
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
-    const [newProduct] = await db.insert(products).values(product).returning();
-    return newProduct;
+    // Ensure JSONB fields are properly typed
+    const productData = {
+      ...product,
+      images: product.images ? [...product.images] as string[] : [],
+      gameData: product.gameData || {}
+    };
+    const result = await db.insert(products).values([productData]).returning();
+    return result[0];
   }
 
   async updateProduct(id: number, updates: Partial<Product>): Promise<Product | undefined> {
@@ -207,8 +219,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPosterGeneration(poster: InsertPosterGeneration): Promise<PosterGeneration> {
-    const [newPoster] = await db.insert(posterGenerations).values(poster).returning();
-    return newPoster;
+    // Ensure JSONB fields are properly typed
+    const posterData = {
+      ...poster,
+      selectedSkins: [...poster.selectedSkins] as string[]
+    };
+    const result = await db.insert(posterGenerations).values([posterData]).returning();
+    return result[0];
   }
 
   async updatePosterGeneration(id: number, updates: Partial<PosterGeneration>): Promise<PosterGeneration | undefined> {
