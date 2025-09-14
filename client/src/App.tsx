@@ -24,6 +24,14 @@ import AIEscrowSystem from "@/pages/AIEscrowSystem";
 import Auth from "@/pages/Auth";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/not-found";
+import Categories from "@/pages/Categories";
+import CategoryProducts from "@/pages/CategoryProducts";
+import StatusUpdates from "@/pages/StatusUpdates";
+import TransactionHistory from "@/pages/TransactionHistory";
+import Notifications from "@/pages/Notifications";
+import SearchResults from "@/pages/SearchResults";
+import SellerDashboard from "@/pages/SellerDashboard";
+import Help from "@/pages/Help";
 
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -73,6 +81,10 @@ function Router() {
           {/* Public routes - Guest dapat akses */}
           <Route path="/" component={Home} />
           <Route path="/market" component={Home} />
+          <Route path="/categories" component={Categories} />
+          <Route path="/category/:categoryId" component={CategoryProducts} />
+          <Route path="/search" component={SearchResults} />
+          <Route path="/help" component={Help} />
           <Route path="/auth" component={Auth} />
           <Route path="/unauthorized" component={Unauthorized} />
           <Route path="/product/:id" component={ProductDetail} />
@@ -131,6 +143,34 @@ function Router() {
             {() => (
               <RequireAuth>
                 <Profile />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/notifications">
+            {() => (
+              <RequireAuth>
+                <Notifications />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/status">
+            {() => (
+              <RequireAuth>
+                <StatusUpdates />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/transactions">
+            {() => (
+              <RequireAuth>
+                <TransactionHistory />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/seller/dashboard">
+            {() => (
+              <RequireAuth>
+                <SellerDashboard />
               </RequireAuth>
             )}
           </Route>

@@ -1353,6 +1353,231 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Missing endpoints for new pages
+  
+  // Notifications (reuse wallet notifications for now)
+  app.get('/api/notifications', requireAuth, async (req, res) => {
+    try {
+      // For now, return empty array as notification system is not fully implemented
+      // In production, this would return user-specific notifications
+      res.json([]);
+    } catch (error) {
+      console.error('Get notifications error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Mark notification as read
+  app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      // Mock response - would update notification read status in database
+      res.json({ success: true, message: 'Notification marked as read' });
+    } catch (error) {
+      console.error('Mark notification as read error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Delete notification
+  app.delete('/api/notifications/:id', requireAuth, async (req, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      // Mock response - would delete notification from database
+      res.json({ success: true, message: 'Notification deleted' });
+    } catch (error) {
+      console.error('Delete notification error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Mark all notifications as read
+  app.patch('/api/notifications/mark-all-read', requireAuth, async (req, res) => {
+    try {
+      // Mock response - would mark all user notifications as read
+      res.json({ success: true, message: 'All notifications marked as read' });
+    } catch (error) {
+      console.error('Mark all notifications as read error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Transaction history endpoints
+  app.get('/api/transactions', requireAuth, async (req, res) => {
+    try {
+      // Return empty array for now - would implement transaction history later
+      res.json([]);
+    } catch (error) {
+      console.error('Get transactions error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.get('/api/wallet/transactions', requireAuth, async (req, res) => {
+    try {
+      // Return empty array for now - would get from wallet transaction storage
+      res.json([]);
+    } catch (error) {
+      console.error('Get wallet transactions error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Seller dashboard endpoints
+  app.get('/api/seller/stats', requireAuth, async (req, res) => {
+    try {
+      // Mock seller statistics
+      const mockStats = {
+        totalProducts: 0,
+        activeProducts: 0,
+        totalSales: 0,
+        totalEarnings: "0",
+        totalViews: 0,
+        averageRating: 0,
+        pendingOrders: 0,
+        completedOrders: 0
+      };
+      
+      res.json(mockStats);
+    } catch (error) {
+      console.error('Get seller stats error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.get('/api/seller/products', requireAuth, async (req, res) => {
+    try {
+      // Get products by current user (seller)
+      const products = await storage.getProducts({});
+      const userProducts = products.filter(p => p.sellerId === req.userId);
+      res.json(userProducts);
+    } catch (error) {
+      console.error('Get seller products error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.get('/api/seller/sales', requireAuth, async (req, res) => {
+    try {
+      // Return empty array for now - would implement sales tracking later
+      res.json([]);
+    } catch (error) {
+      console.error('Get seller sales error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Category products endpoint
+  app.get('/api/products/category/:categoryId', async (req, res) => {
+    try {
+      const categoryId = req.params.categoryId;
+      const products = await storage.getProducts({ category: categoryId });
+      res.json(products);
+    } catch (error) {
+      console.error('Get category products error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Search endpoint
+  app.get('/api/search', async (req, res) => {
+    try {
+      const { q: query, category, minPrice, maxPrice, sortBy, isPremium } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.json([]);
+      }
+      
+      // Simple search implementation - in production would use proper search engine
+      const allProducts = await storage.getProducts({});
+      let searchResults = allProducts.filter(product => 
+        product.title.toLowerCase().includes(query.toLowerCase()) ||
+        product.description.toLowerCase().includes(query.toLowerCase()) ||
+        product.category.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      // Apply filters
+      if (category && category !== 'all') {
+        searchResults = searchResults.filter(p => p.category === category);
+      }
+      
+      if (minPrice) {
+        const min = parseFloat(minPrice as string);
+        searchResults = searchResults.filter(p => parseFloat(p.price) >= min);
+      }
+      
+      if (maxPrice) {
+        const max = parseFloat(maxPrice as string);
+        searchResults = searchResults.filter(p => parseFloat(p.price) <= max);
+      }
+      
+      if (isPremium && isPremium !== 'all') {
+        const premium = isPremium === 'premium';
+        searchResults = searchResults.filter(p => p.isPremium === premium);
+      }
+      
+      // Apply sorting
+      if (sortBy) {
+        switch (sortBy) {
+          case 'price_low':
+            searchResults.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+            break;
+          case 'price_high':
+            searchResults.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+            break;
+          case 'newest':
+            searchResults.sort((a, b) => {
+              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              return dateB - dateA;
+            });
+            break;
+          default:
+            // Keep relevance order (default)
+            break;
+        }
+      }
+      
+      res.json(searchResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  // Status updates endpoints
+  app.get('/api/status', requireAuth, async (req, res) => {
+    try {
+      // For now, return empty array as status system is not fully implemented
+      // In production, this would return active status updates
+      res.json([]);
+    } catch (error) {
+      console.error('Get status updates error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.post('/api/status', requireAuth, async (req, res) => {
+    try {
+      const { content, mediaType } = req.body;
+      
+      // Mock response - would create status update in database
+      const newStatus = {
+        id: Date.now(), // Mock ID
+        userId: req.userId,
+        content,
+        mediaType: mediaType || 'text',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+      };
+      
+      res.json(newStatus);
+    } catch (error) {
+      console.error('Create status update error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
   return httpServer;
 }
 
