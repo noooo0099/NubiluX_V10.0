@@ -1,4 +1,4 @@
-import { Home, Play, Plus, Wallet, Settings, LogIn } from "lucide-react";
+import { Zap, Play, Plus, Wallet, Settings, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,13 +9,13 @@ export default function BottomNavigation() {
 
   // Guest navigation items (public access)
   const guestNavItems = [
-    { path: "/", icon: Home, label: "Home" },
+    { path: "/", icon: Zap, label: "Pembaruan" },
     { path: "/auth", icon: LogIn, label: "Login", isSpecial: true },
   ];
 
-  // Authenticated user navigation items
+  // Authenticated user navigation items (WhatsApp-style)
   const authNavItems = [
-    { path: "/", icon: Home, label: "Home" },
+    { path: "/", icon: Zap, label: "Pembaruan" },
     { path: "/video", icon: Play, label: "Video" },
     { path: "/upload", icon: Plus, label: "Upload", isSpecial: true },
     { path: "/wallet", icon: Wallet, label: "Wallet" },
