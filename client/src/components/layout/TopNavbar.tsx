@@ -152,25 +152,20 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
                         <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer">
-                          <UserCircle className="mr-2 h-4 w-4" />
                           <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer">
-                          <Settings className="mr-2 h-4 w-4" />
                           <span>Pengaturan</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer">
-                          <MessageCircle className="mr-2 h-4 w-4" />
                           <span>Chat</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
                         <DropdownMenuItem className="cursor-pointer">
-                          <HelpCircle className="mr-2 h-4 w-4" />
                           <span>Bantuan</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400">
-                          <LogOut className="mr-2 h-4 w-4" />
                           <span>Keluar</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
