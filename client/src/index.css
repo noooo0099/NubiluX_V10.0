@@ -85,6 +85,83 @@
 }
 
 @layer components {
+  /* Mobile viewport and keyboard fixes */
+  .mobile-viewport-fix {
+    /* Use CSS env() for safe area insets */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: calc(var(--vh, 1vh) * 100);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Prevent layout shifts on mobile keyboard */
+  .mobile-stable {
+    /* Use visual viewport for stable positioning */
+    height: 100dvh; /* Dynamic viewport height */
+    height: 100svh; /* Small viewport height as fallback */
+  }
+
+  /* Bottom navigation safe positioning */
+  .bottom-nav-safe {
+    /* Position relative to visual viewport, not layout viewport */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    /* Ensure it stays above keyboard */
+    transform: translateZ(0);
+    will-change: transform;
+    /* Prevent animation jank */
+    backface-visibility: hidden;
+    /* Use safe area for modern devices */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Smooth keyboard transitions */
+  @media (max-width: 768px) {
+    .keyboard-smooth * {
+      transition-property: transform, opacity, background-color, border-color, color, fill, stroke;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 150ms;
+    }
+    
+    /* Prevent viewport jumping */
+    .keyboard-smooth {
+      /* Use contain for better performance */
+      contain: layout style paint;
+      /* Prevent scrolling issues */
+      touch-action: manipulation;
+    }
+  }
+
+  /* Input focus optimizations */
+  .mobile-input-fix input,
+  .mobile-input-fix textarea {
+    /* Prevent zoom on focus for iOS */
+    font-size: max(16px, 1rem);
+    /* Optimize for mobile keyboard */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Glassmorphism fix for mobile */
+  .nxe-glass {
+    /* GPU acceleration */
+    transform: translateZ(0);
+    will-change: backdrop-filter;
+    /* Better backdrop-filter performance */
+    isolation: isolate;
+  }
+
+  /* Performance optimized animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
   /* NXE specific component styles */
   .nxe-logo {
     font-family: 'Inter', sans-serif;

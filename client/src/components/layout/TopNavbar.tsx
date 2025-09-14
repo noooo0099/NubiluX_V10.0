@@ -1,9 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell, MessageCircle, X, LogIn, User } from "lucide-react";
+import { Search, Bell, MessageCircle, X, LogIn, User, MoreVertical, Settings, LogOut, UserCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,7 +22,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleSearch = () => {
@@ -38,6 +45,11 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
       // Implement search functionality
       console.log("Searching for:", searchQuery);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setLocation("/");
   };
 
   return (
@@ -116,11 +128,11 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             </div>
           </div>
 
-          {/* Right Column - Actions */}
+          {/* Right Column - Actions (WhatsApp Style Layout) */}
           <div className="flex items-center justify-end space-x-1 min-w-0">
             {isAuthenticated ? (
               <>
-                {/* Notifications - Authenticated Only */}
+                {/* Notifications */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -139,54 +151,89 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   </Badge>
                 </Button>
 
-                {/* Chat - Hidden on small screens when search expanded */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setLocation("/chat")}
-                  className={`p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
-                    searchExpanded ? "scale-90 hidden sm:inline-flex" : "scale-100"
-                  }`}
-                  data-testid="button-chat"
-                >
-                  <MessageCircle className="h-5 w-5 text-gray-300" />
-                </Button>
-
-                {/* Profile - Authenticated Only */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setLocation("/profile")}
-                  className={`p-0 hover:bg-transparent shrink-0 transition-all duration-300 ${
-                    searchExpanded ? "scale-90" : "scale-100"
-                  }`}
-                  data-testid="button-profile"
-                >
-                  <Avatar className="w-8 h-8 border-2 border-nxe-primary">
-                    <AvatarImage 
-                      src={user?.profilePicture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"} 
-                      alt={user?.displayName || user?.username || "Profile"} 
-                    />
-                    <AvatarFallback>
-                      {user?.displayName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
+                {/* 3 Dots Menu (WhatsApp Style) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
+                        searchExpanded ? "scale-90" : "scale-100"
+                      }`}
+                      data-testid="button-menu"
+                    >
+                      <MoreVertical className="h-5 w-5 text-gray-300" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
+                    <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer">
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Pengaturan</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      <span>Chat</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                    <DropdownMenuItem className="cursor-pointer">
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <span>Bantuan</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Keluar</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
-              /* Guest Mode - Login Button */
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setLocation("/auth")}
-                className={`bg-nxe-primary hover:bg-nxe-primary/80 text-white px-3 shrink-0 transition-all duration-300 ${
-                  searchExpanded ? "scale-90" : "scale-100"
-                }`}
-                data-testid="button-login"
-              >
-                <LogIn className="h-4 w-4 mr-1" />
-                Login
-              </Button>
+              <>
+                {/* Guest Mode - Only essential actions */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onShowNotifications}
+                  className={`relative p-2 hover:bg-transparent shrink-0 transition-all duration-300 opacity-50 ${
+                    searchExpanded ? "scale-90" : "scale-100"
+                  }`}
+                  disabled
+                  data-testid="button-notifications-guest"
+                >
+                  <Bell className="h-5 w-5 text-gray-300" />
+                </Button>
+
+                {/* Guest 3 Dots Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`p-2 hover:bg-transparent shrink-0 transition-all duration-300 ${
+                        searchExpanded ? "scale-90" : "scale-100"
+                      }`}
+                      data-testid="button-menu-guest"
+                    >
+                      <MoreVertical className="h-5 w-5 text-gray-300" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
+                    <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      <span>Masuk</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                    <DropdownMenuItem className="cursor-pointer">
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <span>Bantuan</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             )}
           </div>
         </div>

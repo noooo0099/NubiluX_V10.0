@@ -1,4 +1,4 @@
-import { Store, Zap, Plus, MessageSquare, Wallet, LogIn, LogOut, User } from "lucide-react";
+import { RotateCcw, MessageSquare, Plus, Wallet, Settings, LogIn, LogOut, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,18 +31,18 @@ export default function BottomNavigation() {
 
   // Guest navigation items - only Market and Logout with guest status
   const guestNavItems: NavItem[] = [
-    { path: "/market", icon: Store, label: "Pasar" },
+    { path: "/", icon: RotateCcw, label: "Pembaruan" },
     { path: "/guest-status", icon: User, label: "Tamu" }, // Gray guest icon
     { path: "/auth", icon: LogOut, label: "Keluar" },
   ];
 
-  // Authenticated user navigation items - marketplace-first design
+  // Authenticated user navigation items - sesuai gambar
   const authNavItems: NavItem[] = [
-    { path: "/market", icon: Store, label: "Pasar" },
-    { path: "/", icon: Zap, label: "Pembaruan" },
-    { path: "/upload", icon: Plus, label: "Jual", isSpecial: true },
+    { path: "/", icon: RotateCcw, label: "Pembaruan" },
     { path: "/chat", icon: MessageSquare, label: "Chat", badge: unreadChats > 0 ? unreadChats : null },
-    { path: "/wallet", icon: Wallet, label: "Dompet", badge: walletNotifications },
+    { path: "/upload", icon: Plus, label: "Posting", isSpecial: true },
+    { path: "/wallet", icon: Wallet, label: "ewallet", badge: walletNotifications },
+    { path: "/settings", icon: Settings, label: "pengaturan" },
   ];
 
   const navItems = isAuthenticated ? authNavItems : guestNavItems;
@@ -61,10 +61,10 @@ export default function BottomNavigation() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
+      className="bottom-nav-safe keyboard-smooth gpu-accelerated"
       role="navigation"
     >
-      {/* Glassmorphism background */}
+      {/* Glassmorphism background dengan mobile optimization */}
       <div className="nxe-glass backdrop-blur-xl bg-nxe-surface/90 border-t border-nxe-primary/20 shadow-2xl">
         <div className="flex items-end justify-around px-2 py-3">
           {navItems.map((item, index) => {

@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UserProfile {
   id: number;
@@ -42,8 +43,9 @@ export default function Profile() {
   const { id: profileId } = useParams();
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
-  const [currentUserId] = useState(1); // This would come from auth context
-  const isOwnProfile = parseInt(profileId!) === currentUserId;
+  const { user } = useAuth();
+  const currentUserId = user?.id || 0;
+  const isOwnProfile = parseInt(profileId!) === currentUserId || !profileId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -119,7 +121,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-nxe-dark">
+    <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark pb-24">
       {/* Profile Header */}
       <div className="relative">
         {/* Banner */}
@@ -346,17 +348,18 @@ export default function Profile() {
                 }}
                 className="space-y-4"
               >
-                <div className="space-y-2">
+                <div className="space-y-2 mobile-input-fix">
                   <Label htmlFor="displayName" className="text-white">Display Name</Label>
                   <Input
                     id="displayName"
                     name="displayName"
                     defaultValue={profile.displayName || profile.username}
                     className="bg-nxe-surface border-nxe-surface text-white"
+                    data-testid="input-display-name"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 mobile-input-fix">
                   <Label htmlFor="bio" className="text-white">Bio</Label>
                   <Textarea
                     id="bio"
@@ -364,6 +367,7 @@ export default function Profile() {
                     defaultValue={profile.bio || ""}
                     placeholder="Tell others about yourself..."
                     className="bg-nxe-surface border-nxe-surface text-white min-h-[80px]"
+                    data-testid="textarea-bio"
                   />
                 </div>
 

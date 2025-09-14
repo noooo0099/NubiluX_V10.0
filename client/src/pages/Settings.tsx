@@ -4,15 +4,16 @@ import {
   UserCheck, Palette, Database, MessageSquare, Globe
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
-      localStorage.clear();
+      logout();
       setLocation("/");
-      window.location.reload();
     }
   };
 
@@ -105,7 +106,7 @@ export default function Settings() {
   ];
 
   return (
-    <div className="min-h-screen bg-nxe-dark px-4 py-6">
+    <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
       <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
 
       {/* Settings Sections */}
