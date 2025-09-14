@@ -27,8 +27,12 @@ declare global {
   }
 }
 
-// JWT Secret (in production, use environment variable)
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production";
+// JWT Secret (required in production, fallback for development)
+const JWT_SECRET = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === 'production' 
+    ? (() => { console.error('FATAL: JWT_SECRET environment variable is required in production'); process.exit(1); })()
+    : 'dev-jwt-secret-change-in-production-' + Date.now()
+);
 
 // Authentication utilities
 const hashPassword = async (password: string): Promise<string> => {
@@ -63,36 +67,64 @@ const verifyToken = (token: string): any => {
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
-  // Skip seeding - Laravel handles this now
-  console.log("🔄 Skipping Node.js database seeding - Laravel handles this now");
+  // Initialize database with seed data if needed
+  console.log("🔄 Node.js backend initializing...");
 
   // WebSocket setup for real-time chat
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   const clients = new Map<number, WebSocket>();
 
-  wss.on('connection', (ws, req) => {
-    const url = new URL(req.url!, `http://${req.headers.host}`);
-    const userId = parseInt(url.searchParams.get('userId') || '0');
-    
-    if (userId) {
-      clients.set(userId, ws);
-    }
+  wss.on('connection', async (ws, req) => {
+    try {
+      const url = new URL(req.url!, `http://${req.headers.host}`);
+      const token = url.searchParams.get('token');
+      
+      if (!token) {
+        ws.close(1000, 'Authentication required');
+        return;
+      }
+      
+      const decoded = verifyToken(token);
+      if (!decoded) {
+        ws.close(1000, 'Invalid token');
+        return;
+      }
+      
+      const user = await storage.getUser(decoded.id);
+      if (!user) {
+        ws.close(1000, 'User not found');
+        return;
+      }
+      
+      clients.set(user.id, ws);
+      
+      // Store user info for this connection
+      (ws as any).userId = user.id;
 
     ws.on('message', async (data) => {
       try {
         const message = JSON.parse(data.toString());
         
         if (message.type === 'chat_message') {
-          // Save message to database
-          const newMessage = await storage.createMessage({
+          // Validate message using authenticated user ID
+          const messageData = insertMessageSchema.parse({
             chatId: message.chatId,
-            senderId: message.senderId,
+            senderId: (ws as any).userId, // Use authenticated user ID, not client-provided
             content: message.content,
             messageType: 'text'
           });
+          
+          // Verify user can send messages to this chat
+          const chat = await storage.getChat(messageData.chatId);
+          if (!chat || (chat.buyerId !== messageData.senderId && chat.sellerId !== messageData.senderId)) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Not authorized to send messages in this chat' }));
+            return;
+          }
+          
+          // Save message to database
+          const newMessage = await storage.createMessage(messageData);
 
-          // Get chat participants
-          const chat = await storage.getChat(message.chatId);
+          // Send to chat participants  
           if (chat) {
             // Send to both buyer and seller
             [chat.buyerId, chat.sellerId].forEach(participantId => {
@@ -113,9 +145,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // This would trigger AI admin response
                 const aiResponse = await processAdminMention(chatHistory, chat);
                 
+                // Create AI admin system user if doesn't exist
+                let aiAdminUser = await storage.getUserByUsername('ai-admin');
+                if (!aiAdminUser) {
+                  aiAdminUser = await storage.createUser({
+                    username: 'ai-admin',
+                    email: 'ai-admin@system.local',
+                    password: await hashPassword('system-ai-admin'),
+                    role: 'admin',
+                    displayName: 'AI Admin',
+                    isVerified: true,
+                    isAdminApproved: true,
+                    walletBalance: '0'
+                  });
+                }
+                const aiAdminId = aiAdminUser.id;
+                
                 const adminMessage = await storage.createMessage({
                   chatId: message.chatId,
-                  senderId: 0, // AI admin ID
+                  senderId: aiAdminId,
                   content: aiResponse,
                   messageType: 'ai_admin'
                 });
@@ -139,10 +187,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     ws.on('close', () => {
+      const userId = (ws as any).userId;
       if (userId) {
         clients.delete(userId);
       }
     });
+    
+    } catch (error) {
+      console.error('WebSocket connection error:', error);
+      ws.close(1000, 'Connection failed');
+    }
   });
 
   // Auth middleware with JWT validation
@@ -1008,7 +1062,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const escrow = await storage.createEscrowTransaction({
         ...escrowData,
         status: 'pending',
-        aiStatus: 'processing',
         riskScore: 0
       });
       
@@ -1102,10 +1155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (action === 'approve') {
         updates.status = 'active';
-        updates.aiStatus = 'approved';
       } else if (action === 'reject') {
         updates.status = 'cancelled';
-        updates.aiStatus = 'flagged';
       }
       
       const escrow = await storage.updateEscrowTransaction(escrowId, updates);
@@ -1130,7 +1181,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const escrow = await storage.updateEscrowTransaction(escrowId, {
-        aiStatus: 'processing',
         riskScore: 0, // Reset risk score for re-analysis
         aiDecision: null
       });
@@ -1156,6 +1206,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Dashboard error:', error);
       res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  // Laravel-compatible route aliases for seamless migration
+  app.post('/api/register', async (req, res) => {
+    try {
+      // Use secure registration schema (no privilege escalation)
+      const userData = userRegisterSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUserByEmail = await storage.getUserByEmail(userData.email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ error: 'Email already registered' });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(userData.username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+      
+      // Hash password
+      const hashedPassword = await hashPassword(userData.password);
+      
+      // Create user with secure defaults
+      const newUser = await storage.createUser({
+        ...userData,
+        password: hashedPassword,
+        role: 'user',
+        walletBalance: '0',
+        isVerified: false,
+        isAdminApproved: false,
+        adminRequestPending: false
+      });
+      
+      // Generate JWT token
+      const token = generateToken({
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role
+      });
+      
+      // Remove password from response
+      const { password, ...userResponse } = newUser;
+      
+      res.status(201).json({
+        message: 'User registered successfully',
+        user: userResponse,
+        token
+      });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          error: 'Validation failed', 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ error: 'Registration failed' });
+    }
+  });
+    
+  app.post('/api/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ 
+          error: 'Email and password are required' 
+        });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ 
+          error: 'Invalid credentials' 
+        });
+      }
+      
+      // Verify password
+      const isValidPassword = await comparePassword(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          error: 'Invalid credentials' 
+        });
+      }
+      
+      // Generate JWT token
+      const token = generateToken({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      });
+      
+      // Remove password from response
+      const { password: _, ...userResponse } = user;
+      
+      res.json({
+        message: 'Login successful',
+        user: userResponse,
+        token
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+  
+  app.post('/api/logout', requireAuth, async (req, res) => {
+    try {
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ error: 'Logout failed' });
+    }
+  });
+  
+  app.get('/api/user', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Remove password from response
+      const { password, ...userResponse } = user;
+      
+      res.json({ user: userResponse });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ error: 'Failed to get user data' });
     }
   });
 
