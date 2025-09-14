@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "wouter";
 import { Edit3, Settings, Star, ShoppingBag, MessageCircle, Shield, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,8 @@ export default function Profile() {
   const { id: profileId } = useParams();
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const currentUserId = user?.id || 0;
   const { toast } = useToast();
@@ -67,14 +69,15 @@ export default function Profile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (updates: Partial<UserProfile>) => {
-      return apiRequest('/api/users/profile/update', {
-        method: 'POST',
+      return apiRequest('/api/users/profile', {
+        method: 'PUT',
         body: JSON.stringify(updates)
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/users/profile/${effectiveProfileId}`] });
       setIsEditing(false);
+      setBannerPreview(null); // Clear banner preview after successful save
       toast({
         title: "Profile updated successfully",
         description: "Your changes have been saved.",
@@ -89,10 +92,48 @@ export default function Profile() {
     }
   });
 
+  const handleBannerClick = () => {
+    bannerInputRef.current?.click();
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Banner image must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert to base64 for storage
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setBannerPreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProfile = (formData: FormData) => {
     const updates = {
       displayName: formData.get('displayName') as string,
       bio: formData.get('bio') as string,
+      ...(bannerPreview && { bannerImage: bannerPreview }),
     };
     updateProfileMutation.mutate(updates);
   };
@@ -133,20 +174,32 @@ export default function Profile() {
         <div 
           className="h-48 bg-gradient-to-r from-nxe-primary to-nxe-accent relative overflow-hidden"
           style={{
-            backgroundImage: profile.bannerImage ? `url(${profile.bannerImage})` : undefined,
+            backgroundImage: (bannerPreview || profile.bannerImage) ? `url(${bannerPreview || profile.bannerImage})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
         >
           <div className="absolute inset-0 bg-black/30" />
           {isOwnProfile && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white"
-            >
-              <Camera className="h-4 w-4" />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBannerClick}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white"
+                data-testid="button-edit-banner"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBannerChange}
+                className="hidden"
+                data-testid="input-banner-upload"
+              />
+            </>
           )}
         </div>
 
@@ -375,6 +428,30 @@ export default function Profile() {
                     data-testid="textarea-bio"
                   />
                 </div>
+
+                {/* Banner Preview Section */}
+                {bannerPreview && (
+                  <div className="space-y-2">
+                    <Label className="text-white">Banner Preview</Label>
+                    <div className="relative h-24 bg-gray-200 rounded-lg overflow-hidden">
+                      <img
+                        src={bannerPreview}
+                        alt="Banner preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setBannerPreview(null)}
+                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white"
+                        data-testid="button-remove-banner"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex space-x-3 pt-4">
                   <Button

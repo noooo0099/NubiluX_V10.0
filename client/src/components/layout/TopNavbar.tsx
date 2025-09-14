@@ -203,12 +203,10 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20">
                         <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer">
-                          <LogIn className="mr-2 h-4 w-4" />
                           <span>Masuk</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-nxe-primary/20" />
                         <DropdownMenuItem className="cursor-pointer">
-                          <HelpCircle className="mr-2 h-4 w-4" />
                           <span>Bantuan</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
