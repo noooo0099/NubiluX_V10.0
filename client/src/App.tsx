@@ -66,6 +66,7 @@ function Router() {
         <Switch>
           {/* Public routes - Guest dapat akses */}
           <Route path="/" component={Home} />
+          <Route path="/market" component={Home} />
           <Route path="/auth" component={Auth} />
           <Route path="/unauthorized" component={Unauthorized} />
           <Route path="/product/:id" component={ProductDetail} />
