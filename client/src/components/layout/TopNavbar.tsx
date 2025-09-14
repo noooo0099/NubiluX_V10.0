@@ -49,31 +49,40 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
         {/* Right side actions */}
         <div className="flex items-center space-x-1">
           {/* Search */}
-          <div className="relative flex items-center">
-            {searchExpanded && (
-              <form onSubmit={handleSearch} className="absolute right-12 top-1/2 transform -translate-y-1/2">
+          <div className="flex items-center">
+            {/* Search Input Container - expands from center */}
+            <div 
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                searchExpanded ? 'w-56 opacity-100' : 'w-0 opacity-0'
+              }`}
+            >
+              <form onSubmit={handleSearch} className="flex">
                 <Input
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-56 bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary"
+                  className="w-full bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary transition-all duration-300"
                   autoFocus
                   data-testid="input-search"
                 />
               </form>
-            )}
+            </div>
+            
+            {/* Search Toggle Button */}
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSearch}
-              className="p-2 hover:bg-transparent"
+              className={`p-2 hover:bg-transparent transition-all duration-300 ${
+                searchExpanded ? 'ml-2' : 'ml-0'
+              }`}
               data-testid="button-search-toggle"
             >
               {searchExpanded ? (
-                <X className="h-5 w-5 text-gray-300" />
+                <X className="h-5 w-5 text-gray-300 transition-transform duration-200" />
               ) : (
-                <Search className="h-5 w-5 text-gray-300" />
+                <Search className="h-5 w-5 text-gray-300 transition-transform duration-200 hover:scale-110" />
               )}
             </Button>
           </div>
