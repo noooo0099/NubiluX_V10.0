@@ -125,8 +125,15 @@ export default function BottomNavigation() {
                         <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-nxe-primary rounded-full" />
                       )}
                       
-                      {/* Notification badge */}
-                      {hasNotificationBadge && (
+                      {/* Notification badge - styled sesuai gambar referensi */}
+                      {hasNotificationBadge && item.label === "Chat" && (
+                        <Badge 
+                          className="absolute -top-0.5 -right-0.5 h-5 w-8 p-0 flex items-center justify-center text-xs min-w-8 rounded-full bg-nxe-primary text-white border-2 border-nxe-surface shadow-md font-bold"
+                        >
+                          99+
+                        </Badge>
+                      )}
+                      {hasNotificationBadge && item.label !== "Chat" && (
                         <Badge 
                           variant="destructive" 
                           className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border border-nxe-surface"
