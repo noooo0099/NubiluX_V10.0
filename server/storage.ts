@@ -1,13 +1,16 @@
 import { 
   users, products, chats, messages, transactions, walletTransactions, 
-  statusUpdates, notifications, posterGenerations,
+  statusUpdates, notifications, posterGenerations, escrowTransactions,
   type User, type InsertUser, type Product, type InsertProduct,
   type Chat, type InsertChat, type Message, type InsertMessage,
   type Transaction, type InsertTransaction, type StatusUpdate, type InsertStatusUpdate,
-  type Notification, type InsertNotification, type PosterGeneration, type InsertPosterGeneration
+  type Notification, type InsertNotification, type PosterGeneration, type InsertPosterGeneration,
+  type EscrowTransaction, type InsertEscrowTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, gt, lt } from "drizzle-orm";
+import session, { SessionData, Store } from "express-session";
+import connectPg from "connect-pg-simple";
 
 export interface IStorage {
   // User operations
@@ -54,9 +57,30 @@ export interface IStorage {
   // Poster generation operations
   createPosterGeneration(poster: InsertPosterGeneration): Promise<PosterGeneration>;
   updatePosterGeneration(id: number, updates: Partial<PosterGeneration>): Promise<PosterGeneration | undefined>;
+  
+  // Escrow transaction operations
+  getEscrowTransaction(id: number): Promise<EscrowTransaction | undefined>;
+  getEscrowTransactionsByUser(userId: number): Promise<EscrowTransaction[]>;
+  getEscrowTransactionsByStatus(status: string): Promise<EscrowTransaction[]>;
+  createEscrowTransaction(escrow: InsertEscrowTransaction): Promise<EscrowTransaction>;
+  updateEscrowTransaction(id: number, updates: Partial<EscrowTransaction>): Promise<EscrowTransaction | undefined>;
+  getEscrowStats(): Promise<{ pending: number; active: number; completed: number; disputed: number }>;
+  
+  // Session store for authentication
+  sessionStore: Store;
 }
 
+const PostgresSessionStore = connectPg(session);
+
 export class DatabaseStorage implements IStorage {
+  sessionStore: Store;
+  
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool: (db as any).pool, 
+      createTableIfMissing: true 
+    });
+  }
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -231,6 +255,43 @@ export class DatabaseStorage implements IStorage {
   async updatePosterGeneration(id: number, updates: Partial<PosterGeneration>): Promise<PosterGeneration | undefined> {
     const [poster] = await db.update(posterGenerations).set(updates).where(eq(posterGenerations.id, id)).returning();
     return poster || undefined;
+  }
+
+  async getEscrowTransaction(id: number): Promise<EscrowTransaction | undefined> {
+    const [escrow] = await db.select().from(escrowTransactions).where(eq(escrowTransactions.id, id));
+    return escrow || undefined;
+  }
+
+  async getEscrowTransactionsByUser(userId: number): Promise<EscrowTransaction[]> {
+    return await db.select().from(escrowTransactions)
+      .where(or(eq(escrowTransactions.buyerId, userId), eq(escrowTransactions.sellerId, userId)))
+      .orderBy(desc(escrowTransactions.createdAt));
+  }
+
+  async getEscrowTransactionsByStatus(status: string): Promise<EscrowTransaction[]> {
+    return await db.select().from(escrowTransactions)
+      .where(eq(escrowTransactions.status, status))
+      .orderBy(desc(escrowTransactions.createdAt));
+  }
+
+  async createEscrowTransaction(escrow: InsertEscrowTransaction): Promise<EscrowTransaction> {
+    const [newEscrow] = await db.insert(escrowTransactions).values(escrow).returning();
+    return newEscrow;
+  }
+
+  async updateEscrowTransaction(id: number, updates: Partial<EscrowTransaction>): Promise<EscrowTransaction | undefined> {
+    const [escrow] = await db.update(escrowTransactions).set(updates).where(eq(escrowTransactions.id, id)).returning();
+    return escrow || undefined;
+  }
+
+  async getEscrowStats(): Promise<{ pending: number; active: number; completed: number; disputed: number }> {
+    const [stats] = await db.select({
+      pending: db.$count(escrowTransactions, eq(escrowTransactions.status, "pending")),
+      active: db.$count(escrowTransactions, eq(escrowTransactions.status, "active")),
+      completed: db.$count(escrowTransactions, eq(escrowTransactions.status, "completed")),
+      disputed: db.$count(escrowTransactions, eq(escrowTransactions.status, "disputed"))
+    }).from(escrowTransactions);
+    return stats || { pending: 0, active: 0, completed: 0, disputed: 0 };
   }
 }
 
