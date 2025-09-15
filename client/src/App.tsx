@@ -32,6 +32,7 @@ import Notifications from "@/pages/Notifications";
 import SearchResults from "@/pages/SearchResults";
 import SellerDashboard from "@/pages/SellerDashboard";
 import Help from "@/pages/Help";
+import ViewAll from "@/pages/ViewAll";
 
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -84,6 +85,7 @@ function Router() {
           <Route path="/categories" component={Categories} />
           <Route path="/category/:categoryId" component={CategoryProducts} />
           <Route path="/search" component={SearchResults} />
+          <Route path="/view-all/:type?" component={ViewAll} />
           <Route path="/help" component={Help} />
           <Route path="/auth" component={Auth} />
           <Route path="/unauthorized" component={Unauthorized} />
