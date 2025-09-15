@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { 
   insertProductSchema, insertChatSchema, insertMessageSchema, 
@@ -64,11 +67,64 @@ const verifyToken = (token: string): any => {
   }
 };
 
+// File upload configuration
+const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'chat-files');
+
+// Ensure upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer configuration for file uploads
+const fileUploadStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename: timestamp_randomstring_originalname
+    const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, uniqueSuffix + '_' + sanitizedName);
+  }
+});
+
+// File filter for security
+const fileFilter = (req: any, file: any, cb: any) => {
+  const allowedTypes = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf', 'text/plain', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/zip', 'application/x-zip-compressed'
+  ];
+  
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only images, documents, and archives are allowed.'), false);
+  }
+};
+
+const upload = multer({
+  storage: fileUploadStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: fileFilter
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
   // Initialize database with seed data if needed
   console.log("🔄 Node.js backend initializing...");
+  
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads'), { 
+    index: false,
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    }
+  }));
 
   // WebSocket setup for real-time chat
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
@@ -625,6 +681,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat routes
+  // File upload endpoint for chat attachments
+  app.post('/api/chats/:id/upload', requireAuth, upload.single('file'), async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      const chat = await storage.getChat(chatId);
+      
+      if (!chat) {
+        return res.status(404).json({ error: 'Chat not found' });
+      }
+      
+      // Only participants can upload files
+      if (chat.buyerId !== req.userId && chat.sellerId !== req.userId) {
+        return res.status(403).json({ error: 'Not authorized to upload files in this chat' });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      
+      // Generate file URL
+      const fileUrl = `/uploads/chat-files/${req.file.filename}`;
+      
+      // Determine message type based on file mimetype
+      let messageType = 'file';
+      if (req.file.mimetype.startsWith('image/')) {
+        messageType = 'image';
+      }
+      
+      // Create message with file attachment
+      const messageData = insertMessageSchema.parse({
+        chatId: chatId,
+        senderId: req.userId!,
+        content: fileUrl,
+        messageType: messageType,
+        metadata: {
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+          uploadedAt: new Date().toISOString()
+        }
+      });
+      
+      const message = await storage.createMessage(messageData);
+      
+      // Broadcast file message to WebSocket clients (both sender and receiver)
+      const otherUserId = chat.buyerId === req.userId ? chat.sellerId : chat.buyerId;
+      const messageData = {
+        type: 'new_message',
+        chatId: chatId,
+        message: message
+      };
+      
+      // Send to other participant
+      const otherClient = clients.get(otherUserId);
+      if (otherClient && otherClient.readyState === WebSocket.OPEN) {
+        otherClient.send(JSON.stringify(messageData));
+      }
+      
+      // Send to sender for immediate feedback
+      const senderClient = clients.get(req.userId!);
+      if (senderClient && senderClient.readyState === WebSocket.OPEN) {
+        senderClient.send(JSON.stringify(messageData));
+      }
+      
+      res.json(message);
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File too large. Maximum size is 10MB.' });
+      }
+      res.status(500).json({ error: 'Failed to upload file' });
+    }
+  });
+
   app.get('/api/chats', requireAuth, async (req, res) => {
     try {
       const chats = await storage.getChatsWithDetailsByUser(req.userId!);

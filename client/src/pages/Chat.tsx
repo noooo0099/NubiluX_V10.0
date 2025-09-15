@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,7 +65,13 @@ interface Message {
   chatId: number;
   senderId: number;
   content: string;
-  messageType: 'text' | 'image' | 'system' | 'ai_admin';
+  messageType: 'text' | 'image' | 'file' | 'system' | 'ai_admin';
+  metadata?: {
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    uploadedAt?: string;
+  };
   createdAt: string;
 }
 
@@ -109,6 +115,7 @@ export default function Chat() {
   const { user } = useAuth();
   const currentUserId = user?.id || 0; // Get user ID from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   // WebSocket connection
@@ -209,11 +216,67 @@ export default function Chat() {
     }
   });
 
+  // File upload mutation
+  const fileUploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Get token for authentication
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`/api/chats/${chatId}/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
+    },
+    onError: (error: any) => {
+      alert(error.message || 'Failed to upload file');
+    }
+  });
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() && !sendMessageMutation.isPending) {
       sendMessageMutation.mutate(newMessage.trim());
     }
+  };
+
+  // Handle file selection and upload
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Reset input
+    e.target.value = '';
+    
+    try {
+      await fileUploadMutation.mutateAsync(file);
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+    }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleChatClick = (chatId: number) => {
@@ -656,7 +719,46 @@ export default function Chat() {
                 </div>
               )}
               
-              <p className="text-sm break-words">{message.content}</p>
+              {/* Render different message types */}
+              {message.messageType === 'image' ? (
+                <div className="space-y-2">
+                  <img 
+                    src={message.content} 
+                    alt="Shared image" 
+                    className="max-w-full h-auto rounded-lg cursor-pointer"
+                    onClick={() => window.open(message.content, '_blank')}
+                    data-testid={`image-message-${message.id}`}
+                  />
+                  {message.metadata?.fileName && (
+                    <p className="text-xs opacity-70">{message.metadata.fileName}</p>
+                  )}
+                </div>
+              ) : message.messageType === 'file' ? (
+                <div className="flex items-center space-x-3 p-3 bg-white/10 rounded-lg">
+                  <FileText className="h-8 w-8 text-blue-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {message.metadata?.fileName || 'File'}
+                    </p>
+                    {message.metadata?.fileSize && (
+                      <p className="text-xs opacity-70">
+                        {(message.metadata.fileSize / 1024).toFixed(1)} KB
+                      </p>
+                    )}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => window.open(message.content, '_blank')}
+                    className="text-blue-400 hover:text-blue-300"
+                    data-testid={`download-file-${message.id}`}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm break-words">{message.content}</p>
+              )}
               
               <p className="text-xs opacity-70 mt-1">
                 {formatMessageTime(message.createdAt)}
@@ -671,22 +773,55 @@ export default function Chat() {
       {/* Message Input */}
       <div className="sticky bottom-0 bg-nxe-dark/95 backdrop-blur-md border-t border-nxe-surface p-4">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
+          {/* File Upload Input (Hidden) */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx,.txt,.zip"
+            onChange={handleFileSelect}
+            className="hidden"
+            data-testid="input-file-attachment"
+          />
+          
+          {/* Attachment Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleAttachmentClick}
+            disabled={fileUploadMutation.isPending}
+            className="text-gray-400 hover:text-white p-2"
+            data-testid="button-attachment"
+          >
+            <Paperclip className="h-5 w-5" />
+          </Button>
+          
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message... (use @admin to get help)"
             className="flex-1 bg-nxe-surface border-nxe-surface text-white rounded-full px-4"
-            disabled={sendMessageMutation.isPending}
+            disabled={sendMessageMutation.isPending || fileUploadMutation.isPending}
+            data-testid="input-message"
           />
           
           <Button
             type="submit"
-            disabled={!newMessage.trim() || sendMessageMutation.isPending}
+            disabled={!newMessage.trim() || sendMessageMutation.isPending || fileUploadMutation.isPending}
             className="bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-3"
+            data-testid="button-send-message"
           >
             <Send className="h-4 w-4" />
           </Button>
         </form>
+        
+        {/* Upload Progress */}
+        {fileUploadMutation.isPending && (
+          <div className="mt-2 text-sm text-gray-400 flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-nxe-primary"></div>
+            <span>Uploading file...</span>
+          </div>
+        )}
       </div>
     </div>
   );
