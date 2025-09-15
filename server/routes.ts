@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcryptjs";
@@ -727,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Broadcast file message to WebSocket clients (both sender and receiver)
       const otherUserId = chat.buyerId === req.userId ? chat.sellerId : chat.buyerId;
-      const messageData = {
+      const wsMessageData = {
         type: 'new_message',
         chatId: chatId,
         message: message
@@ -736,13 +736,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send to other participant
       const otherClient = clients.get(otherUserId);
       if (otherClient && otherClient.readyState === WebSocket.OPEN) {
-        otherClient.send(JSON.stringify(messageData));
+        otherClient.send(JSON.stringify(wsMessageData));
       }
       
       // Send to sender for immediate feedback
       const senderClient = clients.get(req.userId!);
       if (senderClient && senderClient.readyState === WebSocket.OPEN) {
-        senderClient.send(JSON.stringify(messageData));
+        senderClient.send(JSON.stringify(wsMessageData));
       }
       
       res.json(message);
