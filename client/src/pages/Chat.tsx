@@ -561,39 +561,31 @@ export default function Chat() {
                       <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Users className="mr-3 h-4 w-4 text-gray-400" />
+                  <DropdownMenuContent align="start" className="w-48 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Grup baru</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Users className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Komunitas baru</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Megaphone className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Siaran baru</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Smartphone className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuSeparator className="bg-gray-600" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Perangkat tertaut</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Star className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Berbintang</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Mail className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Baca semua</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                    <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <Settings className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuSeparator className="bg-gray-600" />
+                    <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Pengaturan</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                      <UserCheck className="mr-3 h-4 w-4 text-gray-400" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                       <span className="text-white">Ganti akun</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
