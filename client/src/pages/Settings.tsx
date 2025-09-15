@@ -1,7 +1,8 @@
 import { 
   User, Shield, Bell, LogOut, ChevronRight,
-  Lock, Camera, Users, MessageCircle, Radio, 
-  QrCode, CheckCircle
+  Lock, UserCheck, Users, MessageCircle, Palette, 
+  QrCode, CheckCircle, Database, Globe, HelpCircle,
+  CreditCard, Wallet, MessageSquare
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,28 +29,28 @@ export default function Settings() {
 
   const settingItems = [
     {
-      icon: <User className="h-6 w-6" />,
+      icon: <Lock className="h-6 w-6" />,
       label: "Akun",
       description: "Notifikasi keamanan, ganti nomor",
       action: () => setLocation("/profile"),
     },
     {
-      icon: <Lock className="h-6 w-6" />,
+      icon: <Shield className="h-6 w-6" />,
       label: "Privasi",
       description: "Blokir kontak, pesan sementara",
       action: () => handleComingSoon("Privasi"),
     },
     {
-      icon: <Camera className="h-6 w-6" />,
-      label: "Avatar",
-      description: "Buat, edit, foto profil",
-      action: () => handleComingSoon("Avatar"),
+      icon: <UserCheck className="h-6 w-6" />,
+      label: "User Role",
+      description: "Kelola peran sebagai pembeli atau penjual",
+      action: () => handleComingSoon("User Role"),
     },
     {
-      icon: <Users className="h-6 w-6" />,
-      label: "Daftar",
-      description: "Kelola orang dan grup",
-      action: () => handleComingSoon("Daftar"),
+      icon: <Database className="h-6 w-6" />,
+      label: "Data & Storage",
+      description: "Kelola penyimpanan",
+      action: () => handleComingSoon("Data & Storage"),
     },
     {
       icon: <MessageCircle className="h-6 w-6" />,
@@ -58,10 +59,10 @@ export default function Settings() {
       action: () => handleComingSoon("Chat"),
     },
     {
-      icon: <Radio className="h-6 w-6" />,
-      label: "Siaran",
-      description: "Kelola daftar dan kirim siaran",
-      action: () => handleComingSoon("Siaran"),
+      icon: <Palette className="h-6 w-6" />,
+      label: "Theme Settings",
+      description: "Kustomisasi tampilan aplikasi",
+      action: () => handleComingSoon("Theme Settings"),
     },
     {
       icon: <Bell className="h-6 w-6" />,
@@ -69,27 +70,57 @@ export default function Settings() {
       description: "Pesan, grup & nada dering panggilan",
       action: () => handleComingSoon("Notifikasi"),
     },
+    {
+      icon: <Globe className="h-6 w-6" />,
+      label: "Ubah Bahasa",
+      description: "Ubah bahasa aplikasi",
+      action: () => handleComingSoon("Ubah Bahasa"),
+    },
+    {
+      icon: <CreditCard className="h-6 w-6" />,
+      label: "Kelola Pembayaran",
+      description: "Kelola metode pembayaran user",
+      action: () => handleComingSoon("Kelola Pembayaran"),
+    },
+    {
+      icon: <Wallet className="h-6 w-6" />,
+      label: "Setting Akun E-Wallet",
+      description: "Pengaturan akun e-wallet",
+      action: () => handleComingSoon("Setting Akun E-Wallet"),
+    },
+    {
+      icon: <HelpCircle className="h-6 w-6" />,
+      label: "Help & Support",
+      description: "Dapatkan bantuan dan hubungi support",
+      action: () => handleComingSoon("Help & Support"),
+    },
+    {
+      icon: <MessageSquare className="h-6 w-6" />,
+      label: "Feedback",
+      description: "Berikan masukan untuk aplikasi",
+      action: () => handleComingSoon("Feedback"),
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between mb-6">
         <button 
           onClick={() => setLocation("/")}
-          className="text-white hover:text-gray-300"
+          className="text-nxe-text hover:text-nxe-primary"
           data-testid="button-back"
         >
           <ChevronRight className="h-6 w-6 rotate-180" />
         </button>
-        <h1 className="text-xl font-medium">Pengaturan</h1>
-        <button className="text-white hover:text-gray-300" data-testid="button-search">
+        <h1 className="text-xl font-medium text-white">Pengaturan</h1>
+        <button className="text-nxe-text hover:text-nxe-primary" data-testid="button-search">
           <QrCode className="h-6 w-6" />
         </button>
       </div>
 
       {/* Profile Section */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="bg-nxe-card rounded-xl p-4 mb-6">
         <div className="flex items-center space-x-4">
           {/* Avatar */}
           <div className="relative">
@@ -101,31 +132,31 @@ export default function Settings() {
                 data-testid="img-profile-avatar"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 rounded-full bg-nxe-surface flex items-center justify-center">
+                <User className="h-8 w-8 text-nxe-text-secondary" />
               </div>
             )}
           </div>
           
           {/* User Info */}
           <div className="flex-1">
-            <h2 className="text-lg font-medium text-white" data-testid="text-username">
+            <h2 className="text-lg font-medium text-nxe-text" data-testid="text-username">
               {user?.displayName || user?.username || "zen"}
             </h2>
-            <p className="text-gray-400 text-sm" data-testid="text-phone">
+            <p className="text-nxe-text-secondary text-sm" data-testid="text-phone">
               +62 831-1135-0849
             </p>
-            <p className="text-gray-400 text-sm" data-testid="text-status">
+            <p className="text-nxe-text-secondary text-sm" data-testid="text-status">
               Sedang rapat
             </p>
           </div>
           
           {/* QR Code and Check Icons */}
           <div className="flex space-x-4">
-            <button className="text-green-500 hover:text-green-400" data-testid="button-qr">
+            <button className="text-nxe-primary hover:text-nxe-primary/80" data-testid="button-qr">
               <QrCode className="h-6 w-6" />
             </button>
-            <button className="text-green-500 hover:text-green-400" data-testid="button-check">
+            <button className="text-nxe-primary hover:text-nxe-primary/80" data-testid="button-check">
               <CheckCircle className="h-6 w-6" />
             </button>
           </div>
@@ -133,20 +164,20 @@ export default function Settings() {
       </div>
 
       {/* Settings Items */}
-      <div className="px-4">
+      <div className="bg-nxe-card rounded-xl overflow-hidden">
         {settingItems.map((item, index) => (
           <button
             key={index}
             onClick={item.action}
-            className="w-full p-4 flex items-center space-x-4 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
-            data-testid={`button-setting-${item.label.toLowerCase()}`}
+            className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface transition-colors border-b border-nxe-border last:border-b-0"
+            data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
           >
-            <div className="text-gray-400">
+            <div className="text-nxe-primary">
               {item.icon}
             </div>
             <div className="flex-1 text-left">
-              <h3 className="text-white font-medium">{item.label}</h3>
-              <p className="text-gray-400 text-sm">{item.description}</p>
+              <h3 className="text-nxe-text font-medium">{item.label}</h3>
+              <p className="text-nxe-text-secondary text-sm">{item.description}</p>
             </div>
           </button>
         ))}
