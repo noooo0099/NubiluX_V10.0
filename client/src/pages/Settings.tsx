@@ -1,6 +1,6 @@
 import { 
   User, Shield, Bell, LogOut, ChevronRight,
-  Lock, UserCheck, Users, MessageCircle, Palette, 
+  Lock, UserPlus, Users, MessageCircle, Palette, 
   QrCode, CheckCircle, Database, Globe, HelpCircle,
   CreditCard, Wallet, MessageSquare
 } from "lucide-react";
@@ -41,7 +41,7 @@ export default function Settings() {
       action: () => handleComingSoon("Privasi"),
     },
     {
-      icon: <UserCheck className="h-6 w-6" />,
+      icon: <UserPlus className="h-6 w-6" />,
       label: "User Role",
       description: "Kelola peran sebagai pembeli atau penjual",
       action: () => handleComingSoon("User Role"),
