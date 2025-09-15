@@ -2,8 +2,9 @@ import {
   User, Shield, Bell, LogOut, ChevronRight,
   Lock, UserPlus, Users, MessageCircle, Palette, 
   QrCode, CheckCircle, Database, Globe, HelpCircle,
-  CreditCard, Wallet, MessageSquare
+  CreditCard, Wallet, MessageSquare, Search, X
 } from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +13,8 @@ export default function Settings() {
   const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
@@ -25,6 +28,13 @@ export default function Settings() {
       title: "Coming Soon",
       description: `${featureName} sedang dalam pengembangan dan akan tersedia segera.`,
     });
+  };
+
+  const handleSearchToggle = () => {
+    setShowSearch(!showSearch);
+    if (showSearch) {
+      setSearchQuery("");
+    }
   };
 
   const settingItems = [
@@ -102,6 +112,12 @@ export default function Settings() {
     },
   ];
 
+  // Filter settings based on search query
+  const filteredSettings = settingItems.filter(item =>
+    item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
       {/* Header */}
@@ -114,10 +130,32 @@ export default function Settings() {
           <ChevronRight className="h-6 w-6 rotate-180" />
         </button>
         <h1 className="text-xl font-medium text-white">Pengaturan</h1>
-        <button className="text-nxe-text hover:text-nxe-primary" data-testid="button-search">
-          <QrCode className="h-6 w-6" />
+        <button 
+          onClick={handleSearchToggle}
+          className="text-nxe-text hover:text-nxe-primary" 
+          data-testid="button-search"
+        >
+          {showSearch ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
         </button>
       </div>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Cari pengaturan..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-nxe-card text-nxe-text placeholder-nxe-text-secondary px-4 py-3 rounded-xl border border-nxe-border focus:outline-none focus:border-nxe-primary"
+              data-testid="input-search"
+              autoFocus
+            />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-nxe-text-secondary" />
+          </div>
+        </div>
+      )}
 
       {/* Profile Section */}
       <div className="bg-nxe-card rounded-xl p-4 mb-6">
@@ -165,7 +203,7 @@ export default function Settings() {
 
       {/* Settings Items */}
       <div className="bg-nxe-card rounded-xl overflow-hidden">
-        {settingItems.map((item, index) => (
+        {filteredSettings.map((item, index) => (
           <button
             key={index}
             onClick={item.action}
