@@ -2,7 +2,7 @@ import {
   User, Shield, Bell, LogOut, ChevronRight,
   Lock, UserPlus, Users, MessageCircle, Palette, 
   QrCode, CheckCircle, Database, Globe, HelpCircle,
-  CreditCard, Wallet, MessageSquare, Search, X
+  CreditCard, Wallet, MessageSquare, Search
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -34,6 +34,15 @@ export default function Settings() {
     setShowSearch(!showSearch);
     if (showSearch) {
       setSearchQuery("");
+    }
+  };
+
+  const handleBackClick = () => {
+    if (showSearch) {
+      setShowSearch(false);
+      setSearchQuery("");
+    } else {
+      setLocation("/");
     }
   };
 
@@ -123,39 +132,40 @@ export default function Settings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <button 
-          onClick={() => setLocation("/")}
+          onClick={handleBackClick}
           className="text-nxe-text hover:text-nxe-primary"
           data-testid="button-back"
         >
           <ChevronRight className="h-6 w-6 rotate-180" />
         </button>
-        <h1 className="text-xl font-medium text-white">Pengaturan</h1>
+        
+        {/* Title or Search Input */}
+        <div className="flex-1 mx-4 relative overflow-hidden">
+          {!showSearch ? (
+            <h1 className="text-xl font-medium text-white text-center">Pengaturan</h1>
+          ) : (
+            <div className="relative animate-slide-in-right">
+              <input
+                type="text"
+                placeholder="Cari pengaturan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-nxe-card text-nxe-text placeholder-nxe-text-secondary px-4 py-2 rounded-lg border border-nxe-border focus:outline-none focus:border-nxe-primary text-center"
+                data-testid="input-search"
+                autoFocus
+              />
+            </div>
+          )}
+        </div>
+        
         <button 
           onClick={handleSearchToggle}
           className="text-nxe-text hover:text-nxe-primary" 
           data-testid="button-search"
         >
-          {showSearch ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
+          <Search className="h-6 w-6" />
         </button>
       </div>
-
-      {/* Search Bar */}
-      {showSearch && (
-        <div className="mb-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Cari pengaturan..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-nxe-card text-nxe-text placeholder-nxe-text-secondary px-4 py-3 rounded-xl border border-nxe-border focus:outline-none focus:border-nxe-primary"
-              data-testid="input-search"
-              autoFocus
-            />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-nxe-text-secondary" />
-          </div>
-        </div>
-      )}
 
       {/* Profile Section */}
       <div className="bg-nxe-card rounded-xl p-4 mb-6">
