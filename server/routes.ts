@@ -12,7 +12,7 @@ import {
   insertUserSchema, insertPosterGenerationSchema, userRegisterSchema,
   insertEscrowTransactionSchema, escrowPublicCreateSchema
 } from "@shared/schema";
-import { generatePoster, processAdminMention } from "./openai";
+import { generatePoster, processAdminMention } from "./deepseek";
 import { seedDatabase } from "./seed";
 
 // Extend Express Request type to include userId

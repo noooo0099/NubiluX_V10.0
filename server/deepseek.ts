@@ -1,8 +1,9 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key" 
+// DeepSeek API configuration - compatible with OpenAI SDK format
+const deepseek = new OpenAI({ 
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: "https://api.deepseek.com",
 });
 
 export async function generatePoster(
@@ -11,30 +12,9 @@ export async function generatePoster(
   selectedSkins: string[]
 ): Promise<string> {
   try {
-    // Generate poster description for DALL-E
-    const prompt = `Create a professional gaming account showcase poster with the following elements:
-    - A sleek dark background with neon green accents (#134D37)
-    - Place the profile image at the top center in a stylized frame
-    - Arrange ${selectedSkins.length} gaming skins in a 9x6 grid layout below the profile
-    - Use a modern, gaming-themed design with glowing effects
-    - Include subtle geometric patterns and gaming UI elements
-    - Professional typography for the "NubiluXchange" branding
-    - High contrast and vibrant colors suitable for gaming community
-    - Resolution optimized for mobile display (720x1280)
-    
-    Skins to showcase: ${selectedSkins.join(', ')}
-    
-    Style: Modern gaming UI, cyberpunk aesthetic, professional marketplace poster`;
-
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1792", // Closest to 720x1280 ratio
-      quality: "hd",
-    });
-
-    return response.data?.[0]?.url || "";
+    // DeepSeek doesn't support image generation, return placeholder
+    console.log('Poster generation requested but DeepSeek does not support image generation');
+    return 'https://via.placeholder.com/1024x1792/134D37/ffffff?text=Gaming+Account+Poster';
   } catch (error) {
     console.error('Poster generation failed:', error);
     throw new Error('Failed to generate poster');
@@ -51,8 +31,8 @@ export async function processAdminMention(
       `${msg.senderId === chat.buyerId ? 'Buyer' : 'Seller'}: ${msg.content}`
     ).join('\n');
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await deepseek.chat.completions.create({
+      model: "deepseek-chat",
       messages: [
         {
           role: "system",
@@ -72,7 +52,6 @@ export async function processAdminMention(
           content: `Chat history:\n${chatContext}\n\nPlease analyze this conversation and provide appropriate admin assistance.`
         }
       ],
-      response_format: { type: "json_object" },
     });
 
     const result = JSON.parse(response.choices[0].message.content!);
@@ -95,8 +74,8 @@ export async function moderateContent(content: string): Promise<{
   reason?: string;
 }> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await deepseek.chat.completions.create({
+      model: "deepseek-chat",
       messages: [
         {
           role: "system",
@@ -113,7 +92,6 @@ export async function moderateContent(content: string): Promise<{
           content: content
         }
       ],
-      response_format: { type: "json_object" },
     });
 
     const result = JSON.parse(response.choices[0].message.content!);
@@ -139,8 +117,8 @@ export async function generateProductDescription(
   additionalDetails?: string
 ): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await deepseek.chat.completions.create({
+      model: "deepseek-chat",
       messages: [
         {
           role: "system",
