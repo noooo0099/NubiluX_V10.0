@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getAuthToken } from '@/lib/queryClient';
 
 interface WebSocketMessage {
   type: string;
@@ -34,15 +35,19 @@ export function useWebSocket(userId: number | null, options: UseWebSocketOptions
       return;
     }
 
-    // TODO: Implement WebSocket server on backend before enabling
-    console.log('WebSocket connection disabled - server not implemented yet');
-    return;
-
     try {
       setConnectionStatus('connecting');
       
+      // Get JWT token for authentication
+      const token = getAuthToken();
+      if (!token) {
+        console.error('No authentication token found');
+        setConnectionStatus('disconnected');
+        return;
+      }
+      
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws?userId=${userId}`;
+      const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
