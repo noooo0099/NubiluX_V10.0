@@ -134,13 +134,8 @@ function Router() {
               </RequireAuth>
             )}
           </Route>
-          <Route path="/profile/:id">
-            {() => (
-              <RequireAuth>
-                <Profile />
-              </RequireAuth>
-            )}
-          </Route>
+          {/* Public profile route - accessible without login for QR code sharing */}
+          <Route path="/profile/:id" component={Profile} />
           <Route path="/profile">
             {() => (
               <RequireAuth>

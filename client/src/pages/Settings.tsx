@@ -2,12 +2,15 @@ import {
   User, Shield, Bell, LogOut, ChevronRight,
   Lock, UserPlus, Users, MessageCircle, Palette, 
   QrCode, CheckCircle, Database, Globe, HelpCircle,
-  CreditCard, Wallet, MessageSquare, Search
+  CreditCard, Wallet, MessageSquare, Search, X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import QRCode from "qrcode";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
@@ -15,6 +18,9 @@ export default function Settings() {
   const { toast } = useToast();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrCodeDataURL, setQrCodeDataURL] = useState("");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
@@ -43,6 +49,42 @@ export default function Settings() {
       setSearchQuery("");
     } else {
       setLocation("/");
+    }
+  };
+
+  const generateQRCode = async () => {
+    try {
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "User data tidak tersedia",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create profile URL - using user ID to create unique profile link
+      const profileUrl = `${window.location.origin}/profile/${user.id}`;
+      
+      // Generate QR code as data URL
+      const qrDataURL = await QRCode.toDataURL(profileUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#134D37', // nxe-primary color
+          light: '#FFFFFF'
+        }
+      });
+      
+      setQrCodeDataURL(qrDataURL);
+      setShowQRModal(true);
+    } catch (error) {
+      console.error('Failed to generate QR code:', error);
+      toast({
+        title: "Error",
+        description: "Gagal membuat QR code",
+        variant: "destructive",
+      });
     }
   };
 
@@ -129,42 +171,59 @@ export default function Settings() {
 
   return (
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button 
-          onClick={handleBackClick}
-          className="text-nxe-text hover:text-nxe-primary"
-          data-testid="button-back"
-        >
-          <ChevronRight className="h-6 w-6 rotate-180" />
-        </button>
-        
-        {/* Title or Search Input */}
-        <div className="flex-1 mx-4 relative overflow-hidden">
-          {!showSearch ? (
+      {/* Header - Full width search animation */}
+      <div className="relative mb-6 overflow-hidden">
+        {!showSearch ? (
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={handleBackClick}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
+              data-testid="button-back"
+            >
+              <ChevronRight className="h-6 w-6 rotate-180" />
+            </button>
+            
             <h1 className="text-xl font-medium text-white text-center transition-all duration-300 ease-out">Pengaturan</h1>
-          ) : (
-            <div className="relative transform translate-x-0 transition-all duration-300 ease-out animate-in slide-in-from-right">
+            
+            <button 
+              onClick={handleSearchToggle}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200" 
+              data-testid="button-search"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={handleBackClick}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 flex-shrink-0"
+              data-testid="button-back"
+            >
+              <ChevronRight className="h-6 w-6 rotate-180" />
+            </button>
+            
+            <div className="flex-1 transform translate-x-0 transition-all duration-300 ease-out animate-in slide-in-from-right">
               <input
                 type="text"
                 placeholder="Cari pengaturan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-6 py-2.5 rounded-full border-0 focus:outline-none focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 text-center transition-all duration-200"
+                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-6 py-2.5 rounded-full border-0 focus:outline-none focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 transition-all duration-200"
                 data-testid="input-search"
                 autoFocus
               />
             </div>
-          )}
-        </div>
-        
-        <button 
-          onClick={handleSearchToggle}
-          className="text-nxe-text hover:text-nxe-primary" 
-          data-testid="button-search"
-        >
-          <Search className="h-6 w-6" />
-        </button>
+            
+            <button 
+              onClick={handleSearchToggle}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 flex-shrink-0" 
+              data-testid="button-search"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Profile Section */}
@@ -189,22 +248,26 @@ export default function Settings() {
           {/* User Info */}
           <div className="flex-1">
             <h2 className="text-lg font-medium text-nxe-text" data-testid="text-username">
-              {user?.displayName || user?.username || "zen"}
+              {user?.displayName || user?.username || "Pengguna"}
             </h2>
-            <p className="text-nxe-text-secondary text-sm" data-testid="text-phone">
-              +62 831-1135-0849
+            <p className="text-nxe-text-secondary text-sm" data-testid="text-contact">
+              {user?.email || "Belum ada kontak"}
             </p>
             <p className="text-nxe-text-secondary text-sm" data-testid="text-status">
-              Sedang rapat
+              {user?.role === 'admin' ? 'Administrator' : user?.role === 'owner' ? 'Pemilik' : 'Pengguna'}
             </p>
           </div>
           
           {/* QR Code and Check Icons */}
           <div className="flex space-x-4">
-            <button className="text-nxe-primary hover:text-nxe-primary/80" data-testid="button-qr">
+            <button 
+              onClick={generateQRCode}
+              className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200" 
+              data-testid="button-qr"
+            >
               <QrCode className="h-6 w-6" />
             </button>
-            <button className="text-nxe-primary hover:text-nxe-primary/80" data-testid="button-check">
+            <button className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200" data-testid="button-check">
               <CheckCircle className="h-6 w-6" />
             </button>
           </div>
@@ -230,6 +293,80 @@ export default function Settings() {
           </button>
         ))}
       </div>
+
+      {/* QR Code Modal */}
+      <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+        <DialogContent className="sm:max-w-md bg-nxe-card border border-nxe-border">
+          <DialogHeader>
+            <DialogTitle className="text-center text-white">QR Code Profil Saya</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center space-y-4 p-6">
+            {qrCodeDataURL && (
+              <div className="bg-white p-4 rounded-lg">
+                <img 
+                  src={qrCodeDataURL} 
+                  alt="QR Code Profil" 
+                  className="w-64 h-64"
+                  data-testid="img-qr-code"
+                />
+              </div>
+            )}
+            
+            <div className="text-center">
+              <h3 className="text-white font-medium mb-2">
+                {user?.displayName || user?.username || "Pengguna"}
+              </h3>
+              <p className="text-nxe-text-secondary text-sm mb-4">
+                Scan QR code ini untuk melihat profil saya
+              </p>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => {
+                  if (navigator.share && qrCodeDataURL) {
+                    navigator.share({
+                      title: 'Profil Saya',
+                      text: 'Lihat profil saya di NubiluXchange',
+                      url: `${window.location.origin}/profile/${user?.id}`
+                    }).catch(console.error);
+                  } else {
+                    // Fallback: copy to clipboard
+                    navigator.clipboard?.writeText(`${window.location.origin}/profile/${user?.id}`)
+                      .then(() => {
+                        toast({
+                          title: "Berhasil",
+                          description: "Link profil berhasil disalin",
+                        });
+                      })
+                      .catch(() => {
+                        toast({
+                          title: "Error",
+                          description: "Gagal menyalin link",
+                          variant: "destructive",
+                        });
+                      });
+                  }
+                }}
+                variant="outline"
+                className="border-nxe-primary text-nxe-primary hover:bg-nxe-primary hover:text-white"
+                data-testid="button-share-profile"
+              >
+                Bagikan
+              </Button>
+              
+              <Button
+                onClick={() => setShowQRModal(false)}
+                className="bg-nxe-primary hover:bg-nxe-primary/80 text-white"
+                data-testid="button-close-qr"
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
