@@ -56,8 +56,12 @@ export const messages = pgTable("messages", {
   chatId: integer("chat_id").notNull().references(() => chats.id),
   senderId: integer("sender_id").notNull().references(() => users.id),
   content: text("content").notNull(),
-  messageType: text("message_type").default("text"), // text, image, system, ai_admin
+  messageType: text("message_type").default("text"), // text, image, file, system, ai_admin
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+  // WhatsApp-style message status fields
+  status: text("status").notNull().default("sent"), // sent, delivered, read
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

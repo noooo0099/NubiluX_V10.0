@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -72,6 +72,10 @@ interface Message {
     mimeType?: string;
     uploadedAt?: string;
   };
+  // WhatsApp-style status fields
+  status: 'sent' | 'delivered' | 'read';
+  deliveredAt?: string;
+  readAt?: string;
   createdAt: string;
 }
 
@@ -216,6 +220,29 @@ export default function Chat() {
     }
   });
 
+  // Message status update mutations
+  const markAsDeliveredMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      return apiRequest(`/api/messages/${messageId}/delivered`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+    }
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      return apiRequest(`/api/messages/${messageId}/read`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+    }
+  });
+
   // File upload mutation
   const fileUploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -293,11 +320,56 @@ export default function Chat() {
 
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false 
-    });
+    const now = new Date();
+    const diffTime = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    // WhatsApp-style time formatting
+    if (diffDays === 0) {
+      // Today: show time only
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+    } else if (diffDays === 1) {
+      // Yesterday
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      // This week: show day name
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    } else {
+      // Older: show date
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+  };
+
+  // WhatsApp-style status indicator component
+  const MessageStatusIndicator = ({ message }: { message: Message }) => {
+    if (message.senderId !== currentUserId) return null; // Only show for sent messages
+    if (message.messageType === 'system' || message.messageType === 'ai_admin') return null;
+
+    const getStatusIcon = () => {
+      switch (message.status) {
+        case 'sent':
+          return <Check className="h-3 w-3 text-gray-400" />;
+        case 'delivered':
+          return <CheckCheck className="h-3 w-3 text-gray-400" />;
+        case 'read':
+          return <CheckCheck className="h-3 w-3 text-blue-400" />;
+        default:
+          return <Check className="h-3 w-3 text-gray-400" />;
+      }
+    };
+
+    return (
+      <span className="inline-flex items-center ml-1" data-testid={`status-${message.status}-${message.id}`}>
+        {getStatusIcon()}
+      </span>
+    );
   };
 
   const getMessageStyle = (senderId: number, messageType: string) => {
@@ -760,9 +832,12 @@ export default function Chat() {
                 <p className="text-sm break-words">{message.content}</p>
               )}
               
-              <p className="text-xs opacity-70 mt-1">
-                {formatMessageTime(message.createdAt)}
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs opacity-70">
+                  {formatMessageTime(message.createdAt)}
+                </p>
+                <MessageStatusIndicator message={message} />
+              </div>
             </div>
           </div>
         ))}

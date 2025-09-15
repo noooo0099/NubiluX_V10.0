@@ -349,6 +349,27 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
 
+  async getMessageById(messageId: number): Promise<Message | null> {
+    const [message] = await db.select().from(messages).where(eq(messages.id, messageId));
+    return message || null;
+  }
+
+  async updateMessageStatus(messageId: number, status: 'delivered' | 'read'): Promise<void> {
+    const updateData: any = { status };
+    
+    if (status === 'delivered') {
+      updateData.deliveredAt = new Date();
+    } else if (status === 'read') {
+      updateData.readAt = new Date();
+      // Also mark as delivered if not already
+      updateData.deliveredAt = new Date();
+    }
+    
+    await db.update(messages)
+      .set(updateData)
+      .where(eq(messages.id, messageId));
+  }
+
   async getTransaction(id: number): Promise<Transaction | undefined> {
     const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
     return transaction || undefined;

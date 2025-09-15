@@ -755,6 +755,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Message status update endpoints
+  app.post('/api/messages/:id/delivered', requireAuth, async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      
+      // Get message and verify authorization
+      const message = await storage.getMessageById(messageId);
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+      
+      // Get chat to verify user is participant
+      const chat = await storage.getChat(message.chatId);
+      if (!chat || (chat.buyerId !== req.userId && chat.sellerId !== req.userId)) {
+        return res.status(403).json({ error: 'Not authorized' });
+      }
+      
+      // Only receiver can mark as delivered (not sender)
+      if (message.senderId === req.userId) {
+        return res.status(400).json({ error: 'Cannot mark own message as delivered' });
+      }
+      
+      // Update message status to delivered
+      await storage.updateMessageStatus(messageId, 'delivered');
+      
+      // Broadcast status update via WebSocket
+      const senderClient = clients.get(message.senderId);
+      if (senderClient && senderClient.readyState === WebSocket.OPEN) {
+        senderClient.send(JSON.stringify({
+          type: 'message_status_update',
+          messageId: messageId,
+          status: 'delivered',
+          chatId: message.chatId
+        }));
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Mark delivered error:', error);
+      res.status(500).json({ error: 'Failed to mark as delivered' });
+    }
+  });
+
+  app.post('/api/messages/:id/read', requireAuth, async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      
+      // Get message and verify authorization
+      const message = await storage.getMessageById(messageId);
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+      
+      // Get chat to verify user is participant
+      const chat = await storage.getChat(message.chatId);
+      if (!chat || (chat.buyerId !== req.userId && chat.sellerId !== req.userId)) {
+        return res.status(403).json({ error: 'Not authorized' });
+      }
+      
+      // Only receiver can mark as read (not sender)
+      if (message.senderId === req.userId) {
+        return res.status(400).json({ error: 'Cannot mark own message as read' });
+      }
+      
+      // Update message status to read (and delivered if not already)
+      await storage.updateMessageStatus(messageId, 'read');
+      
+      // Broadcast status update via WebSocket
+      const senderClient = clients.get(message.senderId);
+      if (senderClient && senderClient.readyState === WebSocket.OPEN) {
+        senderClient.send(JSON.stringify({
+          type: 'message_status_update',
+          messageId: messageId,
+          status: 'read',
+          chatId: message.chatId
+        }));
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Mark read error:', error);
+      res.status(500).json({ error: 'Failed to mark as read' });
+    }
+  });
+
   app.get('/api/chats', requireAuth, async (req, res) => {
     try {
       const chats = await storage.getChatsWithDetailsByUser(req.userId!);
