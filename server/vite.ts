@@ -20,9 +20,26 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  // Get the actual server address for dynamic HMR configuration
+  const addr = server.address();
+  const actualPort = typeof addr === 'object' && addr ? addr.port : (parseInt(process.env.PORT || '5000', 10));
+  
+  // Detect if running in HTTPS environment (Replit, production, etc.)
+  const isHostedHttps = process.env.REPL_SLUG || process.env.REPLIT_DEV_DOMAIN || process.env.NODE_ENV === 'production';
+  
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server },
+    hmr: isHostedHttps 
+      ? { 
+          server,
+          protocol: 'wss'
+          // Omit clientPort for HTTPS to use default 443
+        }
+      : { 
+          server,
+          clientPort: actualPort,
+          protocol: 'ws'
+        },
     allowedHosts: true as const,
   };
 
