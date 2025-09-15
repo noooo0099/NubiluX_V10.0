@@ -396,6 +396,12 @@ export default function Chat() {
     `Chat #${chat.id}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Filter messages when in a specific chat conversation
+  const filteredMessages = messages.filter(message => 
+    !searchQuery.trim() || 
+    message.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Helper functions with null-safety
   const formatTimeAgo = (timestamp?: string | null) => {
     if (!timestamp) return '';
@@ -593,7 +599,7 @@ export default function Chat() {
               </div>
             </div>
             
-            {/* WhatsApp-style Search Bar */}
+            {/* WhatsApp-style Search Bar - Gray themed for dark mode */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
@@ -601,7 +607,7 @@ export default function Chat() {
                 placeholder="Tanya AI atau Cari..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-nxe-surface/50 border-0 rounded-full text-white placeholder-gray-400 focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/50"
+                className="w-full pl-12 pr-4 py-3 bg-gray-700/80 border-0 rounded-full text-white placeholder-gray-400 focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 transition-all duration-200"
                 data-testid="input-search-chats"
               />
             </div>
@@ -840,7 +846,7 @@ export default function Chat() {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {filteredMessages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}

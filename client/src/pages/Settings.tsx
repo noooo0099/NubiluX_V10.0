@@ -142,15 +142,15 @@ export default function Settings() {
         {/* Title or Search Input */}
         <div className="flex-1 mx-4 relative overflow-hidden">
           {!showSearch ? (
-            <h1 className="text-xl font-medium text-white text-center">Pengaturan</h1>
+            <h1 className="text-xl font-medium text-white text-center transition-all duration-300 ease-out">Pengaturan</h1>
           ) : (
-            <div className="relative animate-slide-in-right">
+            <div className="relative transform translate-x-0 transition-all duration-300 ease-out animate-in slide-in-from-right">
               <input
                 type="text"
                 placeholder="Cari pengaturan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-nxe-card text-nxe-text placeholder-nxe-text-secondary px-4 py-2 rounded-lg border border-nxe-border focus:outline-none focus:border-nxe-primary text-center"
+                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-6 py-2.5 rounded-full border-0 focus:outline-none focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 text-center transition-all duration-200"
                 data-testid="input-search"
                 autoFocus
               />
