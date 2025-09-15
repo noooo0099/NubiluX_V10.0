@@ -3,21 +3,28 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-// Configure WebSocket with SSL certificate handling for development
+// Check if we're in true local development (not hosted environments)
+const isLocalDev = process.env.NODE_ENV === 'development' && !process.env.REPL_SLUG && !process.env.REPLIT_DEV_DOMAIN;
+
+// Configure WebSocket with SSL certificate handling
 class CustomWebSocket extends ws {
-  constructor(url: string, options?: any) {
+  constructor(url: string | URL, protocols?: string | string[], options?: any) {
     const wsOptions = {
-      ...options,
-      rejectUnauthorized: false // Allow self-signed certificates in development
+      ...(options || {}),
+      // Only bypass SSL verification for local development with self-signed certificates
+      rejectUnauthorized: false
     };
-    super(url, wsOptions);
+    
+    if (isLocalDev) {
+      console.warn('SSL verification disabled for local dev WebSocket');
+    }
+    
+    super(url as any, protocols as any, wsOptions);
   }
 }
 
-// Only disable SSL verification in development
-if (process.env.NODE_ENV !== 'production') {
-  neonConfig.webSocketConstructor = CustomWebSocket;
-}
+// Always provide a WebSocket constructor; use custom only for local dev
+neonConfig.webSocketConstructor = isLocalDev ? CustomWebSocket : ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
