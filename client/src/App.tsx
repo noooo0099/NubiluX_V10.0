@@ -33,6 +33,7 @@ import SearchResults from "@/pages/SearchResults";
 import SellerDashboard from "@/pages/SellerDashboard";
 import Help from "@/pages/Help";
 import ViewAll from "@/pages/ViewAll";
+import QRCodePage from "@/pages/QRCode";
 
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -66,8 +67,8 @@ function Router() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [location] = useLocation();
   
-  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, and chat page
-  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/chat' || location.startsWith('/chat/');
+  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, and chat page
+  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/qrcode' || location === '/chat' || location.startsWith('/chat/');
 
   return (
     <div className="min-h-screen bg-nxe-dark">
@@ -87,6 +88,11 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/view-all/:type?" component={ViewAll} />
           <Route path="/help" component={Help} />
+          <Route path="/qrcode">
+            <RequireAuth>
+              <QRCodePage />
+            </RequireAuth>
+          </Route>
           <Route path="/auth" component={Auth} />
           <Route path="/unauthorized" component={Unauthorized} />
           <Route path="/product/:id" component={ProductDetail} />

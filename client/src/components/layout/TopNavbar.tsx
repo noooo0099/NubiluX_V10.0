@@ -86,15 +86,17 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   searchExpanded ? 'w-32 sm:w-48 opacity-100 mr-2' : 'w-0 opacity-0 mr-0'
                 }`}
               >
-                <form onSubmit={handleSearch} className="h-full">
-                  <Input
+                <form onSubmit={handleSearch} className="h-full flex items-center">
+                  <input
                     ref={searchInputRef}
                     type="text"
                     placeholder="Cari produk, kategori..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/20"
+                    className="w-full h-8 bg-nxe-surface rounded-full px-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/20 transition-all duration-200"
                     data-testid="input-search"
+                    autoComplete="off"
+                    spellCheck="false"
                   />
                 </form>
               </div>

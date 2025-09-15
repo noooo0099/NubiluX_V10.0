@@ -10,7 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import QRCode from "qrcode";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
@@ -18,9 +17,6 @@ export default function Settings() {
   const { toast } = useToast();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [qrCodeDataURL, setQrCodeDataURL] = useState("");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
@@ -60,41 +56,6 @@ export default function Settings() {
     }
   };
 
-  const generateQRCode = async () => {
-    try {
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "User data tidak tersedia",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create profile URL - using user ID to create unique profile link
-      const profileUrl = `${window.location.origin}/profile/${user.id}`;
-      
-      // Generate QR code as data URL
-      const qrDataURL = await QRCode.toDataURL(profileUrl, {
-        width: 256,
-        margin: 2,
-        color: {
-          dark: '#134D37', // nxe-primary color
-          light: '#FFFFFF'
-        }
-      });
-      
-      setQrCodeDataURL(qrDataURL);
-      setShowQRModal(true);
-    } catch (error) {
-      console.error('Failed to generate QR code:', error);
-      toast({
-        title: "Error",
-        description: "Gagal membuat QR code",
-        variant: "destructive",
-      });
-    }
-  };
 
   const settingItems = [
     {
@@ -179,56 +140,63 @@ export default function Settings() {
 
   return (
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
-      {/* Header - Smooth search animation similar to navbar */}
+      {/* Header - Mobile-optimized search layout */}
       <div className="relative mb-6">
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={handleBackClick}
-            className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0"
-            data-testid="button-back"
-          >
-            <ChevronRight className="h-6 w-6 rotate-180" />
-          </button>
-          
-          {/* Title with smooth transition */}
-          <h1 className={`text-xl font-medium text-white text-center transition-all duration-300 ease-out ${
-            showSearch ? "opacity-0 scale-95" : "opacity-100 scale-100"
-          }`}>Pengaturan</h1>
-          
-          {/* Search Section with smooth animation */}
-          <div className="flex items-center transition-all duration-300 ease-out">
-            {/* Search Input Container with width/opacity animation */}
-            <div 
-              className={`overflow-hidden transition-all duration-300 ease-out ${
-                showSearch ? 'w-48 opacity-100 mr-3' : 'w-0 opacity-0 mr-0'
-              }`}
+        {!showSearch ? (
+          // Normal header layout
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={handleBackClick}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0"
+              data-testid="button-back"
             >
+              <ChevronRight className="h-6 w-6 rotate-180" />
+            </button>
+            
+            <h1 className="text-xl font-medium text-white text-center flex-1">Pengaturan</h1>
+            
+            <button 
+              onClick={handleSearchToggle}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0" 
+              data-testid="button-search"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+          </div>
+        ) : (
+          // Search mode - full width centered
+          <div className="flex items-center space-x-3 animate-in slide-in-from-top-2 duration-300">
+            <button 
+              onClick={handleBackClick}
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0"
+              data-testid="button-back"
+            >
+              <ChevronRight className="h-6 w-6 rotate-180" />
+            </button>
+            
+            <div className="flex-1">
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Cari pengaturan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-4 py-2 rounded-full border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/30 transition-all duration-200"
+                className="w-full h-9 bg-gray-700/80 text-white placeholder-gray-400 px-4 rounded-full border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/30 transition-all duration-200"
                 data-testid="input-search"
-                autoFocus={showSearch}
+                autoComplete="off"
+                spellCheck="false"
               />
             </div>
             
-            {/* Search Toggle Button */}
             <button 
               onClick={handleSearchToggle}
               className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0" 
               data-testid="button-search"
             >
-              {showSearch ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Search className="h-6 w-6" />
-              )}
+              <X className="h-6 w-6" />
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Profile Section */}
@@ -266,7 +234,7 @@ export default function Settings() {
           {/* QR Code and Check Icons */}
           <div className="flex space-x-4">
             <button 
-              onClick={generateQRCode}
+              onClick={() => setLocation("/qrcode")}
               className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200" 
               data-testid="button-qr"
             >
@@ -299,79 +267,6 @@ export default function Settings() {
         ))}
       </div>
 
-      {/* QR Code Modal */}
-      <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
-        <DialogContent className="sm:max-w-md bg-nxe-card border border-nxe-border">
-          <DialogHeader>
-            <DialogTitle className="text-center text-white">QR Code Profil Saya</DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex flex-col items-center space-y-4 p-6">
-            {qrCodeDataURL && (
-              <div className="bg-white p-4 rounded-lg">
-                <img 
-                  src={qrCodeDataURL} 
-                  alt="QR Code Profil" 
-                  className="w-64 h-64"
-                  data-testid="img-qr-code"
-                />
-              </div>
-            )}
-            
-            <div className="text-center">
-              <h3 className="text-white font-medium mb-2">
-                {user?.displayName || user?.username || "Pengguna"}
-              </h3>
-              <p className="text-nxe-text-secondary text-sm mb-4">
-                Scan QR code ini untuk melihat profil saya
-              </p>
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button
-                onClick={() => {
-                  if (navigator.share && qrCodeDataURL) {
-                    navigator.share({
-                      title: 'Profil Saya',
-                      text: 'Lihat profil saya di NubiluXchange',
-                      url: `${window.location.origin}/profile/${user?.id}`
-                    }).catch(console.error);
-                  } else {
-                    // Fallback: copy to clipboard
-                    navigator.clipboard?.writeText(`${window.location.origin}/profile/${user?.id}`)
-                      .then(() => {
-                        toast({
-                          title: "Berhasil",
-                          description: "Link profil berhasil disalin",
-                        });
-                      })
-                      .catch(() => {
-                        toast({
-                          title: "Error",
-                          description: "Gagal menyalin link",
-                          variant: "destructive",
-                        });
-                      });
-                  }
-                }}
-                variant="outline"
-                className="border-nxe-primary text-nxe-primary hover:bg-nxe-primary hover:text-white"
-                data-testid="button-share-profile"
-              >
-                Bagikan
-              </Button>
-              
-              <Button
-                onClick={() => setShowQRModal(false)}
-                className="bg-nxe-primary hover:bg-nxe-primary/80 text-white"
-                data-testid="button-close-qr"
-              >
-                Tutup
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
