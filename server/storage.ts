@@ -64,6 +64,7 @@ export interface IStorage {
   getEscrowTransaction(id: number): Promise<EscrowTransaction | undefined>;
   getEscrowTransactionsByUser(userId: number): Promise<EscrowTransaction[]>;
   getEscrowTransactionsByStatus(status: string): Promise<EscrowTransaction[]>;
+  getEscrowTransactionByChat(productId: number, buyerId: number, sellerId: number): Promise<EscrowTransaction | undefined>;
   createEscrowTransaction(escrow: InsertEscrowTransaction): Promise<EscrowTransaction>;
   updateEscrowTransaction(id: number, updates: Partial<EscrowTransaction>): Promise<EscrowTransaction | undefined>;
   getEscrowStats(): Promise<{ pending: number; active: number; completed: number; disputed: number }>;
@@ -218,8 +219,10 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(messages.createdAt))
     .limit(1);
     
-    // Get unread count (messages not sent by current user)
-    // For now, we'll just return 0 - this can be enhanced with read receipts
+    // Get escrow transaction for this chat if exists
+    const escrowTransaction = result[0].productId ? 
+      await this.getEscrowTransactionByChat(result[0].productId, result[0].buyerId, result[0].sellerId) :
+      null;
     
     return {
       ...result[0],
@@ -228,7 +231,9 @@ export class DatabaseStorage implements IStorage {
       lastMessageType: latestMessage[0]?.messageType || null,
       lastMessageTime: latestMessage[0]?.createdAt || null,
       lastMessageSenderId: latestMessage[0]?.senderId || null,
-      unreadCount: 0
+      unreadCount: 0,
+      // Escrow transaction info
+      escrowTransaction: escrowTransaction || null
     };
   }
 
@@ -280,6 +285,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(messages.createdAt))
       .limit(1);
       
+      // Get escrow transaction for this chat if exists
+      const escrowTransaction = chat.productId ? 
+        await this.getEscrowTransactionByChat(chat.productId, chat.buyerId, chat.sellerId) :
+        null;
+      
       // Return the exact structure expected by ChatListItem interface
       return {
         id: chat.id,
@@ -306,7 +316,9 @@ export class DatabaseStorage implements IStorage {
         lastMessageType: latestMessage[0]?.messageType || undefined,
         lastMessageTime: latestMessage[0]?.createdAt || undefined,
         lastMessageSenderId: latestMessage[0]?.senderId || undefined,
-        unreadCount: 0 // TODO: Implement proper unread count logic
+        unreadCount: 0, // TODO: Implement proper unread count logic
+        // Escrow transaction info
+        escrowTransaction: escrowTransaction || null
       };
     }));
     
@@ -427,6 +439,20 @@ export class DatabaseStorage implements IStorage {
   async createEscrowTransaction(escrow: InsertEscrowTransaction): Promise<EscrowTransaction> {
     const [newEscrow] = await db.insert(escrowTransactions).values(escrow).returning();
     return newEscrow;
+  }
+
+  async getEscrowTransactionByChat(productId: number, buyerId: number, sellerId: number): Promise<EscrowTransaction | undefined> {
+    const [escrow] = await db.select().from(escrowTransactions)
+      .where(
+        and(
+          eq(escrowTransactions.productId, productId),
+          eq(escrowTransactions.buyerId, buyerId),
+          eq(escrowTransactions.sellerId, sellerId)
+        )
+      )
+      .orderBy(desc(escrowTransactions.createdAt))
+      .limit(1);
+    return escrow || undefined;
   }
 
   async updateEscrowTransaction(id: number, updates: Partial<EscrowTransaction>): Promise<EscrowTransaction | undefined> {

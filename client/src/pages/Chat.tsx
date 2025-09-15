@@ -12,6 +12,24 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface EscrowTransaction {
+  id: number;
+  buyerId: number;
+  sellerId: number;
+  productId: number;
+  amount: string;
+  status: 'pending' | 'active' | 'completed' | 'disputed' | 'cancelled';
+  aiStatus: 'processing' | 'approved' | 'flagged' | 'manual_review';
+  riskScore?: number;
+  approvedBy?: number;
+  approvedAt?: string;
+  adminNote?: string;
+  completedBy?: number;
+  completedAt?: string;
+  completionNote?: string;
+  createdAt: string;
+}
+
 interface ChatListItem {
   id: number;
   productId?: number;
@@ -38,6 +56,8 @@ interface ChatListItem {
   lastMessageTime?: string;
   lastMessageSenderId?: number;
   unreadCount: number;
+  // Escrow transaction info
+  escrowTransaction?: EscrowTransaction | null;
 }
 
 interface Message {
@@ -77,6 +97,8 @@ interface ChatDetails {
   lastMessageTime?: string;
   lastMessageSenderId?: number;
   unreadCount: number;
+  // Escrow transaction info
+  escrowTransaction?: EscrowTransaction | null;
 }
 
 export default function Chat() {
@@ -149,6 +171,40 @@ export default function Chat() {
       // Also invalidate chat list to update last message and ordering
       queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
       // Invalidate chat details to update last message info
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
+    }
+  });
+
+  // Complete transaction mutation
+  const completeTransactionMutation = useMutation({
+    mutationFn: async (completionNote?: string) => {
+      if (!chatId) throw new Error("No chat selected");
+      return apiRequest(`/api/chats/${chatId}/actions/complete`, {
+        method: 'POST',
+        body: JSON.stringify({ completionNote })
+      });
+    },
+    onSuccess: () => {
+      // Invalidate all related queries
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
+    }
+  });
+
+  // Dispute transaction mutation
+  const disputeTransactionMutation = useMutation({
+    mutationFn: async (disputeReason: string) => {
+      if (!chatId) throw new Error("No chat selected");
+      return apiRequest(`/api/chats/${chatId}/actions/dispute`, {
+        method: 'POST',
+        body: JSON.stringify({ disputeReason })
+      });
+    },
+    onSuccess: () => {
+      // Invalidate all related queries
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
       queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
     }
   });
@@ -254,6 +310,70 @@ export default function Chat() {
   const getAvatarFallback = (chat: ChatListItem) => {
     const name = getDisplayName(chat);
     return name ? name[0]?.toUpperCase() || 'U' : 'U';
+  };
+
+  // Escrow transaction helper functions
+  const getEscrowStatusLabel = (status?: string) => {
+    switch (status) {
+      case 'pending': return 'Menunggu';
+      case 'active': return 'Aktif';
+      case 'completed': return 'Selesai';
+      case 'disputed': return 'Sengketa';
+      case 'cancelled': return 'Dibatalkan';
+      default: return 'Tidak ada transaksi';
+    }
+  };
+
+  const getEscrowStatusColor = (status?: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-500';
+      case 'active': return 'bg-green-500';
+      case 'completed': return 'bg-blue-500';
+      case 'disputed': return 'bg-red-500';
+      case 'cancelled': return 'bg-gray-500';
+      default: return 'bg-gray-400';
+    }
+  };
+
+  const canCompleteTransaction = (escrow?: EscrowTransaction | null) => {
+    // Only buyers can complete transactions for security
+    return escrow && escrow.status === 'active' && chatDetails && chatDetails.buyerId === currentUserId;
+  };
+
+  const canDisputeTransaction = (escrow?: EscrowTransaction | null) => {
+    return escrow && (escrow.status === 'pending' || escrow.status === 'active');
+  };
+
+  const handleCompleteTransaction = async () => {
+    if (!chatDetails?.escrowTransaction) return;
+    
+    // Confirm with user before completing
+    const confirmed = confirm('Apakah Anda yakin ingin menyelesaikan transaksi ini? Dana akan dirilis ke penjual.');
+    if (!confirmed) return;
+    
+    try {
+      await completeTransactionMutation.mutateAsync(undefined);
+    } catch (error) {
+      console.error('Error completing transaction:', error);
+      alert('Gagal menyelesaikan transaksi. Silakan coba lagi.');
+    }
+  };
+
+  const handleDisputeTransaction = async () => {
+    if (!chatDetails?.escrowTransaction) return;
+    const reason = prompt('Alasan sengketa (maksimal 1000 karakter):');
+    if (!reason || reason.trim().length === 0) return;
+    if (reason.length > 1000) {
+      alert('Alasan terlalu panjang. Maksimal 1000 karakter.');
+      return;
+    }
+    
+    try {
+      await disputeTransactionMutation.mutateAsync(reason.trim());
+    } catch (error) {
+      console.error('Error disputing transaction:', error);
+      alert('Gagal melaporkan sengketa. Silakan coba lagi.');
+    }
   };
 
   // Chat List View
@@ -366,6 +486,16 @@ export default function Chat() {
                             {chat.status === 'active' ? 'Aktif' : chat.status === 'completed' ? 'Selesai' : 'Sengketa'}
                           </Badge>
                           
+                          {/* Escrow Status Indicator */}
+                          {chat.escrowTransaction && (
+                            <div className="flex items-center space-x-1">
+                              <div className={`w-2 h-2 rounded-full ${getEscrowStatusColor(chat.escrowTransaction.status)}`}></div>
+                              <Badge variant="outline" className="text-xs">
+                                {getEscrowStatusLabel(chat.escrowTransaction.status)}
+                              </Badge>
+                            </div>
+                          )}
+                          
                           {chat.productCategory && (
                             <Badge variant="outline" className="text-xs">
                               {chat.productCategory}
@@ -467,6 +597,36 @@ export default function Chat() {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* Escrow Action Buttons */}
+            {chatDetails?.escrowTransaction && (
+              <>
+                {canCompleteTransaction(chatDetails.escrowTransaction) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-2 text-green-400 hover:text-green-300" 
+                    onClick={handleCompleteTransaction}
+                    disabled={completeTransactionMutation.isPending}
+                    data-testid="button-complete-transaction"
+                  >
+                    ✓
+                  </Button>
+                )}
+                {canDisputeTransaction(chatDetails.escrowTransaction) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-2 text-red-400 hover:text-red-300" 
+                    onClick={handleDisputeTransaction}
+                    disabled={disputeTransactionMutation.isPending}
+                    data-testid="button-dispute-transaction"
+                  >
+                    ⚠️
+                  </Button>
+                )}
+              </>
+            )}
+            
             <Button variant="ghost" size="sm" className="p-2">
               <Phone className="h-4 w-4 text-gray-400" />
             </Button>

@@ -743,6 +743,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Escrow transaction actions for chats
+  app.post('/api/chats/:id/actions/complete', requireAuth, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      
+      // Validate request body
+      const { completionNote } = req.body;
+      if (completionNote && (typeof completionNote !== 'string' || completionNote.length > 500)) {
+        return res.status(400).json({ error: 'Invalid completion note' });
+      }
+      
+      // Get chat and verify authorization
+      const chat = await storage.getChat(chatId);
+      if (!chat) {
+        return res.status(404).json({ error: 'Chat not found' });
+      }
+      
+      if (chat.buyerId !== req.userId && chat.sellerId !== req.userId) {
+        return res.status(403).json({ error: 'Not authorized to access this chat' });
+      }
+      
+      // CRITICAL: Only buyers can complete transactions to prevent financial fraud
+      if (chat.buyerId !== req.userId) {
+        return res.status(403).json({ error: 'Only buyers can complete transactions' });
+      }
+      
+      // Get escrow transaction
+      if (!chat.productId) {
+        return res.status(400).json({ error: 'No product associated with this chat' });
+      }
+      
+      const escrowTransaction = await storage.getEscrowTransactionByChat(
+        chat.productId, chat.buyerId, chat.sellerId
+      );
+      
+      if (!escrowTransaction) {
+        return res.status(404).json({ error: 'No escrow transaction found for this chat' });
+      }
+      
+      if (escrowTransaction.status !== 'active') {
+        return res.status(400).json({ error: 'Transaction must be active to complete' });
+      }
+      
+      // Update escrow transaction to completed
+      const updatedEscrow = await storage.updateEscrowTransaction(escrowTransaction.id, {
+        status: 'completed',
+        completedBy: req.userId!,
+        completedAt: new Date(),
+        completionNote: completionNote || null
+      });
+      
+      // Create system message about completion
+      const systemMessage = await storage.createMessage({
+        chatId,
+        senderId: req.userId!,
+        content: `✅ Transaksi telah diselesaikan oleh pembeli. Dana akan dirilis ke penjual.`,
+        messageType: 'system'
+      });
+      
+      // TODO: Broadcast system message to both participants via WebSocket
+      // This should notify both buyer and seller immediately
+      
+      res.json(updatedEscrow);
+    } catch (error) {
+      console.error('Complete transaction error:', error);
+      res.status(500).json({ error: 'Failed to complete transaction' });
+    }
+  });
+
+  app.post('/api/chats/:id/actions/dispute', requireAuth, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.id);
+      
+      // Validate request body
+      const { disputeReason } = req.body;
+      if (!disputeReason || typeof disputeReason !== 'string' || disputeReason.trim().length === 0) {
+        return res.status(400).json({ error: 'Dispute reason is required' });
+      }
+      if (disputeReason.length > 1000) {
+        return res.status(400).json({ error: 'Dispute reason too long (max 1000 characters)' });
+      }
+      
+      // Get chat and verify authorization
+      const chat = await storage.getChat(chatId);
+      if (!chat) {
+        return res.status(404).json({ error: 'Chat not found' });
+      }
+      
+      if (chat.buyerId !== req.userId && chat.sellerId !== req.userId) {
+        return res.status(403).json({ error: 'Not authorized to access this chat' });
+      }
+      
+      // Get escrow transaction
+      if (!chat.productId) {
+        return res.status(400).json({ error: 'No product associated with this chat' });
+      }
+      
+      const escrowTransaction = await storage.getEscrowTransactionByChat(
+        chat.productId, chat.buyerId, chat.sellerId
+      );
+      
+      if (!escrowTransaction) {
+        return res.status(404).json({ error: 'No escrow transaction found for this chat' });
+      }
+      
+      // Enforce proper status constraints for disputes
+      if (!['pending', 'active'].includes(escrowTransaction.status)) {
+        return res.status(400).json({ error: 'Transaction can only be disputed when pending or active' });
+      }
+      
+      // Update escrow transaction to disputed
+      const updatedEscrow = await storage.updateEscrowTransaction(escrowTransaction.id, {
+        status: 'disputed',
+        adminNote: disputeReason || 'Dispute raised by user'
+      });
+      
+      // Create system message about dispute
+      const systemMessage = await storage.createMessage({
+        chatId,
+        senderId: req.userId!,
+        content: `🚨 Transaksi telah dilaporkan sebagai sengketa oleh ${chat.buyerId === req.userId ? 'pembeli' : 'penjual'}. Tim admin akan segera meninjau. Alasan: ${disputeReason.trim()}`,
+        messageType: 'system'
+      });
+      
+      // TODO: Broadcast system message to both participants via WebSocket
+      // This should notify both buyer and seller immediately
+      
+      res.json(updatedEscrow);
+    } catch (error) {
+      console.error('Dispute transaction error:', error);
+      res.status(500).json({ error: 'Failed to dispute transaction' });
+    }
+  });
+
   // Status routes
   app.get('/api/status', async (req, res) => {
     try {
