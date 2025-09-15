@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck, Users, Megaphone, Star, Mail, Settings, UserCheck, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
@@ -519,14 +520,84 @@ export default function Chat() {
         <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-medium text-white">NubiluXchange</h1>
+              <h1 className="text-lg font-bold text-white">NubiluXchange</h1>
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" className="p-2" data-testid="button-camera">
-                  <Camera className="h-6 w-6 text-white" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out" 
+                  data-testid="button-camera"
+                  onClick={() => {
+                    // Trigger camera functionality (placeholder for now)
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                      navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => {
+                          // Camera access granted - you can implement camera UI here
+                          console.log('Camera access granted');
+                          // Stop the stream for now (just testing access)
+                          stream.getTracks().forEach(track => track.stop());
+                        })
+                        .catch(err => {
+                          console.error('Camera access denied:', err);
+                          alert('Akses kamera ditolak. Pastikan Anda memberikan izin kamera.');
+                        });
+                    } else {
+                      alert('Kamera tidak tersedia di perangkat ini.');
+                    }
+                  }}
+                >
+                  <Camera className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                 </Button>
-                <Button variant="ghost" size="sm" className="p-2" data-testid="button-menu">
-                  <MoreVertical className="h-6 w-6 text-white" />
-                </Button>
+                
+                {/* WhatsApp-style Dropdown Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out" 
+                      data-testid="button-menu"
+                    >
+                      <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Users className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Grup baru</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Users className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Komunitas baru</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Megaphone className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Siaran baru</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Smartphone className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Perangkat tertaut</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Star className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Berbintang</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Mail className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Baca semua</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                    <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <Settings className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Pengaturan</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
+                      <UserCheck className="mr-3 h-4 w-4 text-gray-400" />
+                      <span className="text-white">Ganti akun</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             
