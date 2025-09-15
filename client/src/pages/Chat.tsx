@@ -18,9 +18,26 @@ interface ChatListItem {
   buyerId: number;
   sellerId: number;
   status: string;
-  lastMessage?: string;
-  unreadCount?: number;
   createdAt: string;
+  // Product info
+  productTitle?: string;
+  productThumbnail?: string;
+  productPrice?: string;
+  productCategory?: string;
+  // Other participant info
+  otherUser?: {
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+    isVerified: boolean;
+  };
+  isCurrentUserBuyer: boolean;
+  // Message info
+  lastMessage?: string;
+  lastMessageType?: string;
+  lastMessageTime?: string;
+  lastMessageSenderId?: number;
+  unreadCount: number;
 }
 
 interface Message {
@@ -30,6 +47,36 @@ interface Message {
   content: string;
   messageType: 'text' | 'image' | 'system' | 'ai_admin';
   createdAt: string;
+}
+
+interface ChatDetails {
+  id: number;
+  productId?: number;
+  buyerId: number;
+  sellerId: number;
+  status: string;
+  createdAt: string;
+  // Product info
+  productTitle?: string;
+  productThumbnail?: string;
+  productPrice?: string;
+  productCategory?: string;
+  // Buyer info
+  buyerUsername?: string;
+  buyerDisplayName?: string;
+  buyerProfilePicture?: string;
+  buyerIsVerified?: boolean;
+  // Seller info
+  sellerUsername?: string;
+  sellerDisplayName?: string;
+  sellerProfilePicture?: string;
+  sellerIsVerified?: boolean;
+  // Message info
+  lastMessage?: string;
+  lastMessageType?: string;
+  lastMessageTime?: string;
+  lastMessageSenderId?: number;
+  unreadCount: number;
 }
 
 export default function Chat() {
@@ -48,6 +95,10 @@ export default function Chat() {
       if (message.type === 'new_message') {
         // Invalidate messages query to refetch
         queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+        // Also invalidate chat list to update last message and ordering
+        queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+        // Invalidate chat details to update last message info
+        queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
       }
     }
   });
@@ -56,6 +107,12 @@ export default function Chat() {
   const { data: chatList = [] } = useQuery<ChatListItem[]>({
     queryKey: ["/api/chats"],
     enabled: !chatId, // Only fetch when showing chat list
+  });
+
+  // Fetch detailed chat info for header
+  const { data: chatDetails } = useQuery<ChatDetails>({
+    queryKey: [`/api/chats/${chatId}`],
+    enabled: !!chatId,
   });
 
   // Fetch messages for specific chat
@@ -89,6 +146,10 @@ export default function Chat() {
       setNewMessage("");
       // Messages will be updated via WebSocket, but invalidate as backup
       queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      // Also invalidate chat list to update last message and ordering
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      // Invalidate chat details to update last message info
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
     }
   });
 
@@ -137,8 +198,63 @@ export default function Chat() {
   const filteredChatList = chatList.filter(chat => 
     searchQuery === "" || 
     chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.productTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.otherUser?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.otherUser?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     `Chat #${chat.id}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Helper functions with null-safety
+  const formatTimeAgo = (timestamp?: string | null) => {
+    if (!timestamp) return '';
+    try {
+      const now = new Date();
+      const messageTime = new Date(timestamp);
+      
+      // Check if the date is valid
+      if (isNaN(messageTime.getTime())) {
+        return '';
+      }
+      
+      const diffInHours = Math.floor((now.getTime() - messageTime.getTime()) / (1000 * 60 * 60));
+      
+      if (diffInHours < 1) {
+        const diffInMinutes = Math.floor((now.getTime() - messageTime.getTime()) / (1000 * 60));
+        return diffInMinutes < 1 ? 'Sekarang' : `${diffInMinutes}m`;
+      } else if (diffInHours < 24) {
+        return `${diffInHours}h`;
+      } else if (diffInHours < 48) {
+        return 'Kemarin';
+      } else {
+        return messageTime.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
+      }
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return '';
+    }
+  };
+
+  const getDisplayName = (chat: ChatListItem) => {
+    if (chat.otherUser?.displayName) {
+      return chat.otherUser.displayName;
+    }
+    if (chat.otherUser?.username) {
+      return chat.otherUser.username;
+    }
+    return `User ${chat.isCurrentUserBuyer ? chat.sellerId : chat.buyerId}`;
+  };
+
+  const getProfilePicture = (chat: ChatListItem) => {
+    if (chat.otherUser?.profilePicture) {
+      return chat.otherUser.profilePicture;
+    }
+    return `https://images.unsplash.com/photo-${1500 + chat.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`;
+  };
+
+  const getAvatarFallback = (chat: ChatListItem) => {
+    const name = getDisplayName(chat);
+    return name ? name[0]?.toUpperCase() || 'U' : 'U';
+  };
 
   // Chat List View
   if (!chatId) {
@@ -194,34 +310,72 @@ export default function Chat() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={`https://images.unsplash.com/photo-${1500 + chat.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`} />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={getProfilePicture(chat)} />
+                        <AvatarFallback>{getAvatarFallback(chat)}</AvatarFallback>
+                      </Avatar>
+                      {chat.otherUser?.isVerified && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="text-white font-medium">Chat #{chat.id}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-white font-medium">{getDisplayName(chat)}</p>
+                          {chat.otherUser?.isVerified && (
+                            <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            </div>
+                          )}
+                        </div>
                         <span className="text-xs text-gray-400">
-                          {new Date(chat.createdAt).toLocaleDateString()}
+                          {chat.lastMessageTime ? formatTimeAgo(chat.lastMessageTime) : formatTimeAgo(chat.createdAt)}
                         </span>
                       </div>
                       
-                      <p className="text-gray-400 text-sm truncate">
-                        {chat.lastMessage || "Start your conversation"}
+                      {/* Product info */}
+                      {chat.productTitle && (
+                        <div className="flex items-center space-x-2 mt-1">
+                          {chat.productThumbnail && (
+                            <img 
+                              src={chat.productThumbnail} 
+                              alt={chat.productTitle}
+                              className="w-4 h-4 rounded object-cover"
+                            />
+                          )}
+                          <p className="text-xs text-blue-400 truncate">
+                            {chat.productTitle} {chat.productPrice && `- Rp ${parseFloat(chat.productPrice).toLocaleString('id-ID')}`}
+                          </p>
+                        </div>
+                      )}
+                      
+                      <p className="text-gray-400 text-sm truncate mt-1">
+                        {chat.lastMessage || "Mulai percakapan Anda"}
                       </p>
                       
                       <div className="flex items-center justify-between mt-2">
-                        <Badge 
-                          variant={chat.status === 'active' ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {chat.status}
-                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Badge 
+                            variant={chat.status === 'active' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {chat.status === 'active' ? 'Aktif' : chat.status === 'completed' ? 'Selesai' : 'Sengketa'}
+                          </Badge>
+                          
+                          {chat.productCategory && (
+                            <Badge variant="outline" className="text-xs">
+                              {chat.productCategory}
+                            </Badge>
+                          )}
+                        </div>
                         
-                        {chat.unreadCount && chat.unreadCount > 0 && (
-                          <Badge variant="destructive" className="text-xs">
-                            {chat.unreadCount}
+                        {chat.unreadCount !== undefined && chat.unreadCount > 0 && (
+                          <Badge variant="destructive" className="text-xs min-w-[20px] h-5 rounded-full flex items-center justify-center">
+                            {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
                           </Badge>
                         )}
                       </div>
@@ -242,25 +396,72 @@ export default function Chat() {
       {/* Chat Header */}
       <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setLocation("/chat")}
               className="p-1"
+              data-testid="button-back"
             >
               <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
             
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={`https://images.unsplash.com/photo-${1600 + parseInt(chatId)}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`} />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={chatDetails ? 
+                  (currentUserId === chatDetails.buyerId ? 
+                    (chatDetails.sellerProfilePicture || `https://images.unsplash.com/photo-${1600 + chatDetails.sellerId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`) :
+                    (chatDetails.buyerProfilePicture || `https://images.unsplash.com/photo-${1600 + chatDetails.buyerId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`)
+                  ) : `https://images.unsplash.com/photo-${1600 + parseInt(chatId)}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`
+                } />
+                <AvatarFallback>
+                  {chatDetails ? 
+                    (currentUserId === chatDetails.buyerId ? 
+                      (chatDetails.sellerDisplayName?.[0] || chatDetails.sellerUsername?.[0] || 'S') :
+                      (chatDetails.buyerDisplayName?.[0] || chatDetails.buyerUsername?.[0] || 'B')
+                    ).toUpperCase() : 'U'
+                  }
+                </AvatarFallback>
+              </Avatar>
+              {chatDetails && (
+                (currentUserId === chatDetails.buyerId ? chatDetails.sellerIsVerified : chatDetails.buyerIsVerified) && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )
+              )}
+            </div>
             
-            <div>
-              <p className="text-white font-medium">Chat #{chatId}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <p className="text-white font-medium truncate">
+                  {chatDetails ? 
+                    (currentUserId === chatDetails.buyerId ? 
+                      (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'Penjual') :
+                      (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'Pembeli')
+                    ) : `Chat #${chatId}`
+                  }
+                </p>
+                {chatDetails && (
+                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerIsVerified : chatDetails.buyerIsVerified) && (
+                    <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    </div>
+                  )
+                )}
+              </div>
+              
+              {/* Product info in header */}
+              {chatDetails?.productTitle && (
+                <p className="text-xs text-blue-400 truncate">
+                  {chatDetails.productTitle}
+                  {chatDetails.productPrice && ` - Rp ${parseFloat(chatDetails.productPrice).toLocaleString('id-ID')}`}
+                </p>
+              )}
+              
               <p className="text-xs text-gray-400">
-                {isConnected ? "Online" : "Connecting..."}
+                {isConnected ? "Online" : "Menghubungkan..."} • {chatDetails?.status === 'active' ? 'Aktif' : chatDetails?.status === 'completed' ? 'Selesai' : chatDetails?.status || 'Loading...'}
               </p>
             </div>
           </div>

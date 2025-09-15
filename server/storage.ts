@@ -29,6 +29,8 @@ export interface IStorage {
   // Chat operations
   getChat(id: number): Promise<Chat | undefined>;
   getChatsByUser(userId: number): Promise<Chat[]>;
+  getChatWithDetails(id: number): Promise<any>;
+  getChatsWithDetailsByUser(userId: number): Promise<any[]>;
   createChat(chat: InsertChat): Promise<Chat>;
   
   // Message operations
@@ -164,6 +166,159 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(chats)
       .where(or(eq(chats.buyerId, userId), eq(chats.sellerId, userId)))
       .orderBy(desc(chats.createdAt));
+  }
+
+  async getChatWithDetails(id: number): Promise<any> {
+    const result = await db.select({
+      // Chat fields
+      id: chats.id,
+      productId: chats.productId,
+      buyerId: chats.buyerId,
+      sellerId: chats.sellerId,
+      status: chats.status,
+      createdAt: chats.createdAt,
+      // Product fields
+      productTitle: products.title,
+      productThumbnail: products.thumbnail,
+      productPrice: products.price,
+      productCategory: products.category,
+      // Buyer fields
+      buyerUsername: users.username,
+      buyerDisplayName: users.displayName,
+      buyerProfilePicture: users.profilePicture,
+      buyerIsVerified: users.isVerified,
+      // Seller fields - we'll get this in a separate query
+    })
+    .from(chats)
+    .leftJoin(products, eq(chats.productId, products.id))
+    .leftJoin(users, eq(chats.buyerId, users.id))
+    .where(eq(chats.id, id));
+    
+    if (!result[0]) return undefined;
+    
+    // Get seller details separately
+    const sellerResult = await db.select({
+      sellerUsername: users.username,
+      sellerDisplayName: users.displayName,
+      sellerProfilePicture: users.profilePicture,
+      sellerIsVerified: users.isVerified,
+    })
+    .from(users)
+    .where(eq(users.id, result[0].sellerId));
+    
+    // Get latest message
+    const latestMessage = await db.select({
+      content: messages.content,
+      messageType: messages.messageType,
+      createdAt: messages.createdAt,
+      senderId: messages.senderId
+    })
+    .from(messages)
+    .where(eq(messages.chatId, id))
+    .orderBy(desc(messages.createdAt))
+    .limit(1);
+    
+    // Get unread count (messages not sent by current user)
+    // For now, we'll just return 0 - this can be enhanced with read receipts
+    
+    return {
+      ...result[0],
+      ...sellerResult[0],
+      lastMessage: latestMessage[0]?.content || null,
+      lastMessageType: latestMessage[0]?.messageType || null,
+      lastMessageTime: latestMessage[0]?.createdAt || null,
+      lastMessageSenderId: latestMessage[0]?.senderId || null,
+      unreadCount: 0
+    };
+  }
+
+  async getChatsWithDetailsByUser(userId: number): Promise<any[]> {
+    // Get all chats for user with product and user details
+    const result = await db.select({
+      // Chat fields
+      id: chats.id,
+      productId: chats.productId,
+      buyerId: chats.buyerId,
+      sellerId: chats.sellerId,
+      status: chats.status,
+      createdAt: chats.createdAt,
+      // Product fields
+      productTitle: products.title,
+      productThumbnail: products.thumbnail,
+      productPrice: products.price,
+      productCategory: products.category,
+    })
+    .from(chats)
+    .leftJoin(products, eq(chats.productId, products.id))
+    .where(or(eq(chats.buyerId, userId), eq(chats.sellerId, userId)))
+    .orderBy(desc(chats.createdAt));
+    
+    // Enrich each chat with participant info and latest message
+    const enrichedChats = await Promise.all(result.map(async (chat) => {
+      // Get the other participant (if current user is buyer, get seller and vice versa)
+      const otherUserId = chat.buyerId === userId ? chat.sellerId : chat.buyerId;
+      const isCurrentUserBuyer = chat.buyerId === userId;
+      
+      const otherUserResult = await db.select({
+        username: users.username,
+        displayName: users.displayName,
+        profilePicture: users.profilePicture,
+        isVerified: users.isVerified,
+      })
+      .from(users)
+      .where(eq(users.id, otherUserId));
+      
+      // Get latest message
+      const latestMessage = await db.select({
+        content: messages.content,
+        messageType: messages.messageType,
+        createdAt: messages.createdAt,
+        senderId: messages.senderId
+      })
+      .from(messages)
+      .where(eq(messages.chatId, chat.id))
+      .orderBy(desc(messages.createdAt))
+      .limit(1);
+      
+      // Return the exact structure expected by ChatListItem interface
+      return {
+        id: chat.id,
+        productId: chat.productId,
+        buyerId: chat.buyerId,
+        sellerId: chat.sellerId,
+        status: chat.status,
+        createdAt: chat.createdAt,
+        // Product info
+        productTitle: chat.productTitle || undefined,
+        productThumbnail: chat.productThumbnail || undefined,
+        productPrice: chat.productPrice || undefined,
+        productCategory: chat.productCategory || undefined,
+        // Other participant info (properly structured)
+        otherUser: otherUserResult[0] ? {
+          username: otherUserResult[0].username,
+          displayName: otherUserResult[0].displayName || undefined,
+          profilePicture: otherUserResult[0].profilePicture || undefined,
+          isVerified: otherUserResult[0].isVerified || false,
+        } : undefined,
+        isCurrentUserBuyer,
+        // Latest message info with null-safe defaults
+        lastMessage: latestMessage[0]?.content || undefined,
+        lastMessageType: latestMessage[0]?.messageType || undefined,
+        lastMessageTime: latestMessage[0]?.createdAt || undefined,
+        lastMessageSenderId: latestMessage[0]?.senderId || undefined,
+        unreadCount: 0 // TODO: Implement proper unread count logic
+      };
+    }));
+    
+    // Sort by latest message time if available, otherwise by chat creation time
+    enrichedChats.sort((a, b) => {
+      const timeA = a.lastMessageTime || a.createdAt;
+      const timeB = b.lastMessageTime || b.createdAt;
+      if (!timeA || !timeB) return 0;
+      return new Date(timeB).getTime() - new Date(timeA).getTime();
+    });
+    
+    return enrichedChats;
   }
 
   async createChat(chat: InsertChat): Promise<Chat> {

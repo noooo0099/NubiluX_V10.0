@@ -627,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat routes
   app.get('/api/chats', requireAuth, async (req, res) => {
     try {
-      const chats = await storage.getChatsByUser(req.userId!);
+      const chats = await storage.getChatsWithDetailsByUser(req.userId!);
       res.json(chats);
     } catch (error) {
       console.error('Get chats error:', error);
@@ -669,7 +669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/chats/:id', requireAuth, async (req, res) => {
     try {
       const chatId = parseInt(req.params.id);
-      const chat = await storage.getChat(chatId);
+      const chat = await storage.getChatWithDetails(chatId);
       
       if (!chat) {
         return res.status(404).json({ error: 'Chat not found' });
