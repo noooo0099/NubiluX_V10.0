@@ -1,7 +1,7 @@
 import { 
-  User, Shield, Bell, Moon, Sun, LogOut, 
-  CreditCard, HelpCircle, Star, ChevronRight,
-  UserCheck, Palette, Database, MessageSquare, Globe
+  User, Shield, Bell, LogOut, ChevronRight,
+  Lock, Camera, Users, MessageCircle, Radio, 
+  QrCode, CheckCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -26,134 +26,130 @@ export default function Settings() {
     });
   };
 
-  const settingSections = [
+  const settingItems = [
     {
-      title: "Akun",
-      items: [
-        {
-          icon: <User className="h-5 w-5" />,
-          label: "Edit Profile",
-          description: "Update informasi profil Anda",
-          action: () => setLocation("/profile"),
-        },
-        {
-          icon: <UserCheck className="h-5 w-5" />,
-          label: "User Role",
-          description: "Kelola peran sebagai pembeli atau penjual",
-          action: () => handleComingSoon("User Role Management"),
-        },
-        {
-          icon: <Shield className="h-5 w-5" />,
-          label: "Privacy Settings",
-          description: "Kelola pengaturan privasi",
-          action: () => handleComingSoon("Privacy Settings"),
-        },
-      ]
+      icon: <User className="h-6 w-6" />,
+      label: "Akun",
+      description: "Notifikasi keamanan, ganti nomor",
+      action: () => setLocation("/profile"),
     },
     {
-      title: "Notifikasi",
-      items: [
-        {
-          icon: <Bell className="h-5 w-5" />,
-          label: "Notification Preferences",
-          description: "Atur preferensi notifikasi",
-          action: () => handleComingSoon("Notification Preferences"),
-        },
-      ]
+      icon: <Lock className="h-6 w-6" />,
+      label: "Privasi",
+      description: "Blokir kontak, pesan sementara",
+      action: () => handleComingSoon("Privasi"),
     },
     {
-      title: "Pembayaran",
-      items: [
-        {
-          icon: <CreditCard className="h-5 w-5" />,
-          label: "Payment Methods", 
-          description: "Kelola metode pembayaran",
-          action: () => handleComingSoon("Payment Methods"),
-        },
-      ]
+      icon: <Camera className="h-6 w-6" />,
+      label: "Avatar",
+      description: "Buat, edit, foto profil",
+      action: () => handleComingSoon("Avatar"),
     },
     {
-      title: "App Settings",
-      items: [
-        {
-          icon: <Palette className="h-5 w-5" />,
-          label: "Theme Settings",
-          description: "Kustomisasi tampilan aplikasi",
-          action: () => handleComingSoon("Theme Settings"),
-        },
-        {
-          icon: <Globe className="h-5 w-5" />,
-          label: "Language",
-          description: "Ubah bahasa aplikasi",
-          action: () => handleComingSoon("Language Settings"),
-        },
-        {
-          icon: <Database className="h-5 w-5" />,
-          label: "Data & Storage",
-          description: "Kelola data dan penyimpanan",
-          action: () => handleComingSoon("Data & Storage"),
-        },
-      ]
+      icon: <Users className="h-6 w-6" />,
+      label: "Daftar",
+      description: "Kelola orang dan grup",
+      action: () => handleComingSoon("Daftar"),
     },
     {
-      title: "Support",
-      items: [
-        {
-          icon: <HelpCircle className="h-5 w-5" />,
-          label: "Help & Support",
-          description: "Dapatkan bantuan dan hubungi support",
-          action: () => handleComingSoon("Help & Support"),
-        },
-        {
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Feedback",
-          description: "Berikan masukan untuk aplikasi",
-          action: () => handleComingSoon("Feedback"),
-        },
-      ]
-    }
+      icon: <MessageCircle className="h-6 w-6" />,
+      label: "Chat",
+      description: "Tema, wallpaper, riwayat chat",
+      action: () => handleComingSoon("Chat"),
+    },
+    {
+      icon: <Radio className="h-6 w-6" />,
+      label: "Siaran",
+      description: "Kelola daftar dan kirim siaran",
+      action: () => handleComingSoon("Siaran"),
+    },
+    {
+      icon: <Bell className="h-6 w-6" />,
+      label: "Notifikasi",
+      description: "Pesan, grup & nada dering panggilan",
+      action: () => handleComingSoon("Notifikasi"),
+    },
   ];
 
   return (
-    <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
-      <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+        <button 
+          onClick={() => setLocation("/")}
+          className="text-white hover:text-gray-300"
+          data-testid="button-back"
+        >
+          <ChevronRight className="h-6 w-6 rotate-180" />
+        </button>
+        <h1 className="text-xl font-medium">Pengaturan</h1>
+        <button className="text-white hover:text-gray-300" data-testid="button-search">
+          <QrCode className="h-6 w-6" />
+        </button>
+      </div>
 
-      {/* Settings Sections */}
-      {settingSections.map((section) => (
-        <div key={section.title} className="mb-6">
-          <h2 className="text-lg font-semibold text-nxe-text mb-3 px-2">{section.title}</h2>
-          <div className="bg-nxe-card rounded-xl overflow-hidden">
-            {section.items.map((item, index) => (
-              <button
-                key={index}
-                onClick={item.action}
-                className="w-full p-4 flex items-center justify-between hover:bg-nxe-surface transition-colors border-b border-nxe-border last:border-b-0"
-                data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="text-nxe-primary">{item.icon}</div>
-                  <div className="text-left">
-                    <h3 className="text-nxe-text font-medium">{item.label}</h3>
-                    <p className="text-nxe-text-secondary text-sm">{item.description}</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-nxe-text-secondary" />
-              </button>
-            ))}
+      {/* Profile Section */}
+      <div className="p-4 border-b border-gray-800">
+        <div className="flex items-center space-x-4">
+          {/* Avatar */}
+          <div className="relative">
+            {user?.profilePicture ? (
+              <img 
+                src={user.profilePicture} 
+                alt="Profile" 
+                className="w-16 h-16 rounded-full object-cover"
+                data-testid="img-profile-avatar"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
+                <User className="h-8 w-8 text-gray-400" />
+              </div>
+            )}
+          </div>
+          
+          {/* User Info */}
+          <div className="flex-1">
+            <h2 className="text-lg font-medium text-white" data-testid="text-username">
+              {user?.displayName || user?.username || "zen"}
+            </h2>
+            <p className="text-gray-400 text-sm" data-testid="text-phone">
+              +62 831-1135-0849
+            </p>
+            <p className="text-gray-400 text-sm" data-testid="text-status">
+              Sedang rapat
+            </p>
+          </div>
+          
+          {/* QR Code and Check Icons */}
+          <div className="flex space-x-4">
+            <button className="text-green-500 hover:text-green-400" data-testid="button-qr">
+              <QrCode className="h-6 w-6" />
+            </button>
+            <button className="text-green-500 hover:text-green-400" data-testid="button-check">
+              <CheckCircle className="h-6 w-6" />
+            </button>
           </div>
         </div>
-      ))}
+      </div>
 
-      {/* Logout */}
-      <div className="bg-red-900/20 border border-red-700/30 rounded-xl overflow-hidden">
-        <button
-          onClick={handleLogout}
-          className="w-full p-4 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-colors"
-          data-testid="button-logout"
-        >
-          <LogOut className="h-5 w-5 mr-3" />
-          <span className="font-medium">Keluar dari Akun</span>
-        </button>
+      {/* Settings Items */}
+      <div className="px-4">
+        {settingItems.map((item, index) => (
+          <button
+            key={index}
+            onClick={item.action}
+            className="w-full p-4 flex items-center space-x-4 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0"
+            data-testid={`button-setting-${item.label.toLowerCase()}`}
+          >
+            <div className="text-gray-400">
+              {item.icon}
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="text-white font-medium">{item.label}</h3>
+              <p className="text-gray-400 text-sm">{item.description}</p>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
