@@ -150,27 +150,22 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                           <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
-                        <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <UserCircle className="mr-3 h-4 w-4 text-gray-400" />
+                      <DropdownMenuContent align="start" className="w-48 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                        <DropdownMenuItem onClick={() => setLocation("/profile")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Profile</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <Settings className="mr-3 h-4 w-4 text-gray-400" />
+                        <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Pengaturan</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <MessageCircle className="mr-3 h-4 w-4 text-gray-400" />
+                        <DropdownMenuItem onClick={() => setLocation("/chat")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Chat</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                        <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <HelpCircle className="mr-3 h-4 w-4 text-gray-400" />
+                        <DropdownMenuSeparator className="bg-gray-600" />
+                        <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Bantuan</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-nxe-primary/20" />
+                        <DropdownMenuSeparator className="bg-gray-600" />
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 focus:text-red-400 hover:bg-red-400/10 transition-colors duration-150">
-                          <LogOut className="mr-3 h-4 w-4 text-red-400" />
                           <span>Keluar</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -206,14 +201,12 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                           <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-nxe-surface border border-nxe-primary/20 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
-                        <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <LogIn className="mr-3 h-4 w-4 text-gray-400" />
+                      <DropdownMenuContent align="start" className="w-48 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                        <DropdownMenuItem onClick={() => setLocation("/auth")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Masuk</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-nxe-primary/20" />
-                        <DropdownMenuItem className="cursor-pointer hover:bg-nxe-primary/10 transition-colors duration-150">
-                          <HelpCircle className="mr-3 h-4 w-4 text-gray-400" />
+                        <DropdownMenuSeparator className="bg-gray-600" />
+                        <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
                           <span className="text-white">Bantuan</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
