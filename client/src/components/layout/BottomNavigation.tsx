@@ -82,12 +82,12 @@ export default function BottomNavigation() {
                     variant="ghost"
                     data-testid={`nav-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                   >
-                    {/* Center FAB optimized for mobile */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-nxe-primary via-nxe-primary/90 to-nxe-accent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 group-active:scale-95 transition-all duration-200 group-hover:shadow-xl">
+                    {/* Center FAB optimized for mobile - removed blur circle */}
+                    <div className="flex items-center justify-center group-hover:scale-110 group-active:scale-95 transition-all duration-200">
                       <Icon className="h-6 w-6 text-white" />
                     </div>
                   </Button>
-                  <span className="text-xs font-medium text-nxe-primary mt-1">
+                  <span className="text-xs font-medium text-white mt-1">
                     {item.label}
                   </span>
                 </div>
