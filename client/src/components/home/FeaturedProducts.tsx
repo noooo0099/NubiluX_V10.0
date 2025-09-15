@@ -3,34 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { Product } from "@shared/schema";
 
 export default function FeaturedProducts() {
   const [, setLocation] = useLocation();
-  const { data: featuredProducts = [] } = useQuery({
+  const { data: featuredProducts = [] } = useQuery<Product[]>({
     queryKey: ["/api/products/featured"],
   });
 
-  // Sample featured products for demo
-  const sampleProducts = [
-    {
-      id: 1,
-      title: "Mobile Legends Epic Account - 54 Skins",
-      description: "Mythic rank, all heroes unlocked, premium skins collection",
-      price: "2500000",
-      thumbnail: "https://images.unsplash.com/photo-1556438064-2d7646166914?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
-      rating: "4.9",
-      isPremium: true
-    },
-    {
-      id: 2,
-      title: "PUBG Mobile Conqueror Account",
-      description: "Season 20 Conqueror, rare outfits, maxed weapons",
-      price: "1800000",
-      thumbnail: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
-      rating: "4.7",
-      isPremium: false
-    }
-  ];
 
   const formatPrice = (price: string) => {
     return new Intl.NumberFormat('id-ID', {
@@ -54,7 +34,7 @@ export default function FeaturedProducts() {
       </div>
       
       <div className="space-y-4">
-        {sampleProducts.map((product) => (
+        {featuredProducts.map((product) => (
           <Card 
             key={product.id}
             className={`nxe-featured-card ${product.isPremium ? 'animate-pulse-glow' : ''}`}
@@ -64,7 +44,7 @@ export default function FeaturedProducts() {
               <div className="flex space-x-4">
                 <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                   <img 
-                    src={product.thumbnail}
+                    src={product.thumbnail || '/api/placeholder/300/300'}
                     alt={product.title}
                     className="w-full h-full object-cover" 
                   />

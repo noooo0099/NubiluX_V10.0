@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import type { Product } from "@shared/schema";
 
 interface ProductGridProps {
   category?: string;
@@ -9,45 +10,10 @@ interface ProductGridProps {
 export default function ProductGrid({ category }: ProductGridProps) {
   const [, setLocation] = useLocation();
   
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["/api/products", { category: category !== "all" ? category : undefined }],
   });
 
-  // Sample products for demo
-  const sampleProducts = [
-    {
-      id: 1,
-      title: "Free Fire Diamond Account",
-      description: "5000+ diamonds, rare bundles, elite pass maxed",
-      price: "450000",
-      thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      rating: "4.8"
-    },
-    {
-      id: 2,
-      title: "Valorant Immortal Account",
-      description: "Immortal rank, Phantom/Vandal skins, battlepass",
-      price: "3200000",
-      thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      rating: "4.9"
-    },
-    {
-      id: 3,
-      title: "Rank Boost Service",
-      description: "Professional rank boosting, safe & fast",
-      price: "200000",
-      thumbnail: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      rating: "4.6"
-    },
-    {
-      id: 4,
-      title: "Genshin Impact AR 55",
-      description: "Multiple 5-star characters, weapons, primogems",
-      price: "1500000",
-      thumbnail: "https://images.unsplash.com/photo-1556438064-2d7646166914?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
-      rating: "4.7"
-    }
-  ];
 
   const formatPrice = (price: string) => {
     return new Intl.NumberFormat('id-ID', {
@@ -66,7 +32,7 @@ export default function ProductGrid({ category }: ProductGridProps) {
       <h2 className="text-lg font-semibold text-white mb-4">Latest Products</h2>
       
       <div className="grid grid-cols-2 gap-4">
-        {sampleProducts.map((product) => (
+        {products.map((product) => (
           <div 
             key={product.id}
             className="nxe-product-card"
@@ -74,7 +40,7 @@ export default function ProductGrid({ category }: ProductGridProps) {
           >
             <div className="aspect-square overflow-hidden">
               <img 
-                src={product.thumbnail}
+                src={product.thumbnail || '/api/placeholder/300/300'}
                 alt={product.title}
                 className="w-full h-full object-cover" 
               />
