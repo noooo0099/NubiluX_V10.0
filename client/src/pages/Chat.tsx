@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,6 +36,7 @@ export default function Chat() {
   const { id: chatId } = useParams();
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
   const currentUserId = user?.id || 0; // Get user ID from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -132,25 +133,60 @@ export default function Chat() {
     return "bg-nxe-surface text-white";
   };
 
+  // Filter chat list based on search
+  const filteredChatList = chatList.filter(chat => 
+    searchQuery === "" || 
+    chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    `Chat #${chat.id}`.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Chat List View
   if (!chatId) {
     return (
       <div className="min-h-screen bg-nxe-dark">
-        <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface p-4">
-          <h1 className="text-xl font-semibold text-white">Messages</h1>
+        {/* WhatsApp-style Header */}
+        <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-medium text-white">NubiluXchange</h1>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" size="sm" className="p-2" data-testid="button-camera">
+                  <Camera className="h-6 w-6 text-white" />
+                </Button>
+                <Button variant="ghost" size="sm" className="p-2" data-testid="button-menu">
+                  <MoreVertical className="h-6 w-6 text-white" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* WhatsApp-style Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Tanya AI atau Cari..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-nxe-surface/50 border-0 rounded-full text-white placeholder-gray-400 focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/50"
+                data-testid="input-search-chats"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="p-4 space-y-2">
-          {chatList.length === 0 ? (
+          {filteredChatList.length === 0 ? (
             <div className="text-center py-12">
               <User className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">No conversations yet</p>
+              <p className="text-gray-400">
+                {searchQuery ? "No conversations found" : "No conversations yet"}
+              </p>
               <p className="text-gray-500 text-sm mt-2">
-                Start buying or selling to begin chatting
+                {searchQuery ? "Try a different search term" : "Start buying or selling to begin chatting"}
               </p>
             </div>
           ) : (
-            chatList.map((chat) => (
+            filteredChatList.map((chat) => (
               <Card
                 key={chat.id}
                 className="bg-nxe-card border-nxe-surface cursor-pointer hover:bg-nxe-surface transition-colors"
