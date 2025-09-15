@@ -21,6 +21,7 @@ export default function Settings() {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeDataURL, setQrCodeDataURL] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
@@ -28,6 +29,13 @@ export default function Settings() {
       setLocation("/");
     }
   };
+
+  // Focus input when search expands (matching navbar behavior)
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
 
   const handleComingSoon = (featureName: string) => {
     toast({
@@ -171,59 +179,56 @@ export default function Settings() {
 
   return (
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
-      {/* Header - Full width search animation */}
-      <div className="relative mb-6 overflow-hidden">
-        {!showSearch ? (
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={handleBackClick}
-              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
-              data-testid="button-back"
+      {/* Header - Smooth search animation similar to navbar */}
+      <div className="relative mb-6">
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={handleBackClick}
+            className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0"
+            data-testid="button-back"
+          >
+            <ChevronRight className="h-6 w-6 rotate-180" />
+          </button>
+          
+          {/* Title with smooth transition */}
+          <h1 className={`text-xl font-medium text-white text-center transition-all duration-300 ease-out ${
+            showSearch ? "opacity-0 scale-95" : "opacity-100 scale-100"
+          }`}>Pengaturan</h1>
+          
+          {/* Search Section with smooth animation */}
+          <div className="flex items-center transition-all duration-300 ease-out">
+            {/* Search Input Container with width/opacity animation */}
+            <div 
+              className={`overflow-hidden transition-all duration-300 ease-out ${
+                showSearch ? 'w-48 opacity-100 mr-3' : 'w-0 opacity-0 mr-0'
+              }`}
             >
-              <ChevronRight className="h-6 w-6 rotate-180" />
-            </button>
-            
-            <h1 className="text-xl font-medium text-white text-center transition-all duration-300 ease-out">Pengaturan</h1>
-            
-            <button 
-              onClick={handleSearchToggle}
-              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200" 
-              data-testid="button-search"
-            >
-              <Search className="h-6 w-6" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={handleBackClick}
-              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 flex-shrink-0"
-              data-testid="button-back"
-            >
-              <ChevronRight className="h-6 w-6 rotate-180" />
-            </button>
-            
-            <div className="flex-1 transform translate-x-0 transition-all duration-300 ease-out animate-in slide-in-from-right">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Cari pengaturan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-6 py-2.5 rounded-full border-0 focus:outline-none focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 transition-all duration-200"
+                className="w-full bg-gray-700/80 text-white placeholder-gray-400 px-4 py-2 rounded-full border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/30 transition-all duration-200"
                 data-testid="input-search"
-                autoFocus
+                autoFocus={showSearch}
               />
             </div>
             
+            {/* Search Toggle Button */}
             <button 
               onClick={handleSearchToggle}
-              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 flex-shrink-0" 
+              className="text-nxe-text hover:text-nxe-primary transition-colors duration-200 shrink-0" 
               data-testid="button-search"
             >
-              <Search className="h-6 w-6" />
+              {showSearch ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Search className="h-6 w-6" />
+              )}
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Profile Section */}

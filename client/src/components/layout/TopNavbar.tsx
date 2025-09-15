@@ -93,7 +93,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                     placeholder="Cari produk, kategori..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border border-nxe-primary/30 focus:border-nxe-primary focus:ring-2 focus:ring-nxe-primary/20"
+                    className="w-full bg-nxe-surface rounded-full px-4 py-2 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/20"
                     data-testid="input-search"
                   />
                 </form>
