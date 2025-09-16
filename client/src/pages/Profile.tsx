@@ -345,15 +345,16 @@ export default function Profile() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="space-y-4 mt-6">
+          <TabsContent value="products" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
             {products.length === 0 ? (
-              <div className="text-center py-12">
-                <ShoppingBag className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-                <p className="text-gray-400">No products listed yet</p>
+              <div className="text-center py-8 md:py-12">
+                <ShoppingBag className="h-12 w-12 md:h-16 md:w-16 mx-auto text-gray-500 mb-3 md:mb-4" />
+                <p className="text-gray-400 text-sm md:text-base">No products listed yet</p>
                 {isOwnProfile && (
                   <Button
                     onClick={() => setLocation('/upload')}
-                    className="mt-4 bg-nxe-primary hover:bg-nxe-primary/80"
+                    className="mt-3 md:mt-4 bg-nxe-primary hover:bg-nxe-primary/80 h-9 md:h-auto text-sm md:text-base px-4 md:px-6"
+                    data-testid="button-list-first-product"
                   >
                     List Your First Product
                   </Button>
@@ -395,58 +396,70 @@ export default function Profile() {
             )}
           </TabsContent>
 
-          <TabsContent value="reviews" className="space-y-4 mt-6">
-            <div className="text-center py-12">
-              <Star className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">No reviews yet</p>
+          <TabsContent value="reviews" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
+            <div className="text-center py-8 md:py-12">
+              <Star className="h-12 w-12 md:h-16 md:w-16 mx-auto text-gray-500 mb-3 md:mb-4" />
+              <p className="text-gray-400 text-sm md:text-base">No reviews yet</p>
             </div>
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-4 mt-6">
-            <div className="text-center py-12">
-              <div className="h-16 w-16 mx-auto text-gray-500 mb-4 rounded-full bg-gray-500/20 flex items-center justify-center">
-                <Settings className="h-8 w-8" />
+          <TabsContent value="activity" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
+            <div className="text-center py-8 md:py-12">
+              <div className="h-12 w-12 md:h-16 md:w-16 mx-auto text-gray-500 mb-3 md:mb-4 rounded-full bg-gray-500/20 flex items-center justify-center">
+                <Settings className="h-6 w-6 md:h-8 md:w-8" />
               </div>
-              <p className="text-gray-400">No recent activity</p>
+              <p className="text-gray-400 text-sm md:text-base">No recent activity</p>
             </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Edit Profile Modal */}
+      {/* Edit Profile Modal - Mobile optimized */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Card className="w-full max-w-md mx-4 bg-nxe-card border-nxe-surface">
-            <CardHeader>
-              <CardTitle className="text-white">Edit Profile</CardTitle>
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm">
+          <Card className="w-full md:max-w-md mx-0 md:mx-4 bg-nxe-card border-nxe-surface rounded-t-xl md:rounded-xl rounded-b-none md:rounded-b-xl bottom-nav-safe">
+            <CardHeader className="pb-3 md:pb-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white text-lg md:text-xl">Edit Profile</CardTitle>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(false)}
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-white md:hidden"
+                  data-testid="button-close-modal"
+                >
+                  ×
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSaveProfile(new FormData(e.currentTarget));
                 }}
-                className="space-y-4"
+                className="space-y-4 md:space-y-6"
               >
                 <div className="space-y-2 mobile-input-fix">
-                  <Label htmlFor="displayName" className="text-white">Display Name</Label>
+                  <Label htmlFor="displayName" className="text-white text-sm md:text-base">Display Name</Label>
                   <Input
                     id="displayName"
                     name="displayName"
                     defaultValue={profile.displayName || profile.username}
-                    className="bg-nxe-surface border-nxe-surface text-white"
+                    className="bg-nxe-surface border-nxe-surface text-white h-10 md:h-11 text-sm md:text-base"
                     data-testid="input-display-name"
                   />
                 </div>
 
                 <div className="space-y-2 mobile-input-fix">
-                  <Label htmlFor="bio" className="text-white">Bio</Label>
+                  <Label htmlFor="bio" className="text-white text-sm md:text-base">Bio</Label>
                   <Textarea
                     id="bio"
                     name="bio"
                     defaultValue={profile.bio || ""}
                     placeholder="Tell others about yourself..."
-                    className="bg-nxe-surface border-nxe-surface text-white min-h-[80px]"
+                    className="bg-nxe-surface border-nxe-surface text-white min-h-[80px] md:min-h-[100px] text-sm md:text-base resize-none"
                     data-testid="textarea-bio"
                   />
                 </div>
@@ -454,8 +467,8 @@ export default function Profile() {
                 {/* Banner Preview Section */}
                 {bannerPreview && (
                   <div className="space-y-2">
-                    <Label className="text-white">Banner Preview</Label>
-                    <div className="relative h-24 bg-gray-200 rounded-lg overflow-hidden">
+                    <Label className="text-white text-sm md:text-base">Banner Preview</Label>
+                    <div className="relative h-20 md:h-24 bg-gray-200 rounded-lg overflow-hidden">
                       <img
                         src={bannerPreview}
                         alt="Banner preview"
@@ -466,7 +479,7 @@ export default function Profile() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setBannerPreview(null)}
-                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white"
+                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white h-7 w-7 p-0"
                         data-testid="button-remove-banner"
                       >
                         ×
@@ -475,21 +488,23 @@ export default function Profile() {
                   </div>
                 )}
 
-                <div className="flex space-x-3 pt-4">
+                <div className="flex space-x-3 pt-4 md:pt-6 bottom-nav-safe">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 border-nxe-surface"
+                    className="flex-1 border-nxe-surface h-10 md:h-11 text-sm md:text-base"
+                    data-testid="button-cancel-edit"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="flex-1 bg-nxe-primary hover:bg-nxe-primary/80"
+                    className="flex-1 bg-nxe-primary hover:bg-nxe-primary/80 h-10 md:h-11 text-sm md:text-base"
+                    data-testid="button-save-profile"
                   >
-                    Save Changes
+                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </form>
