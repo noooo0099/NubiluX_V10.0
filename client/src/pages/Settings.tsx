@@ -200,51 +200,53 @@ export default function Settings() {
       </div>
 
       {/* Profile Section */}
-      <div className="bg-nxe-card rounded-xl p-4 mb-6">
-        <div className="flex items-center space-x-4">
-          {/* Avatar */}
-          <div className="relative">
-            {user?.profilePicture ? (
-              <img 
-                src={user.profilePicture} 
-                alt="Profile" 
-                className="w-16 h-16 rounded-full object-cover"
-                data-testid="img-profile-avatar"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-nxe-surface flex items-center justify-center">
-                <User className="h-8 w-8 text-nxe-text-secondary" />
+      <div className="bg-nxe-card rounded-xl mb-6 overflow-hidden">
+        <button
+          onClick={() => setLocation("/profile")}
+          className="w-full p-4 text-left hover:bg-nxe-surface transition-colors duration-200"
+          data-testid="button-profile-container"
+        >
+          <div className="flex items-center space-x-4">
+            {/* Avatar */}
+            <div className="relative">
+              {user?.profilePicture ? (
+                <img 
+                  src={user.profilePicture} 
+                  alt="Profile" 
+                  className="w-16 h-16 rounded-full object-cover"
+                  data-testid="img-profile-avatar"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-nxe-surface flex items-center justify-center">
+                  <User className="h-8 w-8 text-nxe-text-secondary" />
+                </div>
+              )}
+            </div>
+            
+            {/* User Info */}
+            <div className="flex-1">
+              <h2 className="text-lg font-medium text-nxe-text" data-testid="text-username">
+                {user?.displayName || user?.username || "Pengguna"}
+              </h2>
+              <p className="text-nxe-text-secondary text-sm" data-testid="text-contact">
+                {user?.email || "Belum ada kontak"}
+              </p>
+              <p className="text-nxe-text-secondary text-sm" data-testid="text-status">
+                {user?.role === 'admin' ? 'Administrator' : user?.role === 'owner' ? 'Pemilik' : 'Pengguna'}
+              </p>
+            </div>
+            
+            {/* QR Code and Check Icons */}
+            <div className="flex space-x-4">
+              <div className="text-nxe-primary" data-testid="icon-qr">
+                <QrCode className="h-6 w-6" />
               </div>
-            )}
+              <div className="text-nxe-primary" data-testid="icon-check">
+                <CheckCircle className="h-6 w-6" />
+              </div>
+            </div>
           </div>
-          
-          {/* User Info */}
-          <div className="flex-1">
-            <h2 className="text-lg font-medium text-nxe-text" data-testid="text-username">
-              {user?.displayName || user?.username || "Pengguna"}
-            </h2>
-            <p className="text-nxe-text-secondary text-sm" data-testid="text-contact">
-              {user?.email || "Belum ada kontak"}
-            </p>
-            <p className="text-nxe-text-secondary text-sm" data-testid="text-status">
-              {user?.role === 'admin' ? 'Administrator' : user?.role === 'owner' ? 'Pemilik' : 'Pengguna'}
-            </p>
-          </div>
-          
-          {/* QR Code and Check Icons */}
-          <div className="flex space-x-4">
-            <button 
-              onClick={() => setLocation("/qrcode")}
-              className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200" 
-              data-testid="button-qr"
-            >
-              <QrCode className="h-6 w-6" />
-            </button>
-            <button className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200" data-testid="button-check">
-              <CheckCircle className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
+        </button>
       </div>
 
       {/* Settings Items */}
