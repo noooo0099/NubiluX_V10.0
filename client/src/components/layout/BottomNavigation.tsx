@@ -36,9 +36,7 @@ export default function BottomNavigation() {
                                 location.startsWith('/upload/') ||
                                 location === '/settings' || 
                                 location.startsWith('/settings/') ||
-                                location === '/qrcode' || 
-                                location === '/chat' || 
-                                location.startsWith('/chat/');
+                                location === '/qrcode';
   
   if (hideBottomNavigation) {
     return null;
