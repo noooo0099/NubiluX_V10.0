@@ -116,7 +116,14 @@ export default function QRCodePage() {
         <div className="h-12 px-4 flex items-center justify-between">
           {/* Back Button */}
           <button
-            onClick={() => setLocation("/settings")}
+            onClick={() => {
+              // Use browser history to go back, fallback to home if no history
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                setLocation("/");
+              }
+            }}
             className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
             data-testid="button-back"
           >

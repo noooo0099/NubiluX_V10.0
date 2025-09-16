@@ -100,7 +100,14 @@ export default function Upload() {
             size="sm" 
             className="p-2 text-white" 
             data-testid="button-back"
-            onClick={() => setLocation('/')}
+            onClick={() => {
+              // Use browser history to go back, fallback to home if no history
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                setLocation('/');
+              }
+            }}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

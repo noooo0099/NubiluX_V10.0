@@ -73,7 +73,12 @@ export default function Settings() {
       setShowSearch(false);
       setSearchQuery("");
     } else {
-      setLocation("/");
+      // Use browser history to go back, fallback to home if no history
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        setLocation("/");
+      }
     }
   };
 

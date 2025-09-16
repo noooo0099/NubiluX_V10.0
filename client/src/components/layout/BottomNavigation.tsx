@@ -18,8 +18,18 @@ export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
 
-  // Hide bottom navigation on upload page and its sub-routes
-  if (location.startsWith("/upload")) {
+  // Hide bottom navigation on pages that should only use back button navigation
+  // This matches the TopNavbar hiding logic for consistency
+  const hideBottomNavigation = location === '/auth' || 
+                                location === '/upload' || 
+                                location.startsWith('/upload/') ||
+                                location === '/settings' || 
+                                location.startsWith('/settings/') ||
+                                location === '/qrcode' || 
+                                location === '/chat' || 
+                                location.startsWith('/chat/');
+  
+  if (hideBottomNavigation) {
     return null;
   }
 
