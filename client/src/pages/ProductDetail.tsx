@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
-import { ArrowLeft, Star, Heart, Share, MessageCircle, Shield, Eye, Calendar } from "lucide-react";
+import { ArrowLeft, Star, Heart, MessageCircle, Shield, Eye, Calendar } from "lucide-react";
+import { CustomShareIcon } from "@/components/icons/CustomShareIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -179,7 +180,7 @@ export default function ProductDetail() {
               onClick={handleShare}
               className="p-2"
             >
-              <Share className="h-5 w-5 text-gray-400" />
+              <CustomShareIcon className="text-gray-400" size={20} />
             </Button>
           </div>
         </div>
