@@ -93,7 +93,25 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     try {
       const token = getAuthToken();
-      const url = queryKey[0] as string;
+      let url = queryKey[0] as string;
+      
+      // Handle object parameters in queryKey[1] by converting to query string
+      if (queryKey.length > 1 && queryKey[1] && typeof queryKey[1] === 'object') {
+        const params = new URLSearchParams();
+        const queryParams = queryKey[1] as Record<string, any>;
+        
+        for (const [key, value] of Object.entries(queryParams)) {
+          if (value !== undefined && value !== null) {
+            params.append(key, String(value));
+          }
+        }
+        
+        const queryString = params.toString();
+        if (queryString) {
+          url += (url.includes('?') ? '&' : '?') + queryString;
+        }
+      }
+      
       const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
       
       const headers: Record<string, string> = {

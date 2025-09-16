@@ -581,9 +581,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
   app.get('/api/products', async (req, res) => {
     try {
-      const { category, limit, offset } = req.query;
+      const { category, limit, offset, sellerId } = req.query;
+      
+      // Validate sellerId if provided
+      let validatedSellerId: number | undefined;
+      if (sellerId) {
+        const id = Number(sellerId);
+        if (Number.isNaN(id)) {
+          return res.status(400).json({ error: 'Invalid sellerId' });
+        }
+        validatedSellerId = id;
+      }
+      
       const products = await storage.getProducts({
         category: category as string,
+        sellerId: validatedSellerId,
         limit: limit ? parseInt(limit as string) : undefined,
         offset: offset ? parseInt(offset as string) : undefined
       });

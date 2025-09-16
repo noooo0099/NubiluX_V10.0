@@ -57,13 +57,13 @@ export default function Profile() {
   // Fetch user profile
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: [`/api/users/profile/${effectiveProfileId}`],
-    enabled: !!(effectiveProfileId && currentUserId > 0),
+    enabled: Boolean(effectiveProfileId),
   });
 
   // Fetch user's products
-  const { data: products = [] } = useQuery<Product[]>({
-    queryKey: [`/api/products`, { sellerId: effectiveProfileId }],
-    enabled: !!(effectiveProfileId && currentUserId > 0),
+  const { data: products = [], isLoading: isProductsLoading } = useQuery<Product[]>({
+    queryKey: [`/api/products`, { sellerId: Number(effectiveProfileId) }],
+    enabled: Boolean(effectiveProfileId),
   });
 
   // Update profile mutation
@@ -346,7 +346,23 @@ export default function Profile() {
           </TabsList>
 
           <TabsContent value="products" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
-            {products.length === 0 ? (
+            {isProductsLoading ? (
+              // Loading skeleton
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <Card key={index} className="bg-nxe-card border-nxe-surface">
+                    <div className="aspect-square overflow-hidden rounded-t-lg bg-gray-600 animate-pulse" />
+                    <CardContent className="p-2 md:p-3">
+                      <div className="h-4 bg-gray-600 rounded animate-pulse mb-2" />
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="h-3 bg-gray-600 rounded animate-pulse w-16" />
+                        <div className="h-3 bg-gray-600 rounded animate-pulse w-8" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-8 md:py-12">
                 <ShoppingBag className="h-12 w-12 md:h-16 md:w-16 mx-auto text-gray-500 mb-3 md:mb-4" />
                 <p className="text-gray-400 text-sm md:text-base">No products listed yet</p>
