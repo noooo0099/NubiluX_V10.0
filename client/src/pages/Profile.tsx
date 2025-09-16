@@ -295,22 +295,23 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Content */}
-      <div className="px-4 pb-20">
+      {/* Profile Content - Mobile optimized */}
+      <div className="px-3 md:px-4 pb-20">
         {isOwnProfile && (
-          <Card className="bg-nxe-card border-nxe-surface mb-6">
-            <CardContent className="p-4">
+          <Card className="bg-nxe-card border-nxe-surface mb-4 md:mb-6">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white font-medium">Wallet Balance</p>
-                  <p className="text-2xl font-bold text-nxe-accent">
+                  <p className="text-white font-medium text-sm md:text-base">Wallet Balance</p>
+                  <p className="text-xl md:text-2xl font-bold text-nxe-accent">
                     {formatCurrency(profile.walletBalance)}
                   </p>
                 </div>
                 <Button
                   onClick={() => setLocation('/wallet')}
                   variant="outline"
-                  className="border-nxe-surface"
+                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                  data-testid="button-manage-wallet"
                 >
                   Manage Wallet
                 </Button>
@@ -320,14 +321,26 @@ export default function Profile() {
         )}
 
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface">
-            <TabsTrigger value="products" className="data-[state=active]:bg-nxe-primary">
+          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-10 md:h-11">
+            <TabsTrigger 
+              value="products" 
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              data-testid="tab-products"
+            >
               Products
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="data-[state=active]:bg-nxe-primary">
+            <TabsTrigger 
+              value="reviews" 
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              data-testid="tab-reviews"
+            >
               Reviews
             </TabsTrigger>
-            <TabsTrigger value="activity" className="data-[state=active]:bg-nxe-primary">
+            <TabsTrigger 
+              value="activity" 
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              data-testid="tab-activity"
+            >
               Activity
             </TabsTrigger>
           </TabsList>
@@ -347,12 +360,13 @@ export default function Profile() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {products.map((product) => (
                   <Card
                     key={product.id}
-                    className="bg-nxe-card border-nxe-surface cursor-pointer hover:scale-105 transition-transform"
+                    className="bg-nxe-card border-nxe-surface cursor-pointer hover:scale-105 transition-transform active:scale-95"
                     onClick={() => setLocation(`/product/${product.id}`)}
+                    data-testid={`card-product-${product.id}`}
                   >
                     <div className="aspect-square overflow-hidden rounded-t-lg">
                       <img
@@ -361,15 +375,15 @@ export default function Profile() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <CardContent className="p-3">
-                      <h3 className="text-white font-medium text-sm mb-1 line-clamp-1">
+                    <CardContent className="p-2 md:p-3">
+                      <h3 className="text-white font-medium text-xs md:text-sm mb-1 line-clamp-2 md:line-clamp-1 leading-tight">
                         {product.title}
                       </h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-nxe-accent font-bold text-sm">
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-nxe-accent font-bold text-xs md:text-sm truncate">
                           {formatCurrency(product.price)}
                         </span>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-1 flex-shrink-0">
                           <Star className="h-3 w-3 text-yellow-400 fill-current" />
                           <span className="text-xs text-gray-400">{product.rating}</span>
                         </div>
