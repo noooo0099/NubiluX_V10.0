@@ -32,6 +32,9 @@
   --nxe-accent: 142 76% 36%; /* #22C55E */
   --nxe-warning: 38 92% 50%; /* #F59E0B */
   --nxe-error: 0 84% 60%; /* #EF4444 */
+  --nxe-text: 0 0% 64.9%; /* gray-400 */
+  --nxe-border: 0 0% 23.5%; /* #3C3C3C */
+  --nxe-secondary: 0 0% 52.9%; /* gray-500 */
 }
 
 .dark {
@@ -54,6 +57,18 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
   --ring: 147 100% 20%;
+  
+  /* NXE specific colors for dark theme */
+  --nxe-primary: 147 100% 20%; /* #134D37 */
+  --nxe-dark: 0 0% 5.9%; /* #0F0F0F */
+  --nxe-surface: 0 0% 10.2%; /* #1A1A1A */
+  --nxe-card: 0 0% 16.5%; /* #2A2A2A */
+  --nxe-accent: 142 76% 36%; /* #22C55E */
+  --nxe-warning: 38 92% 50%; /* #F59E0B */
+  --nxe-error: 0 84% 60%; /* #EF4444 */
+  --nxe-text: 0 0% 64.9%; /* gray-400 */
+  --nxe-border: 0 0% 23.5%; /* #3C3C3C */
+  --nxe-secondary: 0 0% 52.9%; /* gray-500 */
 }
 
 @layer base {
@@ -294,5 +309,37 @@
 
   .border-nxe-surface {
     border-color: hsl(var(--nxe-surface));
+  }
+
+  .text-nxe-text {
+    color: hsl(var(--nxe-text));
+  }
+
+  .text-nxe-secondary {
+    color: hsl(var(--nxe-secondary));
+  }
+
+  .border-nxe-border {
+    border-color: hsl(var(--nxe-border));
+  }
+
+  .bg-nxe-border {
+    background-color: hsl(var(--nxe-border));
+  }
+
+  .text-nxe-warning {
+    color: hsl(var(--nxe-warning));
+  }
+
+  .text-nxe-error {
+    color: hsl(var(--nxe-error));
+  }
+
+  .bg-nxe-warning {
+    background-color: hsl(var(--nxe-warning));
+  }
+
+  .bg-nxe-error {
+    background-color: hsl(var(--nxe-error));
   }
 }
