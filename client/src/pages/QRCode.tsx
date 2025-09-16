@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, Share, MoreVertical, RefreshCw } from "lucide-react";
+import { ChevronLeft, MoreVertical, RefreshCw } from "lucide-react";
+import { CustomShareIcon } from "@/components/icons/CustomShareIcon";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -132,7 +133,7 @@ export default function QRCodePage() {
               className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
               data-testid="button-share"
             >
-              <Share className="h-4 w-4" />
+              <CustomShareIcon className="" size={16} />
             </button>
 
             <DropdownMenu>
