@@ -114,7 +114,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                 variant="ghost"
                 size="sm"
                 onClick={toggleSearch}
-                className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 mr-1 hover:scale-110 hover:rotate-12"
+                className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 hover:scale-110 hover:rotate-12"
                 data-testid="button-search-toggle"
                 aria-label="Search"
               >
