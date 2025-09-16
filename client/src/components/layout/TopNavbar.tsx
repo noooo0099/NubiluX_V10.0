@@ -78,39 +78,41 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
           {/* Center - Animated Search Container */}
           <div className={`flex items-center transition-all duration-300 ease-out ${
             searchExpanded 
-              ? 'flex-1 mx-4' 
-              : 'w-0 opacity-0 overflow-hidden'
+              ? 'flex-1 mx-4 opacity-100 visible' 
+              : 'w-0 opacity-0 invisible overflow-hidden'
           }`}>
-            {/* Search Bar with Back Button */}
-            <div className="flex items-center w-full space-x-3">
-              {/* Back button inside search bar */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleSearch}
-                className="p-2 hover:bg-transparent shrink-0 transition-all duration-200"
-                data-testid="button-search-back"
-                aria-label="Back"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-white transition-all duration-200" />
-              </Button>
-              
-              {/* Search input */}
-              <form onSubmit={handleSearch} className="flex-1">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Cari produk, kategori..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-8 bg-nxe-surface rounded-full px-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/20 transition-all duration-200"
-                  data-testid="input-search"
-                  autoComplete="off"
-                  spellCheck="false"
-                  aria-label="Search"
-                />
-              </form>
-            </div>
+            {/* Search Bar with Back Button - Only render when expanded */}
+            {searchExpanded && (
+              <div className="flex items-center w-full space-x-3 animate-in fade-in-0 slide-in-from-top-1 duration-200">
+                {/* Back button inside search bar */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSearch}
+                  className="p-2 hover:bg-transparent shrink-0 transition-all duration-200"
+                  data-testid="button-search-back"
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-white transition-all duration-200" />
+                </Button>
+                
+                {/* Search input */}
+                <form onSubmit={handleSearch} className="flex-1">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Cari produk, kategori..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-8 bg-nxe-surface rounded-full px-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-nxe-surface focus:ring-2 focus:ring-nxe-primary/20 transition-all duration-200"
+                    data-testid="input-search"
+                    autoComplete="off"
+                    spellCheck="false"
+                    aria-label="Search"
+                  />
+                </form>
+              </div>
+            )}
           </div>
 
           {/* Right - Search + Actions (pushes to right when search expands) */}
