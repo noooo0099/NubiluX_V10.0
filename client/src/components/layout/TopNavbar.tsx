@@ -41,6 +41,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
   const [, setLocation] = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
 
   // Fetch notifications for unread count
   const { data: notifications = [] } = useQuery({
@@ -64,6 +65,26 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
     if (searchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
     }
+  }, [searchExpanded]);
+
+  // Handle click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (event: PointerEvent) => {
+      if (searchExpanded && 
+          searchContainerRef.current && 
+          !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchExpanded(false);
+        setSearchQuery("");
+      }
+    };
+
+    if (searchExpanded) {
+      document.addEventListener('pointerdown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+    };
   }, [searchExpanded]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -105,7 +126,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
           {/* Expanded search bar overlay */}
           {searchExpanded && (
             <div className="absolute inset-0 h-full flex items-center justify-center px-4 z-10">
-              <form onSubmit={handleSearch} className="relative w-full max-w-2xl">
+              <form ref={searchContainerRef} onSubmit={handleSearch} className="relative w-full max-w-2xl">
                 <input
                   ref={searchInputRef}
                   type="text"

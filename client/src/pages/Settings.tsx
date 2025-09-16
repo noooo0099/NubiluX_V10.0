@@ -18,6 +18,7 @@ export default function Settings() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     if (confirm("Yakin ingin keluar dari akun?")) {
@@ -31,6 +32,26 @@ export default function Settings() {
     if (showSearch && searchInputRef.current) {
       searchInputRef.current.focus();
     }
+  }, [showSearch]);
+
+  // Handle click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (event: PointerEvent) => {
+      if (showSearch && 
+          searchContainerRef.current && 
+          !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearch(false);
+        setSearchQuery("");
+      }
+    };
+
+    if (showSearch) {
+      document.addEventListener('pointerdown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+    };
   }, [showSearch]);
 
   const handleComingSoon = (featureName: string) => {
@@ -141,7 +162,7 @@ export default function Settings() {
   return (
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark px-4 py-6 pb-24">
       {/* Header - Mobile-optimized search layout */}
-      <div className="relative mb-6">
+      <div ref={searchContainerRef} className="relative mb-6">
         {!showSearch ? (
           // Normal header layout
           <div className="flex items-center justify-between">
