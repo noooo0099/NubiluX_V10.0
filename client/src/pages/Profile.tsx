@@ -186,7 +186,7 @@ export default function Profile() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBannerClick}
-                className="absolute top-2 right-2 md:top-4 md:right-4 bg-black/50 hover:bg-black/70 text-white h-8 w-8 p-1"
+                className="absolute top-2 right-2 md:top-4 md:right-4 bg-black/50 hover:bg-black/70 text-white h-11 w-11 md:h-8 md:w-8 p-1"
                 data-testid="button-edit-banner"
               >
                 <Camera className="h-4 w-4" />
@@ -220,10 +220,10 @@ export default function Profile() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute bottom-0 right-0 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-1.5 md:p-2 h-7 w-7 md:h-auto md:w-auto"
+                  className="absolute bottom-0 right-0 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-1.5 md:p-2 h-11 w-11 md:h-auto md:w-auto"
                   data-testid="button-edit-avatar"
                 >
-                  <Camera className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                  <Camera className="h-4 w-4 md:h-4 md:w-4 text-white" />
                 </Button>
               )}
             </div>
@@ -265,7 +265,7 @@ export default function Profile() {
             {isOwnProfile ? (
               <Button
                 onClick={() => setIsEditing(true)}
-                className="bg-nxe-primary hover:bg-nxe-primary/80 text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                className="bg-nxe-primary hover:bg-nxe-primary/80 text-sm md:text-base px-3 md:px-4 h-11 md:h-auto"
                 data-testid="button-edit-profile"
               >
                 <Edit3 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
@@ -275,7 +275,7 @@ export default function Profile() {
               <>
                 <Button
                   onClick={handleStartChat}
-                  className="bg-nxe-accent hover:bg-nxe-accent/80 text-sm md:text-base px-3 md:px-4 h-8 md:h-auto flex-1 md:flex-none"
+                  className="bg-nxe-accent hover:bg-nxe-accent/80 text-sm md:text-base px-3 md:px-4 h-11 md:h-auto flex-1 md:flex-none"
                   data-testid="button-message-user"
                 >
                   <MessageCircle className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
@@ -283,7 +283,7 @@ export default function Profile() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-11 md:h-auto"
                   data-testid="button-follow-user"
                 >
                   <Star className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
@@ -310,7 +310,7 @@ export default function Profile() {
                 <Button
                   onClick={() => setLocation('/wallet')}
                   variant="outline"
-                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-11 md:h-auto"
                   data-testid="button-manage-wallet"
                 >
                   Manage Wallet
@@ -321,7 +321,7 @@ export default function Profile() {
         )}
 
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-10 md:h-11">
+          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-11">
             <TabsTrigger 
               value="products" 
               className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
@@ -353,7 +353,7 @@ export default function Profile() {
                 {isOwnProfile && (
                   <Button
                     onClick={() => setLocation('/upload')}
-                    className="mt-3 md:mt-4 bg-nxe-primary hover:bg-nxe-primary/80 h-9 md:h-auto text-sm md:text-base px-4 md:px-6"
+                    className="mt-3 md:mt-4 bg-nxe-primary hover:bg-nxe-primary/80 h-11 md:h-auto text-sm md:text-base px-4 md:px-6"
                     data-testid="button-list-first-product"
                   >
                     List Your First Product
@@ -414,10 +414,10 @@ export default function Profile() {
         </Tabs>
       </div>
 
-      {/* Edit Profile Modal - Mobile optimized */}
+      {/* Edit Profile Modal - Mobile optimized with slide animation */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Card className="w-full md:max-w-md mx-0 md:mx-4 bg-nxe-card border-nxe-surface rounded-t-xl md:rounded-xl rounded-b-none md:rounded-b-xl bottom-nav-safe">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <Card className="w-full md:max-w-md mx-0 md:mx-4 bg-nxe-card border-nxe-surface rounded-t-xl md:rounded-xl rounded-b-none md:rounded-b-xl bottom-nav-safe animate-in slide-in-from-bottom md:slide-in-from-bottom-0 duration-300 md:zoom-in-95">
             <CardHeader className="pb-3 md:pb-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white text-lg md:text-xl">Edit Profile</CardTitle>
@@ -426,7 +426,7 @@ export default function Profile() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditing(false)}
-                  className="h-8 w-8 p-0 text-gray-400 hover:text-white md:hidden"
+                  className="h-11 w-11 p-0 text-gray-400 hover:text-white md:hidden"
                   data-testid="button-close-modal"
                 >
                   ×
@@ -493,7 +493,7 @@ export default function Profile() {
                     type="button"
                     variant="outline"
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 border-nxe-surface h-10 md:h-11 text-sm md:text-base"
+                    className="flex-1 border-nxe-surface h-11 text-sm md:text-base"
                     data-testid="button-cancel-edit"
                   >
                     Cancel
@@ -501,7 +501,7 @@ export default function Profile() {
                   <Button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="flex-1 bg-nxe-primary hover:bg-nxe-primary/80 h-10 md:h-11 text-sm md:text-base"
+                    className="flex-1 bg-nxe-primary hover:bg-nxe-primary/80 h-11 text-sm md:text-base"
                     data-testid="button-save-profile"
                   >
                     {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
