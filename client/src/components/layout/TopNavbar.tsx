@@ -75,58 +75,50 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
             </div>
           </div>
 
-          {/* WhatsApp-style expanding search bar */}
-          <div className={`absolute right-0 transition-all duration-500 ease-out ${
-            searchExpanded 
-              ? 'inset-0 right-0' 
-              : 'w-10 h-10'
-          }`}>
-            {searchExpanded ? (
-              // Expanded search bar
-              <div className="h-full flex items-center justify-center px-4">
-                <form onSubmit={handleSearch} className="relative w-full max-w-2xl">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Tanya AI atau Cari produk, kategori..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-10 bg-gray-700/90 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
-                    data-testid="input-search"
-                    autoComplete="off"
-                    spellCheck="false"
-                    aria-label="Search"
-                  />
-                  <button
-                    type="button"
-                    onClick={toggleSearch}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-0 hover:scale-110 transition-all duration-300"
-                    data-testid="button-search-back-icon"
-                    aria-label="Back"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-gray-400 hover:text-nxe-primary transition-colors duration-300" />
-                  </button>
-                </form>
-              </div>
-            ) : (
-              // Search toggle button
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleSearch}
-                className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 hover:scale-110 hover:rotate-12"
-                data-testid="button-search-toggle"
-                aria-label="Search"
-              >
-                <Search className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
-              </Button>
-            )}
-          </div>
+          {/* Expanded search bar overlay */}
+          {searchExpanded && (
+            <div className="absolute inset-0 h-full flex items-center justify-center px-4 z-10">
+              <form onSubmit={handleSearch} className="relative w-full max-w-2xl">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Tanya AI atau Cari produk, kategori..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 bg-gray-700/90 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
+                  data-testid="input-search"
+                  autoComplete="off"
+                  spellCheck="false"
+                  aria-label="Search"
+                />
+                <button
+                  type="button"
+                  onClick={toggleSearch}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-0 hover:scale-110 transition-all duration-300"
+                  data-testid="button-search-back-icon"
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="h-4 w-4 text-gray-400 hover:text-nxe-primary transition-colors duration-300" />
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Right - Actions */}
           <div className={`flex items-center space-x-1 transition-all duration-500 ease-out ${
             searchExpanded ? 'transform translate-x-full opacity-0' : ''
           }`}>
+            {/* Search Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSearch}
+              className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 hover:scale-110 hover:rotate-12"
+              data-testid="button-search-toggle"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
+            </Button>
             {isAuthenticated ? (
               <>
                 {/* Notifications */}
