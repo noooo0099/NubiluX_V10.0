@@ -41,8 +41,8 @@ export default function QRCodePage() {
       
       // Generate QR code as data URL
       const qrDataURL = await QRCode.toDataURL(profileUrl, {
-        width: 280,
-        margin: 2,
+        width: 200,
+        margin: 1,
         color: {
           dark: '#134D37', // nxe-primary color
           light: '#FFFFFF'
@@ -112,18 +112,18 @@ export default function QRCodePage() {
     <div className="min-h-screen bg-nxe-dark">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-nxe-dark border-b border-nxe-surface">
-        <div className="h-14 px-4 flex items-center justify-between">
+        <div className="h-12 px-4 flex items-center justify-between">
           {/* Back Button */}
           <button
             onClick={() => setLocation("/settings")}
             className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
             data-testid="button-back"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
 
           {/* Title */}
-          <h1 className="text-lg font-medium text-white">Kode QR</h1>
+          <h1 className="text-base font-medium text-white">Kode QR</h1>
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2">
@@ -132,7 +132,7 @@ export default function QRCodePage() {
               className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
               data-testid="button-share"
             >
-              <Share className="h-5 w-5" />
+              <Share className="h-4 w-4" />
             </button>
 
             <DropdownMenu>
@@ -141,7 +141,7 @@ export default function QRCodePage() {
                   className="text-nxe-text hover:text-nxe-primary transition-colors duration-200"
                   data-testid="button-menu"
                 >
-                  <MoreVertical className="h-5 w-5" />
+                  <MoreVertical className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-nxe-surface border border-gray-600">
@@ -165,7 +165,7 @@ export default function QRCodePage() {
           <div className="flex">
             <button
               onClick={() => setActiveTab("my-code")}
-              className={`flex-1 py-3 text-center border-b-2 transition-colors duration-200 ${
+              className={`flex-1 py-2 text-center border-b-2 transition-colors duration-200 text-sm ${
                 activeTab === "my-code"
                   ? "border-nxe-primary text-nxe-primary"
                   : "border-transparent text-nxe-text-secondary hover:text-nxe-text"
@@ -176,7 +176,7 @@ export default function QRCodePage() {
             </button>
             <button
               onClick={() => setActiveTab("scan-code")}
-              className={`flex-1 py-3 text-center border-b-2 transition-colors duration-200 ${
+              className={`flex-1 py-2 text-center border-b-2 transition-colors duration-200 text-sm ${
                 activeTab === "scan-code"
                   ? "border-nxe-primary text-nxe-primary"
                   : "border-transparent text-nxe-text-secondary hover:text-nxe-text"
@@ -190,23 +190,23 @@ export default function QRCodePage() {
       </div>
 
       {/* Content */}
-      <div className="px-6 py-8">
+      <div className="px-4 py-4">
         {activeTab === "my-code" ? (
           <div className="max-w-sm mx-auto">
             {/* Profile Section */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-4">
               {/* Avatar */}
-              <div className="mb-4">
+              <div className="mb-2">
                 {user?.profilePicture ? (
                   <img 
                     src={user.profilePicture} 
                     alt="Profile" 
-                    className="w-16 h-16 rounded-full object-cover mx-auto border-2 border-nxe-primary"
+                    className="w-12 h-12 rounded-full object-cover mx-auto border-2 border-nxe-primary"
                     data-testid="img-profile-avatar"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-nxe-surface flex items-center justify-center mx-auto border-2 border-nxe-primary">
-                    <span className="text-nxe-primary font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-nxe-surface flex items-center justify-center mx-auto border-2 border-nxe-primary">
+                    <span className="text-nxe-primary font-bold text-sm">
                       {user?.username?.charAt(0)?.toUpperCase() || "U"}
                     </span>
                   </div>
@@ -214,34 +214,34 @@ export default function QRCodePage() {
               </div>
 
               {/* User Info */}
-              <h2 className="text-xl font-medium text-white mb-1" data-testid="text-username">
+              <h2 className="text-lg font-medium text-white mb-1" data-testid="text-username">
                 {user?.displayName || user?.username || "Pengguna"}
               </h2>
-              <p className="text-nxe-text-secondary text-sm" data-testid="text-contact">
+              <p className="text-nxe-text-secondary text-xs" data-testid="text-contact">
                 Kontak NubiluXchange
               </p>
             </div>
 
             {/* QR Code Container */}
-            <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
+            <div className="bg-white rounded-xl p-4 mb-4 shadow-lg">
               {qrCodeDataURL ? (
                 <div className="flex items-center justify-center">
                   <img 
                     src={qrCodeDataURL} 
                     alt="QR Code Profil" 
-                    className="w-full max-w-[280px] h-auto"
+                    className="w-full max-w-[200px] h-auto"
                     data-testid="img-qr-code"
                   />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-[280px]">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-nxe-primary"></div>
+                <div className="flex items-center justify-center h-[200px]">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-nxe-primary"></div>
                 </div>
               )}
             </div>
 
             {/* Description */}
-            <div className="text-center text-nxe-text-secondary text-sm leading-relaxed">
+            <div className="text-center text-nxe-text-secondary text-xs leading-relaxed">
               <p>
                 Kode QR bersifat privat. Jika Anda membagikannya kepada orang lain, ia bisa 
                 memindainya dengan kamera NubiluXchange dan menambahkan Anda sebagai kontak.
@@ -250,15 +250,15 @@ export default function QRCodePage() {
           </div>
         ) : (
           // Scan Code Tab - Placeholder
-          <div className="text-center py-16">
-            <div className="bg-nxe-surface rounded-xl p-8 max-w-sm mx-auto">
-              <div className="text-nxe-text-secondary mb-4">
-                <div className="w-16 h-16 rounded-full bg-nxe-dark flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📷</span>
+          <div className="text-center py-8">
+            <div className="bg-nxe-surface rounded-xl p-6 max-w-sm mx-auto">
+              <div className="text-nxe-text-secondary mb-3">
+                <div className="w-12 h-12 rounded-full bg-nxe-dark flex items-center justify-center mx-auto mb-3">
+                  <span className="text-xl">📷</span>
                 </div>
               </div>
-              <h3 className="text-white font-medium mb-2">Pindai Kode QR</h3>
-              <p className="text-nxe-text-secondary text-sm">
+              <h3 className="text-white font-medium mb-2 text-base">Pindai Kode QR</h3>
+              <p className="text-nxe-text-secondary text-xs">
                 Fitur pemindaian kode QR sedang dalam pengembangan dan akan tersedia segera.
               </p>
             </div>
