@@ -170,9 +170,9 @@ export default function Profile() {
     <div className="mobile-viewport-fix keyboard-smooth bg-nxe-dark pb-24">
       {/* Profile Header */}
       <div className="relative">
-        {/* Banner */}
+        {/* Banner - Optimized for mobile */}
         <div 
-          className="h-48 bg-gradient-to-r from-nxe-primary to-nxe-accent relative overflow-hidden"
+          className="h-32 md:h-48 bg-gradient-to-r from-nxe-primary to-nxe-accent relative overflow-hidden"
           style={{
             backgroundImage: (bannerPreview || profile.bannerImage) ? `url(${bannerPreview || profile.bannerImage})` : undefined,
             backgroundSize: 'cover',
@@ -186,7 +186,7 @@ export default function Profile() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBannerClick}
-                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white"
+                className="absolute top-2 right-2 md:top-4 md:right-4 bg-black/50 hover:bg-black/70 text-white h-8 w-8 p-1"
                 data-testid="button-edit-banner"
               >
                 <Camera className="h-4 w-4" />
@@ -203,16 +203,16 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Profile Info */}
-        <div className="relative px-4 pb-6">
-          <div className="flex items-end space-x-4 -mt-16">
-            <div className="relative">
-              <Avatar className="w-32 h-32 border-4 border-nxe-dark">
+        {/* Profile Info - Mobile optimized */}
+        <div className="relative px-3 md:px-4 pb-4 md:pb-6">
+          <div className="flex items-end space-x-3 md:space-x-4 -mt-10 md:-mt-16">
+            <div className="relative flex-shrink-0">
+              <Avatar className="w-20 h-20 md:w-32 md:h-32 border-3 md:border-4 border-nxe-dark">
                 <AvatarImage 
                   src={profile.profilePicture || `https://images.unsplash.com/photo-${1500 + profile.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200`} 
                   alt={profile.username}
                 />
-                <AvatarFallback className="text-2xl">
+                <AvatarFallback className="text-lg md:text-2xl">
                   {profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -220,69 +220,77 @@ export default function Profile() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute bottom-0 right-0 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-2"
+                  className="absolute bottom-0 right-0 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-1.5 md:p-2 h-7 w-7 md:h-auto md:w-auto"
+                  data-testid="button-edit-avatar"
                 >
-                  <Camera className="h-4 w-4 text-white" />
+                  <Camera className="h-3 w-3 md:h-4 md:w-4 text-white" />
                 </Button>
               )}
             </div>
 
-            <div className="flex-1 min-w-0 pb-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <h1 className="text-2xl font-bold text-white">
+            <div className="flex-1 min-w-0 pb-2 md:pb-4">
+              <div className="flex items-center space-x-2 mb-1 md:mb-2">
+                <h1 className="text-lg md:text-2xl font-bold text-white truncate">
                   {profile.displayName || profile.username}
                 </h1>
                 {profile.isVerified && (
-                  <Shield className="h-5 w-5 text-nxe-accent" />
+                  <Shield className="h-4 w-4 md:h-5 md:w-5 text-nxe-accent flex-shrink-0" />
                 )}
               </div>
               
-              <p className="text-gray-400 mb-2">@{profile.username}</p>
+              <p className="text-gray-400 mb-2 text-sm md:text-base">@{profile.username}</p>
               
-              <div className="flex items-center space-x-4 mb-3">
+              <div className="flex items-center space-x-2 md:space-x-4 mb-3 flex-wrap gap-1">
                 <Badge 
                   variant={profile.role === 'seller' ? 'default' : 'secondary'}
-                  className={profile.role === 'seller' ? 'bg-nxe-primary' : ''}
+                  className={`${profile.role === 'seller' ? 'bg-nxe-primary' : ''} text-xs`}
                 >
                   {profile.role === 'seller' ? 'Seller' : 'Buyer'}
                 </Badge>
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-400 text-xs md:text-sm">
                   Joined {formatDate(profile.createdAt)}
                 </span>
               </div>
 
               {profile.bio && (
-                <p className="text-gray-300 text-sm mb-4 max-w-md">
+                <p className="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2 md:line-clamp-none">
                   {profile.bio}
                 </p>
               )}
-
-              <div className="flex items-center space-x-3">
-                {isOwnProfile ? (
-                  <Button
-                    onClick={() => setIsEditing(true)}
-                    className="bg-nxe-primary hover:bg-nxe-primary/80"
-                  >
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      onClick={handleStartChat}
-                      className="bg-nxe-accent hover:bg-nxe-accent/80"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Message
-                    </Button>
-                    <Button variant="outline" className="border-nxe-surface">
-                      <Star className="h-4 w-4 mr-2" />
-                      Follow
-                    </Button>
-                  </>
-                )}
-              </div>
             </div>
+          </div>
+
+          {/* Action buttons moved below for mobile */}
+          <div className="mt-3 md:mt-0 md:ml-24 flex items-center space-x-2 md:space-x-3">
+            {isOwnProfile ? (
+              <Button
+                onClick={() => setIsEditing(true)}
+                className="bg-nxe-primary hover:bg-nxe-primary/80 text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                data-testid="button-edit-profile"
+              >
+                <Edit3 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                Edit Profile
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={handleStartChat}
+                  className="bg-nxe-accent hover:bg-nxe-accent/80 text-sm md:text-base px-3 md:px-4 h-8 md:h-auto flex-1 md:flex-none"
+                  data-testid="button-message-user"
+                >
+                  <MessageCircle className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                  Message
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-nxe-surface text-sm md:text-base px-3 md:px-4 h-8 md:h-auto"
+                  data-testid="button-follow-user"
+                >
+                  <Star className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                  Follow
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
