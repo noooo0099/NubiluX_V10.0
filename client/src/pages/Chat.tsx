@@ -12,6 +12,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import ChatNavToggle from "@/components/ChatNavToggle";
 
 interface EscrowTransaction {
   id: number;
@@ -720,6 +721,9 @@ export default function Chat() {
             ))
           )}
         </div>
+
+        {/* Chat Navigation Toggle */}
+        <ChatNavToggle />
       </div>
     );
   }
@@ -967,6 +971,9 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {/* Chat Navigation Toggle */}
+      <ChatNavToggle />
     </div>
   );
 }
