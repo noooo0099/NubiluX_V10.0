@@ -207,7 +207,7 @@ export default function Settings() {
                 placeholder="Cari pengaturan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 bg-gray-700/80 text-white placeholder-gray-400 px-4 rounded-full border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/30 transition-all duration-200"
+                className="w-full h-9 bg-gray-700/80 text-white placeholder-gray-400 px-4 rounded-full border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/50 transition-all duration-200"
                 data-testid="input-search"
                 autoComplete="off"
                 spellCheck="false"

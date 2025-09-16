@@ -133,7 +133,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   placeholder="Tanya AI atau Cari produk, kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 bg-gray-700/90 rounded-full pl-14 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
+                  className="w-full h-10 bg-gray-700/90 rounded-full pl-14 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary/50 focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
                   data-testid="input-search"
                   autoComplete="off"
                   spellCheck="false"

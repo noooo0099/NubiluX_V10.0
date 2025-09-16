@@ -67,8 +67,8 @@ function Router() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [location] = useLocation();
   
-  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, and chat page
-  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/qrcode' || location === '/chat' || location.startsWith('/chat/');
+  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, search page, and chat page
+  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/qrcode' || location.startsWith('/search') || location === '/chat' || location.startsWith('/chat/');
 
   return (
     <div className="min-h-screen bg-nxe-dark">
