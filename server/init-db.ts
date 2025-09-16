@@ -44,11 +44,11 @@ export async function initializeDatabase(): Promise<void> {
     const criticalTables = ['users', 'products', 'status_updates', 'transactions'];
     for (const table of criticalTables) {
       const checkResult = await db.execute(
-        sql.raw(`SELECT EXISTS (
+        sql`SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_schema = 'public' 
-          AND table_name = '${table}'
-        );`)
+          AND table_name = ${table}
+        );`
       );
       
       if (!checkResult.rows[0]?.exists) {

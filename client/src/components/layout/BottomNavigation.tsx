@@ -18,6 +18,17 @@ export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
 
+  // Query for notification badges - MUST be called before any early returns
+  const { data: unreadChats = 0 } = useQuery<number>({
+    queryKey: ["/api/chats/unread"],
+    enabled: isAuthenticated
+  });
+
+  const { data: walletNotifications = false } = useQuery<boolean>({
+    queryKey: ["/api/wallet/notifications"], 
+    enabled: isAuthenticated
+  });
+
   // Hide bottom navigation on pages that should only use back button navigation
   // This matches the TopNavbar hiding logic for consistency
   const hideBottomNavigation = location === '/auth' || 
@@ -32,17 +43,6 @@ export default function BottomNavigation() {
   if (hideBottomNavigation) {
     return null;
   }
-
-  // Query for notification badges
-  const { data: unreadChats = 0 } = useQuery<number>({
-    queryKey: ["/api/chats/unread"],
-    enabled: isAuthenticated
-  });
-
-  const { data: walletNotifications = false } = useQuery<boolean>({
-    queryKey: ["/api/wallet/notifications"], 
-    enabled: isAuthenticated
-  });
 
   // Guest navigation items - only Market and Login
   const guestNavItems: NavItem[] = [
