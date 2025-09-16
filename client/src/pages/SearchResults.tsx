@@ -111,10 +111,9 @@ export default function SearchResults() {
 
   return (
     <div className="min-h-screen bg-nxe-dark">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-nxe-dark/95 backdrop-blur-sm border-b border-nxe-border">
-        {/* Top Navigation */}
-        <div className="flex items-center justify-between p-4">
+      {/* Search Bar */}
+      <div className="p-4 border-b border-nxe-border">
+        <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
             size="sm"
@@ -124,8 +123,6 @@ export default function SearchResults() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          
-          <h1 className="text-lg font-semibold text-white">Pencarian</h1>
           
           <Button
             variant="ghost"
@@ -138,53 +135,50 @@ export default function SearchResults() {
           </Button>
         </div>
 
-        {/* Enhanced Search Bar */}
-        <div className="px-4 pb-4">
-          <form onSubmit={handleSearch} className="relative">
-            <div className={`relative flex items-center transition-all duration-300 ${
-              searchFocused ? 'ring-2 ring-nxe-primary/30' : ''
-            }`}>
-              <Search className="absolute left-4 h-5 w-5 text-gray-400 z-10" />
-              <Input
-                type="text"
-                placeholder="Cari akun game, rank, skin..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                className="w-full h-12 pl-12 pr-20 bg-gray-700/90 border-0 rounded-full text-white placeholder-gray-400 focus:outline-none focus:bg-gray-600/90 focus:ring-0 transition-all duration-300"
-                data-testid="input-search"
-              />
-              {searchQuery && (
-                <Button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-14 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-gray-500/20 rounded-full transition-all duration-200"
-                  variant="ghost"
-                  size="sm"
-                  data-testid="button-clear-search"
-                >
-                  <X className="h-4 w-4 text-gray-400" />
-                </Button>
-              )}
-              <Button 
-                type="submit" 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full h-8 w-8 p-0 transition-all duration-200"
-                data-testid="button-search"
+        <form onSubmit={handleSearch} className="relative">
+          <div className={`relative flex items-center transition-all duration-300 ${
+            searchFocused ? 'ring-2 ring-nxe-primary/30' : ''
+          }`}>
+            <Search className="absolute left-4 h-5 w-5 text-gray-400 z-10" />
+            <Input
+              type="text"
+              placeholder="Cari akun game, rank, skin..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              className="w-full h-12 pl-12 pr-20 bg-gray-700/90 border-0 rounded-full text-white placeholder-gray-400 focus:outline-none focus:bg-gray-600/90 focus:ring-0 transition-all duration-300"
+              data-testid="input-search"
+            />
+            {searchQuery && (
+              <Button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-14 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-gray-500/20 rounded-full transition-all duration-200"
+                variant="ghost"
+                size="sm"
+                data-testid="button-clear-search"
               >
-                <Search className="h-4 w-4" />
+                <X className="h-4 w-4 text-gray-400" />
               </Button>
-            </div>
-          </form>
-          
-          {searchQuery && (
-            <div className="mt-3 flex items-center justify-between">
-              <p className="text-sm text-nxe-text">
-                Hasil untuk: <span className="text-white font-medium">"{searchQuery}"</span>
-              </p>
-            </div>
-          )}
-        </div>
+            )}
+            <Button 
+              type="submit" 
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full h-8 w-8 p-0 transition-all duration-200"
+              data-testid="button-search"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+        
+        {searchQuery && (
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-sm text-nxe-text">
+              Hasil untuk: <span className="text-white font-medium">"{searchQuery}"</span>
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Collapsible Filters for Mobile */}
