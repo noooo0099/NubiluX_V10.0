@@ -300,30 +300,38 @@ export default function SearchResults() {
       </Collapsible>
 
       {/* Results */}
-      <div className="p-4">
+      <div className="px-3 sm:px-4 pb-6">
         {!searchQuery.trim() ? (
-          <div className="text-center py-12">
-            <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Mulai pencarian Anda
-            </h3>
-            <p className="text-nxe-text">
-              Masukkan kata kunci untuk mencari akun gaming yang Anda inginkan
-            </p>
+          <div className="text-center py-16 px-4">
+            <div className="max-w-sm mx-auto">
+              <Search className="h-20 w-20 text-gray-400 mx-auto mb-6" />
+              <h3 className="text-xl font-semibold text-white mb-3">
+                Mulai pencarian Anda
+              </h3>
+              <p className="text-nxe-text text-sm leading-relaxed">
+                Masukkan kata kunci untuk mencari akun gaming yang Anda inginkan
+              </p>
+            </div>
           </div>
         ) : isLoading ? (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-6 bg-nxe-border rounded animate-pulse w-32" />
-              <div className="h-6 bg-nxe-border rounded animate-pulse w-24" />
+            <div className="flex items-center justify-between mb-6 px-1">
+              <div className="h-5 bg-nxe-border rounded animate-pulse w-28" />
+              <div className="h-5 bg-nxe-border rounded animate-pulse w-20" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-border">
-                  <CardContent className="p-4">
-                    <div className="w-full h-48 bg-nxe-border rounded animate-pulse mb-4" />
-                    <div className="h-4 bg-nxe-border rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
+                <Card key={i} className="bg-nxe-surface border-nxe-border overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="w-full h-40 sm:h-48 bg-nxe-border animate-pulse" />
+                    <div className="p-3 sm:p-4 space-y-3">
+                      <div className="h-4 bg-nxe-border rounded animate-pulse" />
+                      <div className="h-4 bg-nxe-border rounded animate-pulse w-3/4" />
+                      <div className="flex justify-between items-center">
+                        <div className="h-5 bg-nxe-border rounded animate-pulse w-20" />
+                        <div className="h-4 bg-nxe-border rounded animate-pulse w-16" />
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -332,55 +340,59 @@ export default function SearchResults() {
         ) : (
           <div>
             {/* Results Summary */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-white">
-                Ditemukan <span className="font-semibold text-nxe-primary">{results.length}</span> hasil
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 px-1 gap-3">
+              <p className="text-white font-medium">
+                Ditemukan <span className="font-bold text-nxe-primary">{results.length}</span> hasil
               </p>
               <div className="flex items-center space-x-2">
                 <Users className="h-4 w-4 text-nxe-primary" />
                 <span className="text-sm text-nxe-text">
-                  {results.filter(p => p.seller.isVerified).length} dari penjual terverifikasi
+                  {results.filter(p => p.seller.isVerified).length} penjual terverifikasi
                 </span>
               </div>
             </div>
 
             {results.length === 0 ? (
-              <div className="text-center py-12">
-                <Gamepad2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  Tidak ada hasil ditemukan
-                </h3>
-                <p className="text-nxe-text mb-4">
-                  Coba ubah kata kunci atau filter pencarian Anda
-                </p>
-                <div className="flex justify-center space-x-2">
-                  <Button 
-                    onClick={() => setFilters({
-                      category: "all",
-                      minPrice: "",
-                      maxPrice: "",
-                      sortBy: "relevance",
-                      isPremium: "all"
-                    })}
-                    variant="outline"
-                    className="border-nxe-primary text-nxe-primary hover:bg-nxe-primary hover:text-white"
-                  >
-                    Reset Filter
-                  </Button>
-                  <Button 
-                    onClick={() => setLocation("/categories")}
-                    className="bg-nxe-primary hover:bg-nxe-primary/80 text-white"
-                  >
-                    Jelajahi Kategori
-                  </Button>
+              <div className="text-center py-16 px-4">
+                <div className="max-w-sm mx-auto">
+                  <Gamepad2 className="h-20 w-20 text-gray-400 mx-auto mb-6" />
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Tidak ada hasil ditemukan
+                  </h3>
+                  <p className="text-nxe-text mb-6 text-sm leading-relaxed">
+                    Coba ubah kata kunci atau filter pencarian Anda untuk menemukan akun gaming yang diinginkan
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3">
+                    <Button 
+                      onClick={() => setFilters({
+                        category: "all",
+                        minPrice: "",
+                        maxPrice: "",
+                        sortBy: "relevance",
+                        isPremium: "all"
+                      })}
+                      variant="outline"
+                      className="border-nxe-primary text-nxe-primary hover:bg-nxe-primary hover:text-white w-full sm:w-auto"
+                      data-testid="button-reset-filters-empty"
+                    >
+                      Reset Filter
+                    </Button>
+                    <Button 
+                      onClick={() => setLocation("/categories")}
+                      className="bg-nxe-primary hover:bg-nxe-primary/80 text-white w-full sm:w-auto"
+                      data-testid="button-explore-categories"
+                    >
+                      Jelajahi Kategori
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {results.map((product: Product) => (
                   <Card
                     key={product.id}
-                    className="bg-nxe-surface border-nxe-border hover:border-nxe-primary/50 transition-all duration-200 cursor-pointer group"
+                    className="bg-nxe-surface border-nxe-border hover:border-nxe-primary/50 transition-all duration-200 cursor-pointer group overflow-hidden"
                     onClick={() => setLocation(`/product/${product.id}`)}
                     data-testid={`card-product-${product.id}`}
                   >
@@ -390,15 +402,15 @@ export default function SearchResults() {
                         <img
                           src={product.thumbnail || `/api/placeholder/300/200?text=${product.category}`}
                           alt={product.title}
-                          className="w-full h-48 object-cover rounded-t-lg"
+                          className="w-full h-40 sm:h-48 object-cover"
                         />
                         {product.isPremium && (
-                          <Badge className="absolute top-2 right-2 bg-yellow-600 text-white">
+                          <Badge className="absolute top-2 right-2 bg-yellow-600 text-white text-xs">
                             Premium
                           </Badge>
                         )}
                         <div className="absolute bottom-2 left-2">
-                          <Badge className="bg-black/70 text-white text-xs">
+                          <Badge className="bg-black/70 text-white text-xs px-2 py-1">
                             <Clock className="h-3 w-3 mr-1" />
                             {formatTimeAgo(product.createdAt)}
                           </Badge>
@@ -406,26 +418,26 @@ export default function SearchResults() {
                       </div>
 
                       {/* Product Info */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-nxe-primary transition-colors">
+                      <div className="p-3 sm:p-4">
+                        <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-nxe-primary transition-colors text-sm sm:text-base">
                           {product.title}
                         </h3>
                         
                         {/* Game Data */}
                         {product.gameData && (
-                          <div className="flex flex-wrap gap-1 mb-2">
+                          <div className="flex flex-wrap gap-1 mb-3">
                             {product.gameData.rank && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs border-nxe-border text-nxe-text">
                                 {product.gameData.rank}
                               </Badge>
                             )}
                             {product.gameData.level && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs border-nxe-border text-nxe-text">
                                 Level {product.gameData.level}
                               </Badge>
                             )}
                             {product.gameData.skins && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs border-nxe-border text-nxe-text">
                                 {product.gameData.skins} Skin
                               </Badge>
                             )}
@@ -434,30 +446,33 @@ export default function SearchResults() {
 
                         {/* Price & Rating */}
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-lg font-bold text-nxe-primary">
+                          <span className="text-lg sm:text-xl font-bold text-nxe-primary">
                             {formatPrice(product.price)}
                           </span>
                           <div className="flex items-center space-x-1">
                             <Star className="h-4 w-4 text-yellow-500 fill-current" />
                             <span className="text-sm text-white">
-                              {product.rating} ({product.reviewCount})
+                              {product.rating}
+                            </span>
+                            <span className="text-xs text-nxe-text">
+                              ({product.reviewCount})
                             </span>
                           </div>
                         </div>
 
                         {/* Seller Info */}
-                        <div className="flex items-center justify-between text-sm text-nxe-text">
-                          <div className="flex items-center space-x-1">
-                            <span>@{product.seller.username}</span>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center space-x-1 min-w-0 flex-1">
+                            <span className="text-nxe-text truncate">@{product.seller.username}</span>
                             {product.seller.isVerified && (
-                              <Badge className="bg-blue-600 text-white text-xs px-1 py-0">
+                              <Badge className="bg-blue-600 text-white text-xs px-1.5 py-0.5 ml-1 shrink-0">
                                 ✓
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 text-nxe-text shrink-0 ml-2">
                             <Eye className="h-3 w-3" />
-                            <span>{Math.floor(Math.random() * 200) + 50}</span>
+                            <span className="text-xs">{Math.floor(Math.random() * 200) + 50}</span>
                           </div>
                         </div>
                       </div>
