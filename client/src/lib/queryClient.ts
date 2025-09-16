@@ -71,7 +71,8 @@ export async function apiRequest(
     
     // If backend is not available, return fallback data only in development
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      if (import.meta.env.DEV) {
+      const isDev = import.meta.env?.DEV ?? process.env.NODE_ENV === 'development';
+      if (isDev) {
         console.warn('Backend not available, using fallback data');
         return getFallbackResponse(url, options?.method || 'GET', options?.body);
       } else {
@@ -121,7 +122,8 @@ export const getQueryFn: <T>(options: {
       
       // If backend is not available, return fallback data only in development
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        if (import.meta.env.DEV) {
+        const isDev = import.meta.env?.DEV ?? process.env.NODE_ENV === 'development';
+        if (isDev) {
           console.warn('Backend not available, using fallback data');
           const endpoint = queryKey[0] as string;
           return getFallbackResponse(endpoint, 'GET');
