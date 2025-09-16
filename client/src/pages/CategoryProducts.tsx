@@ -192,11 +192,13 @@ export default function CategoryProducts() {
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="bg-nxe-surface border-nxe-border" data-testid={`product-skeleton-${i}`}>
                 <CardContent className="p-4">
-                  <div className="w-full h-48 bg-nxe-card rounded animate-pulse mb-4" />
+                  <div className="w-full h-48 bg-nxe-card rounded mb-4 flex items-center justify-center">
+                    <Loading variant="pulse" />
+                  </div>
                   <LoadingSkeleton lines={3} />
                   <div className="flex justify-between items-center mt-3">
-                    <div className="h-6 bg-nxe-card rounded animate-pulse w-20" />
-                    <div className="h-4 bg-nxe-card rounded animate-pulse w-16" />
+                    <LoadingSkeleton lines={1} className="w-20" />
+                    <LoadingSkeleton lines={1} className="w-16" />
                   </div>
                 </CardContent>
               </Card>

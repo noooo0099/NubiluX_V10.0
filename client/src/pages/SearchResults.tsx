@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loading } from "@/components/ui/loading";
 import { 
   Search,
   Filter,
@@ -308,28 +309,8 @@ export default function SearchResults() {
             </div>
           </div>
         ) : isLoading ? (
-          <div>
-            <div className="flex items-center justify-between mb-6 px-1">
-              <div className="h-5 bg-nxe-border rounded animate-pulse w-28" />
-              <div className="h-5 bg-nxe-border rounded animate-pulse w-20" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-border overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="w-full h-40 sm:h-48 bg-nxe-border animate-pulse" />
-                    <div className="p-3 sm:p-4 space-y-3">
-                      <div className="h-4 bg-nxe-border rounded animate-pulse" />
-                      <div className="h-4 bg-nxe-border rounded animate-pulse w-3/4" />
-                      <div className="flex justify-between items-center">
-                        <div className="h-5 bg-nxe-border rounded animate-pulse w-20" />
-                        <div className="h-4 bg-nxe-border rounded animate-pulse w-16" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="flex justify-center items-center min-h-96" data-testid="search-results-loading">
+            <Loading variant="gaming" />
           </div>
         ) : (
           <div>

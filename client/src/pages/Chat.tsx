@@ -622,12 +622,14 @@ export default function Chat() {
                 <Card key={i} className="bg-nxe-surface border-nxe-surface" data-testid={`chat-skeleton-${i}`}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-nxe-card rounded-full animate-pulse" />
+                      <div className="w-12 h-12 bg-nxe-card rounded-full">
+                        <Loading variant="pulse" className="w-full h-full rounded-full" />
+                      </div>
                       <div className="flex-1 space-y-2">
                         <LoadingSkeleton className="w-full" lines={2} />
                       </div>
                       <div className="w-12 text-right">
-                        <div className="h-3 bg-nxe-card rounded animate-pulse w-8" />
+                        <LoadingSkeleton lines={1} className="w-8" />
                       </div>
                     </div>
                   </CardContent>

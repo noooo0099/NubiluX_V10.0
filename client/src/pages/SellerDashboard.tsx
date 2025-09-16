@@ -150,7 +150,9 @@ export default function SellerDashboard() {
             <Card key={i} className="bg-nxe-surface border-nxe-border" data-testid={`stats-skeleton-${i}`}>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-nxe-card rounded-lg animate-pulse" />
+                  <div className="w-12 h-12 bg-nxe-card rounded-lg">
+                    <Loading variant="spinner" className="w-full h-full" />
+                  </div>
                   <div className="flex-1">
                     <LoadingSkeleton lines={3} />
                   </div>
@@ -269,9 +271,10 @@ export default function SellerDashboard() {
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="bg-nxe-surface border-nxe-border">
                   <CardContent className="p-4">
-                    <div className="w-full h-48 bg-nxe-border rounded animate-pulse mb-4" />
-                    <div className="h-4 bg-nxe-border rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
+                    <div className="w-full h-48 bg-nxe-border rounded mb-4 flex items-center justify-center">
+                      <Loading variant="dots" />
+                    </div>
+                    <LoadingSkeleton lines={2} />
                   </CardContent>
                 </Card>
               ))}
