@@ -60,7 +60,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
         {searchExpanded ? (
           /* WhatsApp-style full-width search interface */
           <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-left-5 zoom-in-90 duration-500 ease-out">
-            {/* Full-width search input with icon inside */}
+            {/* Full-width search input with back icon inside */}
             <div className="flex-1 relative animate-in slide-in-from-left-3 duration-700 delay-100">
               <form onSubmit={handleSearch} className="relative">
                 <input
@@ -75,9 +75,15 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   spellCheck="false"
                   aria-label="Search"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 pointer-events-none transition-all duration-400">
-                  <Search className="h-4 w-4 text-gray-400 transition-all duration-400 peer-focus:text-nxe-primary peer-focus:scale-110" />
-                </div>
+                <button
+                  type="button"
+                  onClick={toggleSearch}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-0 hover:scale-110 transition-all duration-400"
+                  data-testid="button-search-back-icon"
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="h-4 w-4 text-gray-400 hover:text-nxe-primary transition-all duration-400" />
+                </button>
               </form>
             </div>
           </div>
@@ -110,7 +116,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                 data-testid="button-search-toggle"
                 aria-label="Search"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
+                <Search className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
               </Button>
 
               {/* Actions (Notifications + Menu) */}
