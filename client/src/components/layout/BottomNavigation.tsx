@@ -18,6 +18,11 @@ export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
 
+  // Hide bottom navigation on upload page and its sub-routes
+  if (location.startsWith("/upload")) {
+    return null;
+  }
+
   // Query for notification badges
   const { data: unreadChats = 0 } = useQuery<number>({
     queryKey: ["/api/chats/unread"],

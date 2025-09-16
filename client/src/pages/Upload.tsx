@@ -104,9 +104,9 @@ export default function Upload() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-lg font-semibold text-white" data-testid="text-page-title">{getUploadTypeTitle()}</h1>
-            <p className="text-sm text-gray-400" data-testid="text-page-description">{getUploadTypeDescription()}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg font-semibold text-white truncate" data-testid="text-page-title">{getUploadTypeTitle()}</h1>
+            <p className="text-sm text-gray-400 truncate" data-testid="text-page-description">{getUploadTypeDescription()}</p>
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function Upload() {
                 <Label htmlFor="title" className="text-white text-sm font-medium">Judul Akun</Label>
                 <Input
                   id="title"
-                  placeholder="Misal: Akun Mobile Legends Epic - 54 Skins"
+                  placeholder="Misal: Akun ML Epic - 54 Skins"
                   className="bg-nxe-surface border-nxe-surface text-white h-12 text-base"
                   required
                   data-testid="input-title"
@@ -192,7 +192,7 @@ export default function Upload() {
                 <Label htmlFor="description" className="text-white text-sm font-medium">Deskripsi Detail</Label>
                 <Textarea
                   id="description"
-                  placeholder="Jelaskan detail akun, rank, item, dan keunggulan lainnya..."
+                  placeholder="Jelaskan detail akun, rank, item..."
                   className="bg-nxe-surface border-nxe-surface text-white min-h-[120px] text-base resize-none"
                   required
                   data-testid="textarea-description"
@@ -287,7 +287,7 @@ export default function Upload() {
                       type="button"
                       onClick={() => handleSkinToggle(skin)}
                       variant={selectedSkins.includes(skin) ? "default" : "outline"}
-                      className={`text-xs h-10 justify-start ${selectedSkins.includes(skin) ? "bg-nxe-primary" : ""}`}
+                      className={`text-xs h-10 justify-start truncate w-full min-w-0 ${selectedSkins.includes(skin) ? "bg-nxe-primary" : ""}`}
                       data-testid={`button-skin-${skin.replace(/\s+/g, '-')}`}
                     >
                       {skin}
@@ -315,7 +315,7 @@ export default function Upload() {
                   className="w-full bg-nxe-accent hover:bg-nxe-accent/80 text-white h-12 text-base font-semibold"
                   data-testid="button-submit-poster"
                 >
-                  Generate Poster - Bayar Rp 5,000 via QRIS
+                  Generate Poster - Rp 5,000
                 </Button>
               </div>
             </form>
@@ -329,7 +329,7 @@ export default function Upload() {
                 <Label htmlFor="video-title" className="text-white text-sm font-medium">Judul Video</Label>
                 <Input
                   id="video-title"
-                  placeholder="Misal: Epic Mobile Legends Gameplay"
+                  placeholder="Misal: Epic ML Gameplay"
                   className="bg-nxe-surface border-nxe-surface text-white h-12 text-base"
                   required
                   data-testid="input-video-title"
