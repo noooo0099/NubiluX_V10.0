@@ -147,12 +147,13 @@ export default function SellerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {statsLoading ? (
           [...Array(4)].map((_, i) => (
-            <Card key={i} className="bg-nxe-surface border-nxe-border">
+            <Card key={i} className="bg-nxe-surface border-nxe-border" data-testid={`stats-skeleton-${i}`}>
               <CardContent className="p-6">
-                <div className="space-y-2">
-                  <div className="h-4 bg-nxe-border rounded animate-pulse" />
-                  <div className="h-8 bg-nxe-border rounded animate-pulse" />
-                  <div className="h-3 bg-nxe-border rounded animate-pulse w-2/3" />
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-nxe-card rounded-lg animate-pulse" />
+                  <div className="flex-1">
+                    <LoadingSkeleton lines={3} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
