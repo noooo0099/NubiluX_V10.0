@@ -13,9 +13,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
 interface TopNavbarProps {
   onShowNotifications: () => void;
+}
+
+interface Notification {
+  id: number;
+  userId: number;
+  title: string;
+  message: string;
+  type: 'order' | 'message' | 'payment' | 'system';
+  isRead: boolean;
+  metadata?: {
+    productId?: number;
+    chatId?: number;
+    transactionId?: number;
+    amount?: string;
+  };
+  createdAt: string;
 }
 
 export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
@@ -24,6 +41,16 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
   const [, setLocation] = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch notifications for unread count
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['/api/notifications'],
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Calculate unread count
+  const unreadCount = (notifications as Notification[]).filter(n => !n.isRead).length;
 
   const toggleSearch = () => {
     setSearchExpanded(!searchExpanded);
@@ -132,19 +159,15 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   <div className="relative">
                     <Bell className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                     
-                    {/* Green notification indicator with new design */}
-                    <div className="absolute -bottom-1 -right-1 flex items-center justify-center">
-                      <div className="relative">
-                        {/* Pulsing green dot */}
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg" />
-                        {/* Subtle ripple effect */}
-                        <div className="absolute inset-0 w-3 h-3 bg-green-500/30 rounded-full animate-ping" />
-                        {/* Notification count */}
-                        <div className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-green-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-nxe-surface">
-                          3
+                    {/* Subtle notification indicator - only show when there are unread notifications */}
+                    {unreadCount > 0 && (
+                      <div className="absolute -top-1 -right-1">
+                        {/* Simple notification badge with subtle design */}
+                        <div className="min-w-[16px] h-[16px] bg-blue-500 text-white text-[10px] font-medium rounded-full flex items-center justify-center border border-nxe-surface">
+                          {unreadCount > 99 ? '99+' : unreadCount}
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </Button>
 
