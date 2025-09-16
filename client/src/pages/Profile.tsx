@@ -324,21 +324,21 @@ export default function Profile() {
           <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-11">
             <TabsTrigger 
               value="products" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
               data-testid="tab-products"
             >
               Products
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
               data-testid="tab-reviews"
             >
               Reviews
             </TabsTrigger>
             <TabsTrigger 
               value="activity" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm"
+              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
               data-testid="tab-activity"
             >
               Activity
@@ -447,7 +447,7 @@ export default function Profile() {
                     id="displayName"
                     name="displayName"
                     defaultValue={profile.displayName || profile.username}
-                    className="bg-nxe-surface border-nxe-surface text-white h-10 md:h-11 text-sm md:text-base"
+                    className="bg-nxe-surface border-nxe-surface text-white h-11 text-sm md:text-base"
                     data-testid="input-display-name"
                   />
                 </div>
@@ -479,7 +479,7 @@ export default function Profile() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setBannerPreview(null)}
-                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white h-7 w-7 p-0"
+                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white h-11 w-11 p-0"
                         data-testid="button-remove-banner"
                       >
                         ×
