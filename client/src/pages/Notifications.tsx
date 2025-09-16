@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loading } from "@/components/ui/loading";
 import { 
   Bell,
   ShoppingCart,
@@ -188,21 +189,8 @@ export default function Notifications() {
 
       {/* Notifications List */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i} className="bg-nxe-surface border-nxe-border">
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-nxe-border rounded animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
-                    <div className="h-3 bg-nxe-border rounded animate-pulse w-full" />
-                    <div className="h-3 bg-nxe-border rounded animate-pulse w-1/3" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex justify-center items-center min-h-64" data-testid="notifications-loading">
+          <Loading variant="gaming" />
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="text-center py-12">

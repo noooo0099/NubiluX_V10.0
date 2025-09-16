@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Loading } from "@/components/ui/loading";
 import { 
   Plus,
   Image as ImageIcon,
@@ -238,22 +239,8 @@ export default function StatusUpdates() {
       {/* Status Updates List */}
       <div className="p-4">
         {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="bg-nxe-surface border-nxe-border">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-nxe-border rounded-full animate-pulse" />
-                    <div className="space-y-2">
-                      <div className="h-4 bg-nxe-border rounded animate-pulse w-24" />
-                      <div className="h-3 bg-nxe-border rounded animate-pulse w-16" />
-                    </div>
-                  </div>
-                  <div className="h-4 bg-nxe-border rounded animate-pulse mb-2" />
-                  <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center items-center min-h-64" data-testid="status-updates-loading">
+            <Loading variant="pulse" />
           </div>
         ) : (statusUpdates as StatusUpdate[]).length === 0 ? (
           <div className="text-center py-12">

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loading } from "@/components/ui/loading";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ArrowUpRight,
@@ -288,21 +289,8 @@ export default function TransactionHistory() {
 
         <TabsContent value="all" className="mt-4">
           {loadingProducts || loadingWallet ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-nxe-border rounded animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
-                        <div className="h-3 bg-nxe-border rounded animate-pulse w-1/2" />
-                      </div>
-                      <div className="w-20 h-4 bg-nxe-border rounded animate-pulse" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex justify-center items-center min-h-64" data-testid="all-transactions-loading">
+              <Loading variant="spinner" />
             </div>
           ) : (
             <div className="space-y-4">
@@ -323,21 +311,8 @@ export default function TransactionHistory() {
 
         <TabsContent value="products" className="mt-4">
           {loadingProducts ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-nxe-border rounded animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
-                        <div className="h-3 bg-nxe-border rounded animate-pulse w-1/2" />
-                      </div>
-                      <div className="w-20 h-4 bg-nxe-border rounded animate-pulse" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex justify-center items-center min-h-64" data-testid="products-transactions-loading">
+              <Loading variant="dots" />
             </div>
           ) : (productTransactions as Transaction[]).length === 0 ? (
             <div className="text-center py-12">
@@ -370,21 +345,8 @@ export default function TransactionHistory() {
 
         <TabsContent value="wallet" className="mt-4">
           {loadingWallet ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-nxe-border rounded animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-nxe-border rounded animate-pulse w-2/3" />
-                        <div className="h-3 bg-nxe-border rounded animate-pulse w-1/2" />
-                      </div>
-                      <div className="w-20 h-4 bg-nxe-border rounded animate-pulse" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex justify-center items-center min-h-64" data-testid="wallet-transactions-loading">
+              <Loading variant="progress" />
             </div>
           ) : (walletTransactions as WalletTransaction[]).length === 0 ? (
             <div className="text-center py-12">
