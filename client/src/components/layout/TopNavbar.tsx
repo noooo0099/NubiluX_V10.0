@@ -59,21 +59,21 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
       <div className="h-14 px-4">
         {searchExpanded ? (
           /* WhatsApp-style full-width search interface */
-          <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-top-1 zoom-in-95 duration-300 ease-out">
+          <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-left-5 zoom-in-90 duration-500 ease-out">
             {/* Back button */}
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSearch}
-              className="p-2 hover:bg-transparent shrink-0 transition-all duration-200"
+              className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 hover:scale-110 animate-in slide-in-from-left-2 duration-600"
               data-testid="button-search-back"
               aria-label="Back"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-accent transition-all duration-300 hover:scale-110" />
+              <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-primary transition-all duration-300 hover:scale-125 hover:rotate-12" />
             </Button>
             
             {/* Full-width search input with icon inside */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative animate-in slide-in-from-right-5 duration-700 delay-200">
               <form onSubmit={handleSearch} className="relative">
                 <input
                   ref={searchInputRef}
@@ -81,14 +81,14 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   placeholder="Tanya AI atau Cari produk, kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="peer w-full h-10 bg-gray-700/80 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/80 focus:ring-2 focus:ring-nxe-primary/50 selection:bg-nxe-primary/30 selection:text-white transition-all duration-300"
+                  className="peer w-full h-10 bg-gray-700/90 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/20 selection:bg-nxe-primary selection:text-white transition-all duration-400 transform focus:scale-[1.02]"
                   data-testid="input-search"
                   autoComplete="off"
                   spellCheck="false"
                   aria-label="Search"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400 transition-colors duration-300 peer-focus:text-nxe-primary" />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 pointer-events-none transition-all duration-400">
+                  <Search className="h-4 w-4 text-gray-400 transition-all duration-400 peer-focus:text-nxe-primary peer-focus:scale-110" />
                 </div>
               </form>
             </div>
@@ -118,11 +118,11 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                 variant="ghost"
                 size="sm"
                 onClick={toggleSearch}
-                className="p-2 hover:bg-transparent shrink-0 transition-all duration-200 mr-1"
+                className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 mr-1 hover:scale-110 hover:rotate-12"
                 data-testid="button-search-toggle"
                 aria-label="Search"
               >
-                <Search className="h-5 w-5 text-gray-300 hover:text-white hover:scale-110 transition-all duration-200" />
+                <Search className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
               </Button>
 
               {/* Actions (Notifications + Menu) */}
