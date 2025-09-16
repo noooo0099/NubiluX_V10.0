@@ -47,7 +47,8 @@ export function useWebSocket(userId: number | null, options: UseWebSocketOptions
       }
       
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+      const host = window.location.host || 'localhost:5000'; // Fallback for development
+      const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;

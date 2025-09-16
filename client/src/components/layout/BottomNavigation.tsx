@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useScrollHide } from "@/hooks/useScrollHide";
 
 interface NavItem {
   path: string;
@@ -17,6 +18,9 @@ interface NavItem {
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
+  
+  // Use scroll detection hook for chat pages
+  const { isVisible: isScrollVisible } = useScrollHide(location);
 
   // Query for notification badges - MUST be called before any early returns
   const { data: unreadChats = 0 } = useQuery<number>({
@@ -74,7 +78,9 @@ export default function BottomNavigation() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-40 bottom-nav-safe keyboard-smooth gpu-accelerated"
+      className={`fixed bottom-0 left-0 right-0 z-40 bottom-nav-safe keyboard-smooth gpu-accelerated transition-transform duration-300 ease-in-out ${
+        isScrollVisible ? 'translate-y-0' : 'translate-y-full'
+      }`}
       role="navigation"
     >
       {/* Glassmorphism background dengan mobile optimization */}
