@@ -60,20 +60,8 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
         {searchExpanded ? (
           /* WhatsApp-style full-width search interface */
           <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-left-5 zoom-in-90 duration-500 ease-out">
-            {/* Back button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSearch}
-              className="p-2 hover:bg-transparent shrink-0 transition-all duration-300 hover:scale-110 animate-in slide-in-from-left-2 duration-600"
-              data-testid="button-search-back"
-              aria-label="Back"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-primary transition-all duration-300 hover:scale-125 hover:rotate-12" />
-            </Button>
-            
             {/* Full-width search input with icon inside */}
-            <div className="flex-1 relative animate-in slide-in-from-right-5 duration-700 delay-200">
+            <div className="flex-1 relative animate-in slide-in-from-left-3 duration-700 delay-100">
               <form onSubmit={handleSearch} className="relative">
                 <input
                   ref={searchInputRef}
@@ -122,7 +110,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                 data-testid="button-search-toggle"
                 aria-label="Search"
               >
-                <Search className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
+                <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-primary hover:scale-125 transition-all duration-300" />
               </Button>
 
               {/* Actions (Notifications + Menu) */}
