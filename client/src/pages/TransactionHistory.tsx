@@ -45,7 +45,7 @@ interface WalletTransaction {
   createdAt: string;
 }
 
-const getStatusIcon = (status: string) => {
+const getStatusIcon = (status?: string) => {
   switch (status) {
     case 'completed':
       return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -59,7 +59,7 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
     case 'completed':
       return 'bg-green-600';
@@ -73,7 +73,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getTypeIcon = (type: string) => {
+const getTypeIcon = (type?: string) => {
   switch (type) {
     case 'purchase':
       return <ShoppingCart className="h-4 w-4 text-blue-500" />;
@@ -87,6 +87,21 @@ const getTypeIcon = (type: string) => {
       return <CreditCard className="h-4 w-4 text-purple-500" />;
     default:
       return <Wallet className="h-4 w-4 text-gray-500" />;
+  }
+};
+
+const getStatusText = (status?: string) => {
+  switch (status) {
+    case 'completed':
+      return 'Selesai';
+    case 'pending':
+      return 'Menunggu';
+    case 'failed':
+      return 'Gagal';
+    case 'refunded':
+      return 'Dikembalikan';
+    default:
+      return status || 'Tidak diketahui';
   }
 };
 
@@ -138,7 +153,7 @@ export default function TransactionHistory() {
                 </h4>
                 <Badge className={`${getStatusColor(transaction.status)} text-white text-xs`}>
                   {getStatusIcon(transaction.status)}
-                  <span className="ml-1 capitalize">{transaction.status}</span>
+                  <span className="ml-1">{getStatusText(transaction.status)}</span>
                 </Badge>
               </div>
               

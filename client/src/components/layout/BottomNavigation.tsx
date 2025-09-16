@@ -130,21 +130,29 @@ export default function BottomNavigation() {
                         <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-nxe-primary rounded-full" />
                       )}
                       
-                      {/* Notification badge - styled sesuai gambar referensi */}
-                      {hasNotificationBadge && item.label === "Chat" && (
-                        <Badge 
-                          className="absolute -top-0.5 -right-0.5 h-5 w-8 p-0 flex items-center justify-center text-xs min-w-8 rounded-full bg-nxe-primary text-white border-2 border-nxe-surface shadow-md font-bold"
-                        >
-                          99+
-                        </Badge>
-                      )}
-                      {hasNotificationBadge && item.label !== "Chat" && (
-                        <Badge 
-                          variant="destructive" 
-                          className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-xs min-w-4 rounded-full bg-red-500 text-white border border-nxe-surface"
-                        >
-                          {typeof item.badge === 'number' && item.badge > 9 ? '9+' : item.badge === true ? '•' : item.badge}
-                        </Badge>
+                      {/* New notification concept - subtle green indicators */}
+                      {hasNotificationBadge && (
+                        <>
+                          {/* Green glow effect around icon when notifications are present */}
+                          <div className="absolute inset-0 rounded-full bg-green-500/20 animate-pulse" />
+                          
+                          {/* Small green notification dot - positioned at bottom-right */}
+                          <div className="absolute -bottom-1 -right-1 flex items-center justify-center">
+                            <div className="relative">
+                              {/* Pulsing green dot */}
+                              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg" />
+                              {/* Subtle ripple effect */}
+                              <div className="absolute inset-0 w-3 h-3 bg-green-500/30 rounded-full animate-ping" />
+                              
+                              {/* Show count for chat notifications */}
+                              {item.label === "Chat" && typeof item.badge === 'number' && item.badge > 0 && (
+                                <div className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-green-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-nxe-surface">
+                                  {item.badge > 9 ? '9+' : item.badge}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>

@@ -52,7 +52,7 @@ interface SalesData {
   earnings: string;
 }
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
     case 'active':
       return 'bg-green-600';
@@ -65,7 +65,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusText = (status: string) => {
+const getStatusText = (status?: string) => {
   switch (status) {
     case 'active':
       return 'Aktif';
@@ -74,7 +74,7 @@ const getStatusText = (status: string) => {
     case 'suspended':
       return 'Ditangguhkan';
     default:
-      return status;
+      return status || 'Tidak diketahui';
   }
 };
 

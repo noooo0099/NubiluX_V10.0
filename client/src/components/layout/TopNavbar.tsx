@@ -85,7 +85,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   placeholder="Tanya AI atau Cari produk, kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 bg-gray-700/90 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
+                  className="w-full h-10 bg-gray-700/90 rounded-full pl-14 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/90 focus:ring-2 focus:ring-nxe-primary focus:shadow-lg focus:shadow-nxe-primary/25 selection:bg-nxe-primary selection:text-white transition-all duration-300"
                   data-testid="input-search"
                   autoComplete="off"
                   spellCheck="false"
@@ -94,11 +94,11 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                 <button
                   type="button"
                   onClick={toggleSearch}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-0 hover:scale-110 transition-all duration-300"
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full hover:bg-gray-600/50 hover:scale-105 transition-all duration-300 min-w-[40px] min-h-[40px] flex items-center justify-center"
                   data-testid="button-search-back-icon"
                   aria-label="Back"
                 >
-                  <ArrowLeft className="h-4 w-4 text-gray-400 hover:text-nxe-primary transition-colors duration-300" />
+                  <ArrowLeft className="h-5 w-5 text-gray-400 hover:text-nxe-primary transition-colors duration-300" />
                 </button>
               </form>
             </div>
@@ -129,13 +129,23 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   className="relative p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out"
                   data-testid="button-notifications"
                 >
-                  <Bell className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs animate-pulse"
-                  >
-                    3
-                  </Badge>
+                  <div className="relative">
+                    <Bell className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
+                    
+                    {/* Green notification indicator with new design */}
+                    <div className="absolute -bottom-1 -right-1 flex items-center justify-center">
+                      <div className="relative">
+                        {/* Pulsing green dot */}
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg" />
+                        {/* Subtle ripple effect */}
+                        <div className="absolute inset-0 w-3 h-3 bg-green-500/30 rounded-full animate-ping" />
+                        {/* Notification count */}
+                        <div className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-green-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-nxe-surface">
+                          3
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </Button>
 
                 {/* 3 Dots Menu (WhatsApp Style) */}
