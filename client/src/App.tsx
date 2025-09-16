@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy, createContext, useContext } from "react";
 
 // Layout components
 import TopNavbar from "@/components/layout/TopNavbar";
@@ -39,6 +39,22 @@ import QRCodePage from "@/pages/QRCode";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAuth } from "@/components/auth/ProtectedRoute";
 
+// Theme context
+interface ThemeContextType {
+  theme: string;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+};
+
 // Theme provider
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState("dark");
@@ -56,10 +72,17 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
+  const contextValue: ThemeContextType = {
+    theme,
+    toggleTheme
+  };
+
   return (
-    <div className="min-h-screen bg-nxe-dark text-white">
-      {children}
-    </div>
+    <ThemeContext.Provider value={contextValue}>
+      <div className="min-h-screen bg-nxe-dark text-white">
+        {children}
+      </div>
+    </ThemeContext.Provider>
   );
 }
 
