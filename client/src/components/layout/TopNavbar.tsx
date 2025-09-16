@@ -59,7 +59,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
       <div className="h-14 px-4">
         {searchExpanded ? (
           /* WhatsApp-style full-width search interface */
-          <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-top-1 duration-200">
+          <div className="h-full flex items-center gap-3 animate-in fade-in-0 slide-in-from-top-1 zoom-in-95 duration-300 ease-out">
             {/* Back button */}
             <Button
               variant="ghost"
@@ -69,27 +69,27 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
               data-testid="button-search-back"
               aria-label="Back"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-white transition-all duration-200" />
+              <ArrowLeft className="h-5 w-5 text-gray-300 hover:text-nxe-accent transition-all duration-300 hover:scale-110" />
             </Button>
             
             {/* Full-width search input with icon inside */}
             <div className="flex-1 relative">
               <form onSubmit={handleSearch} className="relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Tanya AI atau Cari produk, kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 bg-gray-700/80 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/80 focus:ring-2 focus:ring-nxe-primary/30 transition-all duration-200"
+                  className="peer w-full h-10 bg-gray-700/80 rounded-full pl-12 pr-4 text-sm text-white placeholder-gray-400 border-0 focus:outline-none focus:bg-gray-600/80 focus:ring-2 focus:ring-nxe-primary/50 selection:bg-nxe-primary/30 selection:text-white transition-all duration-300"
                   data-testid="input-search"
                   autoComplete="off"
                   spellCheck="false"
                   aria-label="Search"
                 />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400 transition-colors duration-300 peer-focus:text-nxe-primary" />
+                </div>
               </form>
             </div>
           </div>
