@@ -238,9 +238,16 @@ export default function Settings() {
             
             {/* QR Code and Check Icons */}
             <div className="flex space-x-4">
-              <div className="text-nxe-primary" data-testid="icon-qr">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLocation("/qrcode");
+                }}
+                className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200"
+                data-testid="button-qr"
+              >
                 <QrCode className="h-6 w-6" />
-              </div>
+              </button>
               <div className="text-nxe-primary" data-testid="icon-check">
                 <CheckCircle className="h-6 w-6" />
               </div>
