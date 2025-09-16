@@ -20,6 +20,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { Loading, LoadingSkeleton } from "@/components/ui/loading";
 
 interface DashboardStats {
   totalProducts: number;

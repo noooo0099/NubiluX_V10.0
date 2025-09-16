@@ -12,6 +12,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loading, LoadingSkeleton } from "@/components/ui/loading";
 
 interface EscrowTransaction {
   id: number;
@@ -138,7 +139,7 @@ export default function Chat() {
   });
 
   // Fetch chat list
-  const { data: chatList = [] } = useQuery<ChatListItem[]>({
+  const { data: chatList = [], isLoading: chatListLoading } = useQuery<ChatListItem[]>({
     queryKey: ["/api/chats"],
     enabled: !chatId, // Only fetch when showing chat list
   });
@@ -150,7 +151,7 @@ export default function Chat() {
   });
 
   // Fetch messages for specific chat
-  const { data: messages = [] } = useQuery<Message[]>({
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
   });
@@ -615,7 +616,25 @@ export default function Chat() {
         </div>
 
         <div className="p-4 space-y-2">
-          {filteredChatList.length === 0 ? (
+          {chatListLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Card key={i} className="bg-nxe-surface border-nxe-surface" data-testid={`chat-skeleton-${i}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-nxe-card rounded-full animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <LoadingSkeleton className="w-full" lines={2} />
+                      </div>
+                      <div className="w-12 text-right">
+                        <div className="h-3 bg-nxe-card rounded animate-pulse w-8" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredChatList.length === 0 ? (
             <div className="text-center py-12">
               <User className="h-16 w-16 mx-auto text-gray-500 mb-4" />
               <p className="text-gray-400">
@@ -846,7 +865,11 @@ export default function Chat() {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {filteredMessages.map((message) => (
+        {messagesLoading ? (
+          <div className="flex justify-center items-center h-full" data-testid="messages-loading">
+            <Loading variant="gaming" text="Memuat pesan..." size="md" />
+          </div>
+        ) : filteredMessages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}

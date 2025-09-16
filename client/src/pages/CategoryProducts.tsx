@@ -18,6 +18,7 @@ import {
   Sword
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { Loading, LoadingSkeleton } from "@/components/ui/loading";
 
 interface Product {
   id: number;
