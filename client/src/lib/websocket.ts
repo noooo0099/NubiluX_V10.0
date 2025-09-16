@@ -36,18 +36,22 @@ export class WebSocketManager {
     this.createConnection();
   }
 
-  private createConnection() {
+  private async createConnection() {
     if (!this.userId || this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
 
-    // TODO: Implement WebSocket server on backend before enabling
-    console.log('WebSocketManager connection disabled - server not implemented yet');
-    return;
+    // Get JWT token for authentication (same as useWebSocket hook)
+    const { getAuthToken } = await import('@/lib/queryClient');
+    const token = getAuthToken();
+    if (!token) {
+      console.error('WebSocketManager: No authentication token found');
+      return;
+    }
 
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws?userId=${this.userId}`;
+      const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
       
       const ws = new WebSocket(wsUrl);
       this.ws = ws;
