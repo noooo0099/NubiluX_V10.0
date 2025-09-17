@@ -1,7 +1,10 @@
-import { Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Star, Repeat2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import type { Product } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductGridProps {
   category?: string;
@@ -9,11 +12,39 @@ interface ProductGridProps {
 
 export default function ProductGrid({ category }: ProductGridProps) {
   const [, setLocation] = useLocation();
+  const [repostingProducts, setRepostingProducts] = useState<Set<number>>(new Set());
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["/api/products", { category: category !== "all" ? category : undefined }],
   });
 
+  // Mutation for handling repost
+  const repostMutation = useMutation({
+    mutationFn: async ({ productId }: { productId: number }) => {
+      return apiRequest('/api/reposts', {
+        method: 'POST',
+        body: JSON.stringify({ productId })
+      });
+    },
+    onSuccess: (data, variables) => {
+      const action = data.isReposted ? 'direpost' : 'dibatalkan repostnya';
+      toast({
+        title: data.isReposted ? "Berhasil repost!" : "Repost dibatalkan",
+        description: `Produk telah ${action}`,
+      });
+      // Invalidate any repost-related queries
+      queryClient.invalidateQueries({ queryKey: ['/api/reposts'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Gagal repost",
+        description: "Terjadi kesalahan saat mencoba repost produk",
+        variant: "destructive",
+      });
+    }
+  });
 
   const formatPrice = (price: string) => {
     return new Intl.NumberFormat('id-ID', {
@@ -25,6 +56,14 @@ export default function ProductGrid({ category }: ProductGridProps) {
 
   const handleProductClick = (productId: number) => {
     setLocation(`/product/${productId}`);
+  };
+
+  const handleRepost = async (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation(); // Prevent navigation to product page
+    
+    if (repostMutation.isPending) return;
+    
+    repostMutation.mutate({ productId });
   };
 
   return (
@@ -58,9 +97,24 @@ export default function ProductGrid({ category }: ProductGridProps) {
                 <span className="text-nxe-accent font-bold text-sm">
                   {formatPrice(product.price)}
                 </span>
-                <div className="flex items-center space-x-1">
-                  <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                  <span className="text-xs text-gray-400">{product.rating}</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                    <span className="text-xs text-gray-400">{product.rating}</span>
+                  </div>
+                  <button
+                    onClick={(e) => handleRepost(e, product.id)}
+                    disabled={repostMutation.isPending}
+                    className={`p-1.5 rounded-full transition-colors ${
+                      repostMutation.isPending 
+                        ? 'text-gray-500 cursor-not-allowed' 
+                        : 'text-gray-400 hover:text-nxe-primary hover:bg-nxe-primary/10'
+                    }`}
+                    data-testid={`button-repost-${product.id}`}
+                    title="Repost produk ini"
+                  >
+                    <Repeat2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
             </div>

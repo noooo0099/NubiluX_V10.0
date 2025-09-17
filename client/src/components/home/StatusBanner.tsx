@@ -1,6 +1,8 @@
-import { Plus, Eye } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Plus, Eye, Repeat2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface StatusUser {
   id: number;
@@ -11,9 +13,37 @@ interface StatusUser {
 
 export default function StatusBanner() {
   const [statusModal, setStatusModal] = useState<{ isOpen: boolean; statusId?: number }>({ isOpen: false });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: statusUpdates = [] } = useQuery<StatusUser[]>({
     queryKey: ["/api/status"],
+  });
+
+  // Mutation for handling status repost
+  const repostStatusMutation = useMutation({
+    mutationFn: async ({ statusId }: { statusId: number }) => {
+      return apiRequest('/api/reposts', {
+        method: 'POST',
+        body: JSON.stringify({ statusId })
+      });
+    },
+    onSuccess: (data) => {
+      const action = data.isReposted ? 'direpost' : 'dibatalkan repostnya';
+      toast({
+        title: data.isReposted ? "Berhasil repost!" : "Repost dibatalkan",
+        description: `Status telah ${action}`,
+      });
+      // Invalidate any repost-related queries
+      queryClient.invalidateQueries({ queryKey: ['/api/reposts'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Gagal repost",
+        description: "Terjadi kesalahan saat mencoba repost status",
+        variant: "destructive",
+      });
+    }
   });
 
   // My status (always first)
@@ -50,6 +80,11 @@ export default function StatusBanner() {
 
   const closeStatusModal = () => {
     setStatusModal({ isOpen: false });
+  };
+
+  const handleStatusRepost = async (statusId: number) => {
+    if (repostStatusMutation.isPending) return;
+    repostStatusMutation.mutate({ statusId });
   };
 
   const getTimeAgo = (dateString: string) => {
@@ -172,6 +207,19 @@ export default function StatusBanner() {
                 <div className="flex items-center space-x-4">
                   <button className="text-white hover:text-nxe-primary transition-colors">
                     <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => statusModal.statusId && handleStatusRepost(statusModal.statusId)}
+                    disabled={repostStatusMutation.isPending}
+                    className={`transition-colors ${
+                      repostStatusMutation.isPending 
+                        ? 'text-gray-500 cursor-not-allowed' 
+                        : 'text-white hover:text-nxe-primary'
+                    }`}
+                    data-testid={`button-repost-status-${statusModal.statusId}`}
+                    title="Repost status ini"
+                  >
+                    <Repeat2 className="w-5 h-5" />
                   </button>
                 </div>
                 <div className="flex items-center space-x-3">
