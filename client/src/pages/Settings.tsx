@@ -121,13 +121,13 @@ export default function Settings() {
       icon: <Database className="h-6 w-6" />,
       label: "Data & Storage",
       description: "Kelola penyimpanan",
-      action: () => handleComingSoon("Data & Storage"),
+      action: () => setLocation("/settings/data-storage"),
     },
     {
       icon: <MessageCircle className="h-6 w-6" />,
       label: "Chat",
       description: "Tema, wallpaper, riwayat chat",
-      action: () => handleComingSoon("Chat"),
+      action: () => setLocation("/settings/chat"),
     },
     {
       icon: <Palette className="h-6 w-6" />,
@@ -151,13 +151,13 @@ export default function Settings() {
       icon: <CreditCard className="h-6 w-6" />,
       label: "Kelola Pembayaran",
       description: "Kelola metode pembayaran user",
-      action: () => handleComingSoon("Kelola Pembayaran"),
+      action: () => setLocation("/settings/payment-management"),
     },
     {
       icon: <Wallet className="h-6 w-6" />,
       label: "Setting Akun E-Wallet",
       description: "Pengaturan akun e-wallet",
-      action: () => handleComingSoon("Setting Akun E-Wallet"),
+      action: () => setLocation("/settings/ewallet"),
     },
     {
       icon: <HelpCircle className="h-6 w-6" />,
@@ -169,7 +169,7 @@ export default function Settings() {
       icon: <MessageSquare className="h-6 w-6" />,
       label: "Feedback",
       description: "Berikan masukan untuk aplikasi",
-      action: () => handleComingSoon("Feedback"),
+      action: () => setLocation("/settings/feedback"),
     },
     {
       icon: <LogOut className="h-6 w-6" />,

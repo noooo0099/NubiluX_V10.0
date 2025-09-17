@@ -36,6 +36,13 @@ import ViewAll from "@/pages/ViewAll";
 import QRCodePage from "@/pages/QRCode";
 import EditAccount from "@/pages/EditAccount";
 
+// Settings pages
+import DataStorage from "@/pages/settings/DataStorage";
+import ChatSettings from "@/pages/settings/ChatSettings";
+import PaymentManagement from "@/pages/settings/PaymentManagement";
+import EWalletSettings from "@/pages/settings/EWalletSettings";
+import Feedback from "@/pages/settings/Feedback";
+
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAuth } from "@/components/auth/ProtectedRoute";
@@ -285,6 +292,41 @@ function Router() {
                 </RequireAuth>
               );
             }}
+          </Route>
+          <Route path="/settings/data-storage">
+            {() => (
+              <RequireAuth>
+                <DataStorage />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/settings/chat">
+            {() => (
+              <RequireAuth>
+                <ChatSettings />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/settings/payment-management">
+            {() => (
+              <RequireAuth>
+                <PaymentManagement />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/settings/ewallet">
+            {() => (
+              <RequireAuth>
+                <EWalletSettings />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/settings/feedback">
+            {() => (
+              <RequireAuth>
+                <Feedback />
+              </RequireAuth>
+            )}
           </Route>
           <Route component={NotFound} />
         </Switch>
