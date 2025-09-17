@@ -34,7 +34,7 @@ export default function ProductGrid({ category }: ProductGridProps) {
         title: data.isReposted ? "Berhasil repost!" : "Repost dibatalkan",
         description: `Produk telah ${action}`,
       });
-      // Invalidate any repost-related queries
+      // Invalidate all repost-related queries (covers all user-specific queries too)
       queryClient.invalidateQueries({ queryKey: ['/api/reposts'] });
     },
     onError: (error) => {

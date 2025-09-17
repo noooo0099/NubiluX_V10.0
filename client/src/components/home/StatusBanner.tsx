@@ -1,6 +1,7 @@
 import { Plus, Eye, Repeat2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +14,7 @@ interface StatusUser {
 
 export default function StatusBanner() {
   const [statusModal, setStatusModal] = useState<{ isOpen: boolean; statusId?: number }>({ isOpen: false });
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -34,7 +36,7 @@ export default function StatusBanner() {
         title: data.isReposted ? "Berhasil repost!" : "Repost dibatalkan",
         description: `Status telah ${action}`,
       });
-      // Invalidate any repost-related queries
+      // Invalidate all repost-related queries (covers all user-specific queries too)
       queryClient.invalidateQueries({ queryKey: ['/api/reposts'] });
     },
     onError: (error) => {
@@ -68,14 +70,14 @@ export default function StatusBanner() {
   const handleStatusClick = (statusId: number) => {
     if (statusId === 0) {
       // Navigate to upload for adding new status
-      window.location.href = '/upload';
+      setLocation('/upload');
       return;
     }
     setStatusModal({ isOpen: true, statusId });
   };
 
   const handleAddStatus = () => {
-    window.location.href = '/upload';
+    setLocation('/upload');
   };
 
   const closeStatusModal = () => {

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useParams } from "wouter";
-import { Edit3, Settings, Star, ShoppingBag, MessageCircle, Shield, Camera, Heart, UserPlus, Sparkles } from "lucide-react";
+import { Edit3, Settings, Star, ShoppingBag, MessageCircle, Shield, Camera, Heart, UserPlus, Sparkles, Repeat2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,6 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Product } from "@shared/schema";
 
 interface UserProfile {
   id: number;
@@ -29,14 +30,21 @@ interface UserProfile {
   createdAt: string;
 }
 
-interface Product {
+interface Repost {
   id: number;
-  title: string;
-  price: string;
-  thumbnail?: string;
-  status: string;
-  rating: string;
+  userId: number;
+  productId?: number;
+  statusId?: number;
+  comment?: string;
   createdAt: string;
+  // Populated data from relations
+  product?: Product;
+  status?: {
+    id: number;
+    content: string;
+    username: string;
+    createdAt: string;
+  };
 }
 
 export default function Profile() {
@@ -63,6 +71,12 @@ export default function Profile() {
   // Fetch user's products with pagination
   const { data: products = [], isLoading: isProductsLoading } = useQuery<Product[]>({
     queryKey: [`/api/products`, { sellerId: Number(effectiveProfileId), limit: 12, offset: 0 }],
+    enabled: Boolean(effectiveProfileId),
+  });
+
+  // Fetch user's reposts
+  const { data: reposts = [], isLoading: isRepostsLoading } = useQuery<Repost[]>({
+    queryKey: ['/api/reposts/user', effectiveProfileId],
     enabled: Boolean(effectiveProfileId),
   });
 
@@ -395,6 +409,14 @@ export default function Profile() {
               <Settings className="h-3.5 w-3.5 mr-1.5" />
               Activity
             </TabsTrigger>
+            <TabsTrigger 
+              value="reposts" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nxe-primary data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-300 hover:text-white text-sm font-medium h-8 rounded-xl transition-all duration-300 data-[state=active]:scale-105"
+              data-testid="tab-reposts"
+            >
+              <Repeat2 className="h-3.5 w-3.5 mr-1.5" />
+              Reposts
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
@@ -500,6 +522,103 @@ export default function Profile() {
               <p className="text-gray-300 text-base font-medium mb-2">No recent activity</p>
               <p className="text-gray-500 text-sm">User activities will be displayed here</p>
             </div>
+          </TabsContent>
+
+          <TabsContent value="reposts" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
+            {isRepostsLoading ? (
+              // Loading skeleton for reposts
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Card key={index} className="bg-gradient-to-br from-nxe-card to-nxe-surface/50 border border-white/10 overflow-hidden">
+                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-600 to-gray-700 animate-pulse relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-pulse" style={{ animationDuration: '1.5s', animationIterationCount: 'infinite' }} />
+                    </div>
+                    <CardContent className="p-4">
+                      <div className="h-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded animate-pulse mb-3" />
+                      <div className="flex items-center justify-between">
+                        <div className="h-3 bg-gradient-to-r from-gray-600 to-gray-700 rounded animate-pulse w-20" />
+                        <div className="h-3 bg-gradient-to-r from-gray-600 to-gray-700 rounded animate-pulse w-10" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : reposts.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="relative mx-auto w-20 h-20 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-red-600/20 rounded-full animate-pulse" />
+                  <Repeat2 className="h-20 w-20 mx-auto text-orange-400/60 relative z-10" />
+                  <div className="absolute inset-0 bg-orange-400/10 rounded-full blur-xl" />
+                </div>
+                <p className="text-gray-300 text-lg font-medium mb-2">Belum ada repost</p>
+                <p className="text-gray-500 text-sm mb-6">{isOwnProfile ? 'Repost akan muncul disini ketika Anda melakukan repost' : 'Pengguna ini belum melakukan repost apapun'}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {reposts.map((repost) => (
+                  <Card
+                    key={repost.id}
+                    className="bg-gradient-to-br from-nxe-card to-nxe-surface/50 border border-white/10 cursor-pointer hover:scale-105 transition-all duration-300 active:scale-95 shadow-xl backdrop-blur-sm overflow-hidden group"
+                    onClick={() => {
+                      if (repost.productId) {
+                        setLocation(`/product/${repost.productId}`);
+                      }
+                    }}
+                    data-testid={`card-repost-${repost.id}`}
+                  >
+                    <div className="aspect-square overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      {repost.product ? (
+                        <img
+                          src={repost.product.thumbnail || `https://images.unsplash.com/photo-${1400 + repost.product.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300`}
+                          alt={repost.product.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : repost.status ? (
+                        <div className="w-full h-full bg-gradient-to-br from-nxe-primary/20 to-blue-600/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <div className="text-center p-4">
+                            <MessageCircle className="h-8 w-8 mx-auto text-white/80 mb-2" />
+                            <p className="text-white/80 text-sm font-medium truncate">{repost.status.content}</p>
+                          </div>
+                        </div>
+                      ) : null}
+                      <div className="absolute top-2 left-2 z-20">
+                        <Badge className="bg-gradient-to-r from-orange-500/90 to-red-600/90 text-white text-xs font-medium backdrop-blur-sm">
+                          <Repeat2 className="h-3 w-3 mr-1" />
+                          Repost
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="text-white font-medium text-sm mb-2 line-clamp-2 leading-tight group-hover:text-nxe-primary transition-colors">
+                        {repost.product?.title || repost.status?.content || 'Repost'}
+                      </h3>
+                      {repost.comment && (
+                        <p className="text-gray-400 text-xs mb-2 line-clamp-1 italic">"{repost.comment}"</p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        {repost.product && (
+                          <>
+                            <span className="text-nxe-accent font-bold text-sm">
+                              {formatCurrency(repost.product.price)}
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-3.5 w-3.5 text-yellow-400 fill-current" />
+                              <span className="text-xs text-gray-300">{repost.product.rating}</span>
+                            </div>
+                          </>
+                        )}
+                        {repost.status && (
+                          <span className="text-gray-400 text-xs">
+                            Status • {new Date(repost.createdAt).toLocaleDateString('id-ID')}
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
