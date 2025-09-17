@@ -93,7 +93,7 @@ function Router() {
   const [location] = useLocation();
   
   // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, search page, chat page, and edit account page
-  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/edit-account' || location === '/qrcode' || location.startsWith('/search') || location === '/chat' || location.startsWith('/chat/');
+  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location.startsWith('/settings/') || location === '/edit-account' || location === '/qrcode' || location.startsWith('/search') || location === '/chat' || location.startsWith('/chat/');
 
   return (
     <div className="min-h-screen bg-nxe-dark">
@@ -245,6 +245,42 @@ function Router() {
                 <RequireAuth>
                   <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
                     <NotificationPreferences />
+                  </Suspense>
+                </RequireAuth>
+              );
+            }}
+          </Route>
+          <Route path="/settings/privacy">
+            {() => {
+              const Privacy = lazy(() => import("./pages/settings/Privacy"));
+              return (
+                <RequireAuth>
+                  <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                    <Privacy />
+                  </Suspense>
+                </RequireAuth>
+              );
+            }}
+          </Route>
+          <Route path="/settings/theme">
+            {() => {
+              const ThemeSettings = lazy(() => import("./pages/settings/ThemeSettings"));
+              return (
+                <RequireAuth>
+                  <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                    <ThemeSettings />
+                  </Suspense>
+                </RequireAuth>
+              );
+            }}
+          </Route>
+          <Route path="/settings/language">
+            {() => {
+              const LanguageSettings = lazy(() => import("./pages/settings/LanguageSettings"));
+              return (
+                <RequireAuth>
+                  <Suspense fallback={<div className="min-h-screen bg-nxe-dark flex items-center justify-center"><div className="text-nxe-text">Loading...</div></div>}>
+                    <LanguageSettings />
                   </Suspense>
                 </RequireAuth>
               );

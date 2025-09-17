@@ -109,13 +109,13 @@ export default function Settings() {
       icon: <Shield className="h-6 w-6" />,
       label: "Privasi",
       description: "Blokir kontak, pesan sementara",
-      action: () => handleComingSoon("Privasi"),
+      action: () => setLocation("/settings/privacy"),
     },
     {
       icon: <UserPlus className="h-6 w-6" />,
       label: "User Role",
       description: "Kelola peran sebagai pembeli atau penjual",
-      action: () => handleComingSoon("User Role"),
+      action: () => setLocation("/settings/user-role"),
     },
     {
       icon: <Database className="h-6 w-6" />,
@@ -133,19 +133,19 @@ export default function Settings() {
       icon: <Palette className="h-6 w-6" />,
       label: "Theme Settings",
       description: "Kustomisasi tampilan aplikasi",
-      action: () => handleComingSoon("Theme Settings"),
+      action: () => setLocation("/settings/theme"),
     },
     {
       icon: <Bell className="h-6 w-6" />,
       label: "Notifikasi",
       description: "Pesan, grup & nada dering panggilan",
-      action: () => handleComingSoon("Notifikasi"),
+      action: () => setLocation("/settings/notifications"),
     },
     {
       icon: <Globe className="h-6 w-6" />,
       label: "Ubah Bahasa",
       description: "Ubah bahasa aplikasi",
-      action: () => handleComingSoon("Ubah Bahasa"),
+      action: () => setLocation("/settings/language"),
     },
     {
       icon: <CreditCard className="h-6 w-6" />,
@@ -163,7 +163,7 @@ export default function Settings() {
       icon: <HelpCircle className="h-6 w-6" />,
       label: "Help & Support",
       description: "Dapatkan bantuan dan hubungi support",
-      action: () => handleComingSoon("Help & Support"),
+      action: () => setLocation("/help"),
     },
     {
       icon: <MessageSquare className="h-6 w-6" />,
