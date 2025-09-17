@@ -21,8 +21,9 @@ export function log(message: string, source = "express") {
 
 export async function setupVite(app: Express, server: Server) {
   // Get the actual server address for dynamic HMR configuration
+  // Ensure we always have a valid port number, fallback to 5000 if address not available yet
   const addr = server.address();
-  const actualPort = typeof addr === 'object' && addr ? addr.port : (parseInt(process.env.PORT || '5000', 10));
+  const actualPort = typeof addr === 'object' && addr ? addr.port : 5000;
   
   // Detect if running in HTTPS environment (Replit, production, etc.)
   const isHostedHttps = process.env.REPL_SLUG || process.env.REPLIT_DEV_DOMAIN || process.env.NODE_ENV === 'production';
