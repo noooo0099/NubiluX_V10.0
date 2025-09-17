@@ -770,6 +770,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/reposts/user/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const reposts = await storage.getRepostsByUser(userId);
+      res.json(reposts);
+    } catch (error) {
+      console.error('Get user reposts error:', error);
+      res.status(500).json({ error: 'Failed to get user reposts' });
+    }
+  });
+
   app.delete('/api/reposts', requireAuth, async (req, res) => {
     try {
       const { productId, statusId } = req.query;

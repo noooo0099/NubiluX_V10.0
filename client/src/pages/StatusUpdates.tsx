@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/ui/loading";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Plus,
   Image as ImageIcon,
@@ -19,7 +20,8 @@ import {
   Share,
   Camera,
   X,
-  Search
+  Search,
+  Repeat2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -49,6 +51,9 @@ export default function StatusUpdates() {
   const [content, setContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showRepostDialog, setShowRepostDialog] = useState(false);
+  const [repostComment, setRepostComment] = useState("");
+  const [selectedStatusForRepost, setSelectedStatusForRepost] = useState<StatusUpdate | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -161,6 +166,34 @@ export default function StatusUpdates() {
     }
   });
 
+  // Create repost mutation
+  const createRepostMutation = useMutation({
+    mutationFn: async (data: { statusId: number; comment?: string }) => {
+      return apiRequest('/api/reposts', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/reposts'] });
+      setShowRepostDialog(false);
+      setRepostComment("");
+      setSelectedStatusForRepost(null);
+      toast({
+        title: "Berhasil repost!",
+        description: "Status telah ditambahkan ke profil Anda.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Gagal melakukan repost",
+        description: "Silakan coba lagi.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -211,6 +244,28 @@ export default function StatusUpdates() {
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}j`;
     return `${Math.floor(diffInHours / 24)}h`;
+  };
+
+  const handleRepost = (status: StatusUpdate) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Silakan login untuk melakukan repost.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSelectedStatusForRepost(status);
+    setShowRepostDialog(true);
+  };
+
+  const handleRepostSubmit = () => {
+    if (!selectedStatusForRepost) return;
+    
+    createRepostMutation.mutate({
+      statusId: selectedStatusForRepost.id,
+      comment: repostComment.trim() || undefined
+    });
   };
 
   return (
@@ -698,6 +753,16 @@ export default function StatusUpdates() {
                         <MessageCircle className="h-4 w-4 mr-1" />
                         <span className="text-sm">{Math.floor(Math.random() * 5)}</span>
                       </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-nxe-text hover:text-green-500"
+                        onClick={() => handleRepost(status)}
+                        data-testid={`button-repost-${status.id}`}
+                      >
+                        <Repeat2 className="h-4 w-4 mr-1" />
+                        <span className="text-sm">Repost</span>
+                      </Button>
                       <Button variant="ghost" size="sm" className="text-nxe-text hover:text-nxe-primary">
                         <Share className="h-4 w-4 mr-1" />
                         <span className="text-sm">Bagikan</span>
@@ -715,6 +780,109 @@ export default function StatusUpdates() {
           </div>
         )}
       </div>
+
+      {/* Repost Dialog */}
+      <Dialog open={showRepostDialog} onOpenChange={setShowRepostDialog}>
+        <DialogContent className="bg-nxe-surface border-nxe-border text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Repost Status</DialogTitle>
+          </DialogHeader>
+          
+          {selectedStatusForRepost && (
+            <div className="space-y-4">
+              {/* Original Status Preview */}
+              <div className="bg-nxe-card/30 rounded-lg p-3 border border-nxe-border/50">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-nxe-primary/20 flex items-center justify-center">
+                    {selectedStatusForRepost.user.profilePicture ? (
+                      <img
+                        src={selectedStatusForRepost.user.profilePicture}
+                        alt={selectedStatusForRepost.user.username}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-3 w-3 text-nxe-primary" />
+                    )}
+                  </div>
+                  <span className="text-sm font-medium">
+                    {selectedStatusForRepost.user.displayName || selectedStatusForRepost.user.username}
+                  </span>
+                  <span className="text-xs text-gray-400">@{selectedStatusForRepost.user.username}</span>
+                </div>
+                <p className="text-sm text-gray-300 mb-2">
+                  {selectedStatusForRepost.content}
+                </p>
+                {selectedStatusForRepost.media && (
+                  <div className="rounded overflow-hidden">
+                    {selectedStatusForRepost.mediaType === 'image' ? (
+                      <img
+                        src={selectedStatusForRepost.media}
+                        alt="Media"
+                        className="w-full max-h-32 object-cover"
+                      />
+                    ) : selectedStatusForRepost.mediaType === 'video' ? (
+                      <video
+                        src={selectedStatusForRepost.media}
+                        className="w-full max-h-32 object-cover"
+                        muted
+                      />
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {/* Comment Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Tambahkan komentar (opsional)
+                </label>
+                <Textarea
+                  value={repostComment}
+                  onChange={(e) => setRepostComment(e.target.value)}
+                  placeholder="Tulis komentar Anda tentang post ini..."
+                  className="bg-nxe-card border-nxe-border text-white placeholder:text-gray-400 resize-none"
+                  rows={3}
+                  maxLength={280}
+                  data-testid="textarea-repost-comment"
+                />
+                <div className="text-xs text-gray-400 text-right">
+                  {repostComment.length}/280
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowRepostDialog(false)}
+                  className="text-gray-400 hover:text-white"
+                  data-testid="button-cancel-repost"
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleRepostSubmit}
+                  disabled={createRepostMutation.isPending}
+                  className="bg-nxe-primary hover:bg-nxe-primary/80 text-white"
+                  data-testid="button-confirm-repost"
+                >
+                  {createRepostMutation.isPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Reposting...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Repeat2 className="h-4 w-4" />
+                      <span>Repost</span>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
