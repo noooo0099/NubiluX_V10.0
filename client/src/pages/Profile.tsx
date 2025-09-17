@@ -346,24 +346,24 @@ export default function Profile() {
         )}
 
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-11">
+          <TabsList className="grid w-full grid-cols-3 bg-nxe-surface h-12 sm:h-11 rounded-lg">
             <TabsTrigger 
               value="products" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
+              className="data-[state=active]:bg-nxe-primary text-xs sm:text-sm md:text-base min-h-12 sm:min-h-11 h-12 sm:h-11 flex items-center justify-center font-medium"
               data-testid="tab-products"
             >
               Products
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
+              className="data-[state=active]:bg-nxe-primary text-xs sm:text-sm md:text-base min-h-12 sm:min-h-11 h-12 sm:h-11 flex items-center justify-center font-medium"
               data-testid="tab-reviews"
             >
               Reviews
             </TabsTrigger>
             <TabsTrigger 
               value="activity" 
-              className="data-[state=active]:bg-nxe-primary text-xs md:text-sm min-h-11 h-11 flex items-center justify-center"
+              className="data-[state=active]:bg-nxe-primary text-xs sm:text-sm md:text-base min-h-12 sm:min-h-11 h-12 sm:h-11 flex items-center justify-center font-medium"
               data-testid="tab-activity"
             >
               Activity
@@ -372,14 +372,14 @@ export default function Profile() {
 
           <TabsContent value="products" className="space-y-3 md:space-y-4 mt-4 md:mt-6">
             {isProductsLoading ? (
-              // Loading skeleton
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              // Loading skeleton - Optimized for smartphone display
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <Card key={index} className="bg-nxe-card border-nxe-surface">
                     <div className="aspect-square overflow-hidden rounded-t-lg bg-gray-600 animate-pulse" />
-                    <CardContent className="p-2 md:p-3">
+                    <CardContent className="p-3 sm:p-3 md:p-4">
                       <div className="h-4 bg-gray-600 rounded animate-pulse mb-2" />
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between mt-3 sm:mt-2">
                         <div className="h-3 bg-gray-600 rounded animate-pulse w-16" />
                         <div className="h-3 bg-gray-600 rounded animate-pulse w-8" />
                       </div>
@@ -402,7 +402,7 @@ export default function Profile() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-4">
                 {products.map((product) => (
                   <Card
                     key={product.id}
@@ -417,12 +417,12 @@ export default function Profile() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <CardContent className="p-2 md:p-3">
-                      <h3 className="text-white font-medium text-xs md:text-sm mb-1 line-clamp-2 md:line-clamp-1 leading-tight">
+                    <CardContent className="p-3 sm:p-3 md:p-4">
+                      <h3 className="text-white font-medium text-xs sm:text-sm md:text-base mb-2 sm:mb-1 line-clamp-2 leading-tight">
                         {product.title}
                       </h3>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-nxe-accent font-bold text-xs md:text-sm truncate">
+                      <div className="flex items-center justify-between mt-3 sm:mt-2">
+                        <span className="text-nxe-accent font-bold text-xs sm:text-sm md:text-base truncate">
                           {formatCurrency(product.price)}
                         </span>
                         <div className="flex items-center space-x-1 flex-shrink-0">
