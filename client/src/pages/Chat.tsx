@@ -1,83 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck, Users, Megaphone, Star, Mail, Settings, UserCheck, Smartphone, Bell, Eye, Shield, Timer, Lock, UserPlus, Heart, UserMinus, Flag, MessageSquare } from "lucide-react";
+import { Send, ArrowLeft, Phone, Video, MoreVertical, Paperclip, Smile, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loading, LoadingSkeleton } from "@/components/ui/loading";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
-interface EscrowTransaction {
-  id: number;
-  buyerId: number;
-  sellerId: number;
-  productId: number;
-  amount: string;
-  status: 'pending' | 'active' | 'completed' | 'disputed' | 'cancelled';
-  aiStatus: 'processing' | 'approved' | 'flagged' | 'manual_review';
-  riskScore?: number;
-  approvedBy?: number;
-  approvedAt?: string;
-  adminNote?: string;
-  completedBy?: number;
-  completedAt?: string;
-  completionNote?: string;
-  createdAt: string;
-}
-
-interface ChatListItem {
-  id: number;
-  productId?: number;
-  buyerId: number;
-  sellerId: number;
-  status: string;
-  createdAt: string;
-  // Product info
-  productTitle?: string;
-  productThumbnail?: string;
-  productPrice?: string;
-  productCategory?: string;
-  // Other participant info
-  otherUser?: {
-    username: string;
-    displayName?: string;
-    profilePicture?: string;
-    isVerified: boolean;
-  };
-  isCurrentUserBuyer: boolean;
-  // Message info
-  lastMessage?: string;
-  lastMessageType?: string;
-  lastMessageTime?: string;
-  lastMessageSenderId?: number;
-  unreadCount: number;
-  // Escrow transaction info
-  escrowTransaction?: EscrowTransaction | null;
-}
-
-interface Message {
+interface ChatMessage {
   id: number;
   chatId: number;
   senderId: number;
   content: string;
-  messageType: 'text' | 'image' | 'file' | 'system' | 'ai_admin';
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    uploadedAt?: string;
-  };
-  // WhatsApp-style status fields
-  status: 'sent' | 'delivered' | 'read';
-  deliveredAt?: string;
-  readAt?: string;
+  messageType: 'text' | 'image' | 'system' | 'ai_admin';
+  metadata?: Record<string, any>;
+  status?: 'sent' | 'delivered' | 'read';
   createdAt: string;
 }
 
@@ -87,1120 +29,336 @@ interface ChatDetails {
   buyerId: number;
   sellerId: number;
   status: string;
-  createdAt: string;
-  // Product info
   productTitle?: string;
   productThumbnail?: string;
   productPrice?: string;
   productCategory?: string;
-  // Buyer info
-  buyerUsername?: string;
-  buyerDisplayName?: string;
-  buyerProfilePicture?: string;
-  buyerIsVerified?: boolean;
-  // Seller info
-  sellerUsername?: string;
-  sellerDisplayName?: string;
-  sellerProfilePicture?: string;
-  sellerIsVerified?: boolean;
-  // Message info
-  lastMessage?: string;
-  lastMessageType?: string;
-  lastMessageTime?: string;
-  lastMessageSenderId?: number;
-  unreadCount: number;
-  // Escrow transaction info
-  escrowTransaction?: EscrowTransaction | null;
+  otherUser?: {
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+    isVerified: boolean;
+  };
+  isCurrentUserBuyer: boolean;
+  escrowTransaction?: any;
 }
 
 export default function Chat() {
   const { id: chatId } = useParams();
   const [, setLocation] = useLocation();
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [chatSettings, setChatSettings] = useState({
-    notifications: true,
-    mediaVisibility: true,
-    encryption: true,
-    temporaryMessages: false,
-    chatLock: false,
-    isFavorite: false,
-    isBlocked: false
-  });
-  const { user } = useAuth();
-  const currentUserId = user?.id || null; // Get user ID from auth context
+  const [message, setMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // WebSocket connection
-  const { isConnected, sendMessage: sendWsMessage } = useWebSocket(currentUserId, {
-    onMessage: (message) => {
-      if (message.type === 'new_message') {
-        // Invalidate messages query to refetch
+  // WebSocket connection for real-time messaging
+  const { isConnected, sendMessage: sendWSMessage } = useWebSocket(user?.id || null, {
+    onMessage: (wsMessage) => {
+      if (wsMessage.type === 'new_message' && wsMessage.message?.chatId === parseInt(chatId || '0')) {
+        // Invalidate messages query to fetch new message
         queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-        // Also invalidate chat list to update last message and ordering
-        queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-        // Invalidate chat details to update last message info
-        queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
       }
     }
   });
 
-  // Fetch chat list
-  const { data: chatList = [], isLoading: chatListLoading } = useQuery<ChatListItem[]>({
-    queryKey: ["/api/chats"],
-    enabled: !chatId, // Only fetch when showing chat list
-  });
-
-  // Fetch detailed chat info for header
-  const { data: chatDetails } = useQuery<ChatDetails>({
+  // Fetch chat details
+  const { data: chatDetails, isLoading: chatLoading } = useQuery<ChatDetails>({
     queryKey: [`/api/chats/${chatId}`],
     enabled: !!chatId,
   });
 
-  // Fetch messages for specific chat
-  const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
+  // Fetch messages
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<ChatMessage[]>({
     queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
+    refetchInterval: 5000, // Refresh every 5 seconds as fallback
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
-      if (!chatId) throw new Error("No chat selected");
+    mutationFn: async ({ content, messageType = 'text' }: { content: string; messageType?: string }) => {
+      return apiRequest(`/api/chats/${chatId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ content, messageType })
+      });
+    },
+    onSuccess: (newMessage) => {
+      // Optimistically update the messages list
+      queryClient.setQueryData([`/api/chats/${chatId}/messages`], (old: ChatMessage[] = []) => [
+        ...old,
+        newMessage
+      ]);
       
       // Send via WebSocket for real-time delivery
-      const sent = sendWsMessage({
-        type: 'chat_message',
-        chatId: parseInt(chatId),
-        senderId: currentUserId,
-        content
-      });
-
-      if (!sent) {
-        // Fallback to HTTP if WebSocket fails
-        return apiRequest(`/api/chats/${chatId}/messages`, { 
-          method: 'POST', 
-          body: JSON.stringify({ content }) 
+      if (isConnected && chatDetails) {
+        sendWSMessage({
+          type: 'chat_message',
+          chatId: parseInt(chatId || '0'),
+          senderId: user?.id || 0,
+          content: newMessage.content
         });
       }
-    },
-    onSuccess: () => {
-      setNewMessage("");
-      // Messages will be updated via WebSocket, but invalidate as backup
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      // Also invalidate chat list to update last message and ordering
-      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      // Invalidate chat details to update last message info
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
-    }
-  });
-
-  // Complete transaction mutation
-  const completeTransactionMutation = useMutation({
-    mutationFn: async (completionNote?: string) => {
-      if (!chatId) throw new Error("No chat selected");
-      return apiRequest(`/api/chats/${chatId}/actions/complete`, {
-        method: 'POST',
-        body: JSON.stringify({ completionNote })
-      });
-    },
-    onSuccess: () => {
-      // Invalidate all related queries
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
-    }
-  });
-
-  // Dispute transaction mutation
-  const disputeTransactionMutation = useMutation({
-    mutationFn: async (disputeReason: string) => {
-      if (!chatId) throw new Error("No chat selected");
-      return apiRequest(`/api/chats/${chatId}/actions/dispute`, {
-        method: 'POST',
-        body: JSON.stringify({ disputeReason })
-      });
-    },
-    onSuccess: () => {
-      // Invalidate all related queries
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
-    }
-  });
-
-  // Message status update mutations
-  const markAsDeliveredMutation = useMutation({
-    mutationFn: async (messageId: number) => {
-      return apiRequest(`/api/messages/${messageId}/delivered`, {
-        method: 'POST'
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-    }
-  });
-
-  const markAsReadMutation = useMutation({
-    mutationFn: async (messageId: number) => {
-      return apiRequest(`/api/messages/${messageId}/read`, {
-        method: 'POST'
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-    }
-  });
-
-  // File upload mutation
-  const fileUploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
       
-      // Get token for authentication
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-      
-      const response = await fetch(`/api/chats/${chatId}/upload`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      // Invalidate chat list to update last message
       queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}`] });
     },
     onError: (error: any) => {
-      alert(error.message || 'Failed to upload file');
+      toast({
+        title: "Failed to send message",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   });
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() && !sendMessageMutation.isPending) {
-      sendMessageMutation.mutate(newMessage.trim());
-    }
+    if (!message.trim() || sendMessageMutation.isPending) return;
+
+    const messageContent = message.trim();
+    setMessage("");
+    sendMessageMutation.mutate({ content: messageContent });
   };
 
-  // Handle file selection and upload
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Reset input
-    e.target.value = '';
-    
-    try {
-      await fileUploadMutation.mutateAsync(file);
-    } catch (error) {
-      console.error('Failed to upload file:', error);
-    }
-  };
-
-  const handleAttachmentClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleChatClick = (chatId: number) => {
-    setLocation(`/chat/${chatId}`);
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const formatMessageTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffTime = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    // WhatsApp-style time formatting
-    if (diffDays === 0) {
-      // Today: show time only
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-      });
-    } else if (diffDays === 1) {
-      // Yesterday
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      // This week: show day name
-      return date.toLocaleDateString('en-US', { weekday: 'long' });
-    } else {
-      // Older: show date
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
+  // Handle typing indicator
+  useEffect(() => {
+    if (message.trim() && !isTyping) {
+      setIsTyping(true);
+      // Send typing indicator via WebSocket
+      if (isConnected && chatDetails) {
+        sendWSMessage({
+          type: 'user_typing',
+          chatId: parseInt(chatId || '0'),
+          userId: user?.id || 0
+        });
+      }
+    } else if (!message.trim() && isTyping) {
+      setIsTyping(false);
     }
+  }, [message, isTyping, isConnected, chatDetails, sendWSMessage, user?.id, chatId]);
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
   };
 
-  // WhatsApp-style status indicator component
-  const MessageStatusIndicator = ({ message }: { message: Message }) => {
-    if (message.senderId !== currentUserId) return null; // Only show for sent messages
-    if (message.messageType === 'system' || message.messageType === 'ai_admin') return null;
+  const formatCurrency = (amount: string) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(parseInt(amount));
+  };
 
-    const getStatusIcon = () => {
-      switch (message.status) {
-        case 'sent':
-          return <Check className="h-3 w-3 text-gray-400" />;
-        case 'delivered':
-          return <CheckCheck className="h-3 w-3 text-gray-400" />;
-        case 'read':
-          return <CheckCheck className="h-3 w-3 text-blue-400" />;
-        default:
-          return <Check className="h-3 w-3 text-gray-400" />;
-      }
-    };
-
+  if (chatLoading || !chatDetails) {
     return (
-      <span className="inline-flex items-center ml-1" data-testid={`status-${message.status}-${message.id}`}>
-        {getStatusIcon()}
-      </span>
-    );
-  };
-
-  const getMessageStyle = (senderId: number, messageType: string) => {
-    if (messageType === 'ai_admin') {
-      return "bg-yellow-600/20 border border-yellow-600/30 text-yellow-100";
-    }
-    if (messageType === 'system') {
-      return "bg-gray-600/20 border border-gray-600/30 text-gray-300";
-    }
-    if (senderId === currentUserId) {
-      return "bg-nxe-primary text-white ml-auto";
-    }
-    return "bg-nxe-surface text-white";
-  };
-
-  // Filter chat list based on search
-  const filteredChatList = chatList.filter(chat => 
-    searchQuery === "" || 
-    chat.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.productTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.otherUser?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.otherUser?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    `Chat #${chat.id}`.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Filter messages when in a specific chat conversation
-  const filteredMessages = messages.filter(message => 
-    !searchQuery.trim() || 
-    message.content?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Helper functions with null-safety
-  const formatTimeAgo = (timestamp?: string | null) => {
-    if (!timestamp) return '';
-    try {
-      const now = new Date();
-      const messageTime = new Date(timestamp);
-      
-      // Check if the date is valid
-      if (isNaN(messageTime.getTime())) {
-        return '';
-      }
-      
-      const diffInHours = Math.floor((now.getTime() - messageTime.getTime()) / (1000 * 60 * 60));
-      
-      if (diffInHours < 1) {
-        const diffInMinutes = Math.floor((now.getTime() - messageTime.getTime()) / (1000 * 60));
-        return diffInMinutes < 1 ? 'Sekarang' : `${diffInMinutes}m`;
-      } else if (diffInHours < 24) {
-        return `${diffInHours}h`;
-      } else if (diffInHours < 48) {
-        return 'Kemarin';
-      } else {
-        return messageTime.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
-      }
-    } catch (error) {
-      console.error('Error formatting time:', error);
-      return '';
-    }
-  };
-
-  const getDisplayName = (chat: ChatListItem) => {
-    if (chat.otherUser?.displayName) {
-      return chat.otherUser.displayName;
-    }
-    if (chat.otherUser?.username) {
-      return chat.otherUser.username;
-    }
-    return `User ${chat.isCurrentUserBuyer ? chat.sellerId : chat.buyerId}`;
-  };
-
-  const getProfilePicture = (chat: ChatListItem) => {
-    if (chat.otherUser?.profilePicture) {
-      return chat.otherUser.profilePicture;
-    }
-    return `https://images.unsplash.com/photo-${1500 + chat.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`;
-  };
-
-  const getAvatarFallback = (chat: ChatListItem) => {
-    const name = getDisplayName(chat);
-    return name ? name[0]?.toUpperCase() || 'U' : 'U';
-  };
-
-  // Escrow transaction helper functions
-  const getEscrowStatusLabel = (status?: string) => {
-    switch (status) {
-      case 'pending': return 'Menunggu';
-      case 'active': return 'Aktif';
-      case 'completed': return 'Selesai';
-      case 'disputed': return 'Sengketa';
-      case 'cancelled': return 'Dibatalkan';
-      default: return 'Tidak ada transaksi';
-    }
-  };
-
-  const getEscrowStatusColor = (status?: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-500';
-      case 'active': return 'bg-green-500';
-      case 'completed': return 'bg-blue-500';
-      case 'disputed': return 'bg-red-500';
-      case 'cancelled': return 'bg-gray-500';
-      default: return 'bg-gray-400';
-    }
-  };
-
-  const canCompleteTransaction = (escrow?: EscrowTransaction | null) => {
-    // Only buyers can complete transactions for security
-    return escrow && escrow.status === 'active' && chatDetails && chatDetails.buyerId === currentUserId;
-  };
-
-  const canDisputeTransaction = (escrow?: EscrowTransaction | null) => {
-    return escrow && (escrow.status === 'pending' || escrow.status === 'active');
-  };
-
-  const handleCompleteTransaction = async () => {
-    if (!chatDetails?.escrowTransaction) return;
-    
-    // Confirm with user before completing
-    const confirmed = confirm('Apakah Anda yakin ingin menyelesaikan transaksi ini? Dana akan dirilis ke penjual.');
-    if (!confirmed) return;
-    
-    try {
-      await completeTransactionMutation.mutateAsync(undefined);
-    } catch (error) {
-      console.error('Error completing transaction:', error);
-      alert('Gagal menyelesaikan transaksi. Silakan coba lagi.');
-    }
-  };
-
-  const handleDisputeTransaction = async () => {
-    if (!chatDetails?.escrowTransaction) return;
-    const reason = prompt('Alasan sengketa (maksimal 1000 karakter):');
-    if (!reason || reason.trim().length === 0) return;
-    if (reason.length > 1000) {
-      alert('Alasan terlalu panjang. Maksimal 1000 karakter.');
-      return;
-    }
-    
-    try {
-      await disputeTransactionMutation.mutateAsync(reason.trim());
-    } catch (error) {
-      console.error('Error disputing transaction:', error);
-      alert('Gagal melaporkan sengketa. Silakan coba lagi.');
-    }
-  };
-
-  // Chat List View
-  if (!chatId) {
-    return (
-      <div className="min-h-screen bg-nxe-dark">
-        {/* WhatsApp-style Header */}
-        <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-lg font-bold text-white">NubiluXchange</h1>
-              <div className="flex items-center space-x-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out" 
-                  data-testid="button-camera"
-                  onClick={() => {
-                    // Trigger camera functionality (placeholder for now)
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                      navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(stream => {
-                          // Camera access granted - you can implement camera UI here
-                          console.log('Camera access granted');
-                          // Stop the stream for now (just testing access)
-                          stream.getTracks().forEach(track => track.stop());
-                        })
-                        .catch(err => {
-                          console.error('Camera access denied:', err);
-                          alert('Akses kamera ditolak. Pastikan Anda memberikan izin kamera.');
-                        });
-                    } else {
-                      alert('Kamera tidak tersedia di perangkat ini.');
-                    }
-                  }}
-                >
-                  <Camera className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
-                </Button>
-                
-                {/* WhatsApp-style Dropdown Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="p-2 hover:bg-transparent hover:scale-105 shrink-0 transition-all duration-200 ease-in-out" 
-                      data-testid="button-menu"
-                    >
-                      <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Grup baru</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Komunitas baru</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Siaran baru</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-600" />
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Perangkat tertaut</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Berbintang</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Baca semua</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-600" />
-                    <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Pengaturan</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-700 transition-colors duration-150">
-                      <span className="text-white">Ganti akun</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-            
-            {/* WhatsApp-style Search Bar - Gray themed for dark mode */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Tanya AI atau Cari..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-700/80 border-0 rounded-full text-white placeholder-gray-400 focus:bg-gray-600 focus:ring-2 focus:ring-nxe-primary/50 transition-all duration-200"
-                data-testid="input-search-chats"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 space-y-2">
-          {chatListLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Card key={i} className="bg-nxe-surface border-nxe-surface" data-testid={`chat-skeleton-${i}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-nxe-card rounded-full">
-                        <Loading variant="pulse" className="w-full h-full rounded-full" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <LoadingSkeleton className="w-full" lines={2} />
-                      </div>
-                      <div className="w-12 text-right">
-                        <LoadingSkeleton lines={1} className="w-8" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredChatList.length === 0 ? (
-            <div className="text-center py-12">
-              <User className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">
-                {searchQuery ? "No conversations found" : "No conversations yet"}
-              </p>
-              <p className="text-gray-500 text-sm mt-2">
-                {searchQuery ? "Try a different search term" : "Start buying or selling to begin chatting"}
-              </p>
-            </div>
-          ) : (
-            filteredChatList.map((chat) => (
-              <Card
-                key={chat.id}
-                className="bg-nxe-card border-nxe-surface cursor-pointer hover:bg-nxe-surface transition-colors"
-                onClick={() => handleChatClick(chat.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={getProfilePicture(chat)} />
-                        <AvatarFallback>{getAvatarFallback(chat)}</AvatarFallback>
-                      </Avatar>
-                      {chat.otherUser?.isVerified && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <p className="text-white font-medium">{getDisplayName(chat)}</p>
-                          {chat.otherUser?.isVerified && (
-                            <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-xs text-gray-400">
-                          {chat.lastMessageTime ? formatTimeAgo(chat.lastMessageTime) : formatTimeAgo(chat.createdAt)}
-                        </span>
-                      </div>
-                      
-                      {/* Product info */}
-                      {chat.productTitle && (
-                        <div className="flex items-center space-x-2 mt-1">
-                          {chat.productThumbnail && (
-                            <img 
-                              src={chat.productThumbnail} 
-                              alt={chat.productTitle}
-                              className="w-4 h-4 rounded object-cover"
-                            />
-                          )}
-                          <p className="text-xs text-blue-400 truncate">
-                            {chat.productTitle} {chat.productPrice && `- Rp ${parseFloat(chat.productPrice).toLocaleString('id-ID')}`}
-                          </p>
-                        </div>
-                      )}
-                      
-                      <p className="text-gray-400 text-sm truncate mt-1">
-                        {chat.lastMessage || "Mulai percakapan Anda"}
-                      </p>
-                      
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center space-x-2">
-                          <Badge 
-                            variant={chat.status === 'active' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {chat.status === 'active' ? 'Aktif' : chat.status === 'completed' ? 'Selesai' : 'Sengketa'}
-                          </Badge>
-                          
-                          {/* Escrow Status Indicator */}
-                          {chat.escrowTransaction && (
-                            <div className="flex items-center space-x-1">
-                              <div className={`w-2 h-2 rounded-full ${getEscrowStatusColor(chat.escrowTransaction.status)}`}></div>
-                              <Badge variant="outline" className="text-xs">
-                                {getEscrowStatusLabel(chat.escrowTransaction.status)}
-                              </Badge>
-                            </div>
-                          )}
-                          
-                          {chat.productCategory && (
-                            <Badge variant="outline" className="text-xs">
-                              {chat.productCategory}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {chat.unreadCount !== undefined && chat.unreadCount > 0 && (
-                          <Badge variant="destructive" className="text-xs min-w-[20px] h-5 rounded-full flex items-center justify-center">
-                            {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+      <div className="min-h-screen bg-nxe-dark flex items-center justify-center">
+        <div className="text-white">Loading chat...</div>
       </div>
     );
   }
 
-  // Chat Detail View
   return (
     <div className="min-h-screen bg-nxe-dark flex flex-col">
       {/* Chat Header */}
-      <div className="sticky top-0 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
+      <div className="sticky top-0 z-50 bg-nxe-surface border-b border-nxe-border">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setLocation("/chat")}
-              className="p-1"
+              className="p-2 text-white hover:bg-nxe-card"
               data-testid="button-back"
             >
-              <ArrowLeft className="h-5 w-5 text-white" />
+              <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            {/* Clickable User Profile Area */}
-            <div 
-              className="relative cursor-pointer hover:bg-gray-700/30 rounded-lg p-1 transition-colors"
-              onClick={() => {
-                const otherUserId = chatDetails ? 
-                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerId : chatDetails.buyerId) : 
-                  null;
-                if (otherUserId) {
-                  setLocation(`/profile/${otherUserId}`);
-                }
-              }}
-              data-testid="user-profile-clickable"
-            >
+            <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
-                <AvatarImage src={chatDetails ? 
-                  (currentUserId === chatDetails.buyerId ? 
-                    (chatDetails.sellerProfilePicture || `https://images.unsplash.com/photo-${1600 + chatDetails.sellerId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`) :
-                    (chatDetails.buyerProfilePicture || `https://images.unsplash.com/photo-${1600 + chatDetails.buyerId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`)
-                  ) : `https://images.unsplash.com/photo-${1600 + parseInt(chatId)}?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100`
-                } />
+                <AvatarImage 
+                  src={chatDetails.otherUser?.profilePicture || `https://images.unsplash.com/photo-${1500 + (chatDetails.otherUser?.username?.length || 0)}?w=40&h=40&fit=crop&crop=face`}
+                  alt={chatDetails.otherUser?.username}
+                />
                 <AvatarFallback>
-                  {chatDetails ? 
-                    (currentUserId === chatDetails.buyerId ? 
-                      (chatDetails.sellerDisplayName?.[0] || chatDetails.sellerUsername?.[0] || 'S') :
-                      (chatDetails.buyerDisplayName?.[0] || chatDetails.buyerUsername?.[0] || 'B')
-                    ).toUpperCase() : 'U'
-                  }
+                  {chatDetails.otherUser?.username?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
-              {chatDetails && (
-                (currentUserId === chatDetails.buyerId ? chatDetails.sellerIsVerified : chatDetails.buyerIsVerified) && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                )
-              )}
-            </div>
-            
-            <div 
-              className="flex-1 min-w-0 cursor-pointer hover:bg-gray-700/30 rounded-lg p-1 transition-colors"
-              onClick={() => {
-                const otherUserId = chatDetails ? 
-                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerId : chatDetails.buyerId) : 
-                  null;
-                if (otherUserId) {
-                  setLocation(`/profile/${otherUserId}`);
-                }
-              }}
-              data-testid="user-info-clickable"
-            >
-              <div className="flex items-center space-x-2">
-                <p className="text-white font-medium truncate">
-                  {chatDetails ? 
-                    (currentUserId === chatDetails.buyerId ? 
-                      (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'Penjual') :
-                      (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'Pembeli')
-                    ) : `Chat #${chatId}`
-                  }
-                </p>
-                {chatDetails && (
-                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerIsVerified : chatDetails.buyerIsVerified) && (
-                    <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                    </div>
-                  )
-                )}
+              
+              <div>
+                <h2 className="text-white font-medium text-sm">
+                  {chatDetails.otherUser?.displayName || chatDetails.otherUser?.username || 'User'}
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-400">
+                    {isConnected ? 'Online' : 'Offline'}
+                  </span>
+                  {chatDetails.otherUser?.isVerified && (
+                    <Badge className="bg-blue-600 text-white text-xs px-1 py-0">✓</Badge>
+                  )}
+                </div>
               </div>
-              
-              {/* Product info in header */}
-              {chatDetails?.productTitle && (
-                <p className="text-xs text-blue-400 truncate">
-                  {chatDetails.productTitle}
-                  {chatDetails.productPrice && ` - Rp ${parseFloat(chatDetails.productPrice).toLocaleString('id-ID')}`}
-                </p>
-              )}
-              
-              <p className="text-xs text-gray-400">
-                {isConnected ? "Online" : "Menghubungkan..."} • {chatDetails?.status === 'active' ? 'Aktif' : chatDetails?.status === 'completed' ? 'Selesai' : chatDetails?.status || 'Loading...'}
-              </p>
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
-            {/* Escrow Action Buttons */}
-            {chatDetails?.escrowTransaction && (
-              <>
-                {canCompleteTransaction(chatDetails.escrowTransaction) && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="p-2 text-green-400 hover:text-green-300" 
-                    onClick={handleCompleteTransaction}
-                    disabled={completeTransactionMutation.isPending}
-                    data-testid="button-complete-transaction"
-                  >
-                    ✓
-                  </Button>
-                )}
-                {canDisputeTransaction(chatDetails.escrowTransaction) && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="p-2 text-red-400 hover:text-red-300" 
-                    onClick={handleDisputeTransaction}
-                    disabled={disputeTransactionMutation.isPending}
-                    data-testid="button-dispute-transaction"
-                  >
-                    ⚠️
-                  </Button>
-                )}
-              </>
-            )}
-            
-            <Button variant="ghost" size="sm" className="p-2" data-testid="button-voice-call">
-              <Phone className="h-4 w-4 text-gray-400" />
+            <Button variant="ghost" size="sm" className="p-2 text-white hover:bg-nxe-card">
+              <Phone className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="sm" className="p-2" data-testid="button-video-call">
-              <Video className="h-4 w-4 text-gray-400" />
+            <Button variant="ghost" size="sm" className="p-2 text-white hover:bg-nxe-card">
+              <Video className="h-5 w-5" />
             </Button>
-            
-            {/* WhatsApp-style Chat Options Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2" data-testid="button-chat-options">
-                  <MoreVertical className="h-4 w-4 text-gray-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
-                {/* Primary Actions */}
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-send-message"
-                >
-                  <MessageSquare className="h-4 w-4 text-gray-300" />
-                  <span className="text-white">Kirim pesan</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-voice-call"
-                >
-                  <Phone className="h-4 w-4 text-gray-300" />
-                  <span className="text-white">Panggilan</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-video-call"
-                >
-                  <Video className="h-4 w-4 text-gray-300" />
-                  <span className="text-white">Video</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator className="bg-gray-600" />
-                
-                {/* Chat Settings */}
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between px-4 py-3"
-                  onClick={() => setChatSettings(prev => ({ ...prev, notifications: !prev.notifications }))}
-                  data-testid="menu-notifications"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Bell className="h-4 w-4 text-gray-300" />
-                    <span className="text-white">Notifikasi</span>
-                  </div>
-                  <div className={`w-4 h-4 rounded ${chatSettings.notifications ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-media-visibility"
-                >
-                  <Eye className="h-4 w-4 text-gray-300" />
-                  <div>
-                    <div className="text-white">Visibilitas media</div>
-                    <div className="text-xs text-gray-400">Media bisa dilihat</div>
-                  </div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-encryption"
-                >
-                  <Shield className="h-4 w-4 text-gray-300" />
-                  <div>
-                    <div className="text-white">Enkripsi</div>
-                    <div className="text-xs text-gray-400">Pesan dan panggilan terenkripsi secara end-to-end. Ketuk untuk memverifikasi.</div>
-                  </div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  onClick={() => setChatSettings(prev => ({ ...prev, temporaryMessages: !prev.temporaryMessages }))}
-                  data-testid="menu-temporary-messages"
-                >
-                  <Timer className="h-4 w-4 text-gray-300" />
-                  <div>
-                    <div className="text-white">Pesan sementara</div>
-                    <div className="text-xs text-gray-400">{chatSettings.temporaryMessages ? 'Aktif' : 'Mati'}</div>
-                  </div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between px-4 py-3"
-                  onClick={() => setChatSettings(prev => ({ ...prev, chatLock: !prev.chatLock }))}
-                  data-testid="menu-chat-lock"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Lock className="h-4 w-4 text-gray-300" />
-                    <div>
-                      <div className="text-white">Kunci chat</div>
-                      <div className="text-xs text-gray-400">Kunci dan sembunyikan chat ini di perangkat ini.</div>
-                    </div>
-                  </div>
-                  <div className={`w-8 h-4 rounded-full ${chatSettings.chatLock ? 'bg-green-500' : 'bg-gray-500'} relative transition-colors`}>
-                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform duration-200 ${chatSettings.chatLock ? 'translate-x-4' : 'translate-x-0.5'}`}></div>
-                  </div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-privacy"
-                >
-                  <Shield className="h-4 w-4 text-gray-300" />
-                  <div>
-                    <div className="text-white">Privasi chat tingkat lanjut</div>
-                    <div className="text-xs text-gray-400">Mati</div>
-                  </div>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator className="bg-gray-600" />
-                
-                {/* Group & Social Actions */}
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-create-group"
-                >
-                  <Users className="h-4 w-4 text-green-400" />
-                  <span className="text-white">
-                    Buat grup dengan {chatDetails ? 
-                      (currentUserId === chatDetails.buyerId ? 
-                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
-                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
-                      ) : 'pengguna ini'
-                    }
-                  </span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  onClick={() => setChatSettings(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
-                  data-testid="menu-add-favorite"
-                >
-                  <Heart className={`h-4 w-4 ${chatSettings.isFavorite ? 'text-red-400 fill-current' : 'text-gray-300'}`} />
-                  <span className="text-white">
-                    {chatSettings.isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-                  </span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-add-contact"
-                >
-                  <UserPlus className="h-4 w-4 text-gray-300" />
-                  <span className="text-white">Tambah ke daftar</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator className="bg-gray-600" />
-                
-                {/* Warning Actions */}
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  onClick={() => setChatSettings(prev => ({ ...prev, isBlocked: !prev.isBlocked }))}
-                  data-testid="menu-block-user"
-                >
-                  <UserMinus className="h-4 w-4 text-red-400" />
-                  <span className="text-red-400">
-                    {chatSettings.isBlocked ? 'Buka blokir' : 'Blokir'} {chatDetails ? 
-                      (currentUserId === chatDetails.buyerId ? 
-                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
-                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
-                      ) : 'pengguna ini'
-                    }
-                  </span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
-                  data-testid="menu-report-user"
-                >
-                  <Flag className="h-4 w-4 text-red-400" />
-                  <span className="text-red-400">
-                    Laporkan {chatDetails ? 
-                      (currentUserId === chatDetails.buyerId ? 
-                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
-                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
-                      ) : 'pengguna ini'
-                    }
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="ghost" size="sm" className="p-2 text-white hover:bg-nxe-card">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
           </div>
         </div>
+
+        {/* Product Info Banner */}
+        {chatDetails.productTitle && (
+          <div className="px-4 py-2 bg-nxe-card border-t border-nxe-border">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={chatDetails.productThumbnail || '/api/placeholder/60/60'}
+                alt={chatDetails.productTitle}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-medium text-sm truncate">
+                  {chatDetails.productTitle}
+                </h3>
+                <p className="text-nxe-primary font-bold text-sm">
+                  {chatDetails.productPrice ? formatCurrency(chatDetails.productPrice) : 'Price not set'}
+                </p>
+              </div>
+              <Button
+                onClick={() => setLocation(`/product/${chatDetails.productId}`)}
+                variant="outline"
+                size="sm"
+                className="border-nxe-primary text-nxe-primary hover:bg-nxe-primary hover:text-white"
+              >
+                View
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messagesLoading ? (
-          <div className="flex justify-center items-center h-full" data-testid="messages-loading">
-            <Loading variant="gaming" text="Memuat pesan..." size="md" />
+          <div className="flex justify-center items-center h-32">
+            <div className="text-gray-400">Loading messages...</div>
           </div>
-        ) : filteredMessages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${getMessageStyle(message.senderId, message.messageType)}`}>
-              {message.messageType === 'ai_admin' && (
-                <div className="flex items-center space-x-1 mb-1">
-                  <Badge variant="outline" className="text-xs border-yellow-600/50">
-                    AI Admin
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Render different message types */}
-              {message.messageType === 'image' ? (
-                <div className="space-y-2">
-                  <img 
-                    src={message.content} 
-                    alt="Shared image" 
-                    className="max-w-full h-auto rounded-lg cursor-pointer"
-                    onClick={() => window.open(message.content, '_blank')}
-                    data-testid={`image-message-${message.id}`}
-                  />
-                  {message.metadata?.fileName && (
-                    <p className="text-xs opacity-70">{message.metadata.fileName}</p>
+        ) : messages.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400 mb-2">No messages yet</div>
+            <div className="text-sm text-gray-500">Start the conversation!</div>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isOwnMessage = msg.senderId === user?.id;
+            const isAIAdmin = msg.messageType === 'ai_admin';
+            
+            return (
+              <div
+                key={msg.id}
+                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} ${isAIAdmin ? 'justify-center' : ''}`}
+              >
+                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                  isAIAdmin 
+                    ? 'bg-yellow-600/20 border border-yellow-600/30 text-yellow-100'
+                    : isOwnMessage 
+                    ? 'bg-nxe-primary text-white' 
+                    : 'bg-nxe-card text-white'
+                }`}>
+                  {isAIAdmin && (
+                    <div className="text-xs text-yellow-300 mb-1 font-medium">🤖 AI Admin</div>
                   )}
-                </div>
-              ) : message.messageType === 'file' ? (
-                <div className="flex items-center space-x-3 p-3 bg-white/10 rounded-lg">
-                  <FileText className="h-8 w-8 text-blue-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {message.metadata?.fileName || 'File'}
-                    </p>
-                    {message.metadata?.fileSize && (
-                      <p className="text-xs opacity-70">
-                        {(message.metadata.fileSize / 1024).toFixed(1)} KB
-                      </p>
+                  <p className="text-sm">{msg.content}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs opacity-70">
+                      {formatTime(msg.createdAt)}
+                    </span>
+                    {isOwnMessage && msg.status && (
+                      <span className="text-xs opacity-70">
+                        {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓' : '○'}
+                      </span>
                     )}
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => window.open(message.content, '_blank')}
-                    className="text-blue-400 hover:text-blue-300"
-                    data-testid={`download-file-${message.id}`}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
                 </div>
-              ) : (
-                <p className="text-sm break-words">{message.content}</p>
-              )}
-              
-              <div className="flex items-center justify-between mt-1">
-                <p className="text-xs opacity-70">
-                  {formatMessageTime(message.createdAt)}
-                </p>
-                <MessageStatusIndicator message={message} />
               </div>
-            </div>
-          </div>
-        ))}
-        
+            );
+          })
+        )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}
-      <div className="sticky bottom-0 bg-nxe-dark/95 backdrop-blur-md border-t border-nxe-surface p-4">
+      <div className="sticky bottom-0 bg-nxe-surface border-t border-nxe-border p-4">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
-          {/* File Upload Input (Hidden) */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,.pdf,.doc,.docx,.txt,.zip"
-            onChange={handleFileSelect}
-            className="hidden"
-            data-testid="input-file-attachment"
-          />
-          
-          {/* Attachment Button */}
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={handleAttachmentClick}
-            disabled={fileUploadMutation.isPending}
-            className="text-gray-400 hover:text-white p-2"
-            data-testid="button-attachment"
+            className="p-2 text-gray-400 hover:text-white hover:bg-nxe-card"
           >
             <Paperclip className="h-5 w-5" />
           </Button>
           
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message... (use @admin to get help)"
-            className="flex-1 bg-nxe-surface border-nxe-surface text-white rounded-full px-4"
-            disabled={sendMessageMutation.isPending || fileUploadMutation.isPending}
-            data-testid="input-message"
-          />
+          <div className="flex-1 relative">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="bg-nxe-card border-nxe-border text-white pr-10"
+              data-testid="input-message"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-white"
+            >
+              <Smile className="h-4 w-4" />
+            </Button>
+          </div>
           
-          <Button
-            type="submit"
-            disabled={!newMessage.trim() || sendMessageMutation.isPending || fileUploadMutation.isPending}
-            className="bg-nxe-primary hover:bg-nxe-primary/80 rounded-full p-3"
-            data-testid="button-send-message"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          {message.trim() ? (
+            <Button
+              type="submit"
+              disabled={sendMessageMutation.isPending}
+              className="bg-nxe-primary hover:bg-nxe-primary/80 p-2"
+              data-testid="button-send"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="p-2 text-gray-400 hover:text-white hover:bg-nxe-card"
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          )}
         </form>
         
-        {/* Upload Progress */}
-        {fileUploadMutation.isPending && (
-          <div className="mt-2 text-sm text-gray-400 flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-nxe-primary"></div>
-            <span>Uploading file...</span>
+        {/* Connection Status */}
+        {!isConnected && (
+          <div className="text-center mt-2">
+            <span className="text-xs text-yellow-400">Reconnecting...</span>
           </div>
         )}
       </div>
