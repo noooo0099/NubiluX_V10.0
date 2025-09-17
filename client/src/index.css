@@ -342,4 +342,30 @@
   .bg-nxe-error {
     background-color: hsl(var(--nxe-error));
   }
+
+  /* Custom scrollbar for notification modal */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--nxe-dark));
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, hsl(var(--nxe-primary)), hsl(var(--nxe-accent)));
+    border-radius: 10px;
+    border: 1px solid hsl(var(--nxe-surface));
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, hsl(var(--nxe-primary) / 0.8), hsl(var(--nxe-accent) / 0.8));
+  }
+
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--nxe-primary)) hsl(var(--nxe-dark));
+  }
 }

@@ -1,4 +1,4 @@
-import { X, ShoppingCart, MessageCircle, AlertTriangle, Bell } from "lucide-react";
+import { X, ShoppingCart, MessageCircle, AlertTriangle, Bell, Sparkles, Zap, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
@@ -44,101 +44,170 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop */}
+      {/* Enhanced backdrop with glassmorphism */}
       <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onClose}
-      />
+      >
+        {/* Animated background patterns */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-nxe-primary/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-40 right-32 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl animate-bounce" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-10 w-16 h-16 bg-nxe-accent/20 rounded-full blur-xl animate-ping" style={{ animationDelay: '2s' }} />
+        </div>
+      </div>
       
-      {/* Modal */}
-      <div className="relative w-80 h-full bg-nxe-surface transform transition-transform duration-300 ease-out shadow-2xl border-l border-nxe-border">
-        {/* Header */}
-        <div className="p-6 border-b border-nxe-card bg-gradient-to-r from-nxe-surface to-nxe-card/50">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-white">Notifications</h3>
+      {/* Enhanced modal with glassmorphism */}
+      <div className="relative w-80 h-full bg-gradient-to-b from-nxe-surface/95 to-nxe-dark/95 backdrop-blur-xl transform transition-all duration-500 ease-out shadow-2xl border-l border-white/10 animate-in slide-in-from-right">
+        {/* Enhanced header with gradient */}
+        <div className="p-6 border-b border-white/10 bg-gradient-to-r from-nxe-primary/20 via-purple-600/10 to-nxe-accent/20 relative overflow-hidden">
+          {/* Header background effects */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+          <div className="absolute -top-2 -right-2 w-20 h-20 bg-nxe-primary/10 rounded-full blur-2xl" />
+          
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <Bell className="h-6 w-6 text-nxe-primary" />
+                <div className="absolute inset-0 bg-nxe-primary/20 rounded-full blur-sm animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white drop-shadow-lg">Notifications</h3>
+                <p className="text-gray-300 text-xs">Stay updated with your activity</p>
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-nxe-card/70 text-gray-400 hover:text-white transition-all duration-200"
+              className="p-2.5 rounded-full bg-black/20 hover:bg-black/40 backdrop-blur-sm text-gray-300 hover:text-white transition-all duration-300 border border-white/10 hover:border-white/20 hover:scale-110"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
         
-        {/* Content */}
-        <div className="p-6 space-y-4 overflow-y-auto h-full pb-20">
+        {/* Enhanced content area */}
+        <div className="p-6 space-y-4 overflow-y-auto h-full pb-20 custom-scrollbar">
           {notifications.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
-              <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-sm">No notifications yet</p>
+            <div className="text-center py-16">
+              <div className="relative mx-auto w-20 h-20 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-nxe-primary/20 to-purple-600/20 rounded-full animate-pulse" />
+                <Bell className="h-20 w-20 mx-auto text-nxe-primary/60 relative z-10" />
+                <div className="absolute inset-0 bg-nxe-primary/10 rounded-full blur-xl" />
+                <div className="absolute top-2 right-2 w-3 h-3 bg-nxe-accent rounded-full animate-ping" />
+              </div>
+              <p className="text-gray-300 text-lg font-medium mb-2">All caught up!</p>
+              <p className="text-gray-500 text-sm">You'll see new notifications here</p>
             </div>
           ) : (
-            notifications.map((notification: any) => (
+            notifications.map((notification: any, index: number) => (
               <Card 
                 key={notification.id} 
-                className={`bg-nxe-card border-l-4 ${getBorderColor(notification.type)} border-t-0 border-r-0 border-b-0 hover:bg-nxe-card/80 transition-all duration-200 shadow-sm hover:shadow-md`}
+                className="bg-gradient-to-r from-nxe-card/80 to-nxe-surface/60 border border-white/10 hover:from-nxe-card hover:to-nxe-surface/80 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer hover:scale-[1.02] group animate-in slide-in-from-right"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    {getNotificationIcon(notification.type)}
+                <CardContent className="p-4 relative overflow-hidden">
+                  {/* Card gradient overlay */}
+                  <div className={`absolute left-0 top-0 w-1 h-full bg-gradient-to-b ${notification.type === 'order' ? 'from-nxe-primary to-green-600' : notification.type === 'message' ? 'from-blue-500 to-purple-600' : 'from-yellow-500 to-orange-600'}`} />
+                  
+                  <div className="flex items-start space-x-3 relative z-10">
+                    <div className="relative">
+                      <div className={`p-2 rounded-xl ${notification.type === 'order' ? 'bg-gradient-to-br from-nxe-primary/20 to-green-600/20' : notification.type === 'message' ? 'bg-gradient-to-br from-blue-500/20 to-purple-600/20' : 'bg-gradient-to-br from-yellow-500/20 to-orange-600/20'} backdrop-blur-sm border border-white/10`}>
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className={`absolute inset-0 ${notification.type === 'order' ? 'bg-nxe-primary/10' : notification.type === 'message' ? 'bg-blue-500/10' : 'bg-yellow-500/10'} rounded-xl blur-lg group-hover:blur-xl transition-all duration-300`} />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium">
+                      <p className="text-white text-sm font-semibold mb-1 group-hover:text-nxe-primary transition-colors">
                         {notification.title}
                       </p>
-                      <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed">
+                      <p className="text-gray-300 text-xs line-clamp-2 leading-relaxed mb-2">
                         {notification.message}
                       </p>
-                      <span className="text-gray-500 text-xs mt-2 block">
-                        {new Date(notification.createdAt).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 text-xs bg-black/20 px-2 py-1 rounded-full">
+                          {new Date(notification.createdAt).toLocaleDateString()}
+                        </span>
+                        <div className="w-2 h-2 bg-nxe-accent rounded-full animate-pulse" />
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))
           )}
-          
-          {/* Sample notifications for demo */}
-          <Card className="bg-nxe-card border-l-4 border-l-nxe-primary border-t-0 border-r-0 border-b-0 hover:bg-nxe-card/80 transition-all duration-200 shadow-sm hover:shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <ShoppingCart className="h-4 w-4 text-nxe-primary mt-1" />
-                <div className="flex-1">
-                  <p className="text-white text-sm font-medium">New Order Received</p>
-                  <p className="text-gray-400 text-xs mt-2 leading-relaxed">You have a new order for Mobile Legends account</p>
-                  <span className="text-gray-500 text-xs mt-2 block">2 minutes ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-nxe-card border-l-4 border-l-nxe-accent border-t-0 border-r-0 border-b-0 hover:bg-nxe-card/80 transition-all duration-200 shadow-sm hover:shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <MessageCircle className="h-4 w-4 text-nxe-accent mt-1" />
-                <div className="flex-1">
-                  <p className="text-white text-sm font-medium">New Message</p>
-                  <p className="text-gray-400 text-xs mt-2 leading-relaxed">Buyer is asking about the account details</p>
-                  <span className="text-gray-500 text-xs mt-2 block">5 minutes ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-nxe-card border-l-4 border-l-yellow-500 border-t-0 border-r-0 border-b-0 hover:bg-nxe-card/80 transition-all duration-200 shadow-sm hover:shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <AlertTriangle className="h-4 w-4 text-yellow-500 mt-1" />
-                <div className="flex-1">
-                  <p className="text-white text-sm font-medium">Payment Pending</p>
-                  <p className="text-gray-400 text-xs mt-2 leading-relaxed">Waiting for QRIS payment confirmation</p>
-                  <span className="text-gray-500 text-xs mt-2 block">10 minutes ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
+          {/* Enhanced sample notifications for demo - only show when no real notifications exist */}
+          {notifications.length === 0 && (
+            <>
+              <Card className="bg-gradient-to-r from-nxe-card/80 to-nxe-surface/60 border border-white/10 hover:from-nxe-card hover:to-nxe-surface/80 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer hover:scale-[1.02] group animate-in slide-in-from-right" style={{ animationDelay: '200ms' }}>
+                <CardContent className="p-4 relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-nxe-primary to-green-600" />
+                  <div className="flex items-start space-x-3 relative z-10">
+                    <div className="relative">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-nxe-primary/20 to-green-600/20 backdrop-blur-sm border border-white/10">
+                        <ShoppingCart className="h-4 w-4 text-nxe-primary" />
+                      </div>
+                      <div className="absolute inset-0 bg-nxe-primary/10 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-semibold mb-1 group-hover:text-nxe-primary transition-colors">New Order Received</p>
+                      <p className="text-gray-300 text-xs leading-relaxed mb-2">You have a new order for Mobile Legends account</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 text-xs bg-black/20 px-2 py-1 rounded-full">2 minutes ago</span>
+                        <div className="w-2 h-2 bg-nxe-accent rounded-full animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-nxe-card/80 to-nxe-surface/60 border border-white/10 hover:from-nxe-card hover:to-nxe-surface/80 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer hover:scale-[1.02] group animate-in slide-in-from-right" style={{ animationDelay: '300ms' }}>
+                <CardContent className="p-4 relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-600" />
+                  <div className="flex items-start space-x-3 relative z-10">
+                    <div className="relative">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-sm border border-white/10">
+                        <MessageCircle className="h-4 w-4 text-blue-400" />
+                      </div>
+                      <div className="absolute inset-0 bg-blue-500/10 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-semibold mb-1 group-hover:text-blue-400 transition-colors">New Message</p>
+                      <p className="text-gray-300 text-xs leading-relaxed mb-2">Buyer is asking about the account details</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 text-xs bg-black/20 px-2 py-1 rounded-full">5 minutes ago</span>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-nxe-card/80 to-nxe-surface/60 border border-white/10 hover:from-nxe-card hover:to-nxe-surface/80 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer hover:scale-[1.02] group animate-in slide-in-from-right" style={{ animationDelay: '400ms' }}>
+                <CardContent className="p-4 relative overflow-hidden">
+                  <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-yellow-500 to-orange-600" />
+                  <div className="flex items-start space-x-3 relative z-10">
+                    <div className="relative">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-600/20 backdrop-blur-sm border border-white/10">
+                        <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                      </div>
+                      <div className="absolute inset-0 bg-yellow-500/10 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-semibold mb-1 group-hover:text-yellow-400 transition-colors">Payment Pending</p>
+                      <p className="text-gray-300 text-xs leading-relaxed mb-2">Waiting for QRIS payment confirmation</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 text-xs bg-black/20 px-2 py-1 rounded-full">10 minutes ago</span>
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </div>
     </div>
