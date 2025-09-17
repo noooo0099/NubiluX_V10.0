@@ -346,8 +346,8 @@ export default function QRCodePage() {
 
             {/* QR Code Container dengan desain grid putih dan blur hijau */}
             <div className="relative mb-4 rounded-2xl overflow-hidden">
-              {/* Background dengan grid pattern */}
-              <div className="bg-white p-8 relative">
+              {/* Background dengan grid pattern - adjusted padding for better QR fit */}
+              <div className="bg-white p-4 relative">
                 {/* Grid pattern overlay */}
                 <div 
                   className="absolute inset-0 opacity-10"
@@ -461,7 +461,14 @@ export default function QRCodePage() {
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-nxe-primary to-transparent animate-pulse"></div>
                     
                     {/* Center focus area */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-nxe-primary/50 rounded-2xl"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-nxe-primary/50 rounded-2xl">
+                      {/* Moving circular scan indicator */}
+                      <div className="absolute inset-0 animate-spin duration-2000">
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-nxe-primary rounded-full shadow-lg">
+                          <div className="absolute inset-0 bg-nxe-primary rounded-full animate-ping opacity-75"></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Success overlay when QR detected */}

@@ -251,29 +251,38 @@ export default function Settings() {
             
             {/* User Info */}
             <div className="flex-1">
-              <h2 className="text-lg font-medium text-nxe-text" data-testid="text-username">
+              <h2 className="text-lg font-medium text-white" data-testid="text-username">
                 {user?.displayName || user?.username || "Pengguna"}
               </h2>
-              <p className="text-nxe-text-secondary text-sm" data-testid="text-contact">
+              <p className="text-gray-400 text-sm" data-testid="text-contact">
                 {user?.email || "Belum ada kontak"}
               </p>
-              <p className="text-nxe-text-secondary text-sm" data-testid="text-status">
+              <p className="text-gray-400 text-sm" data-testid="text-status">
                 {user?.role === 'admin' ? 'Administrator' : user?.role === 'owner' ? 'Pemilik' : 'Pengguna'}
               </p>
             </div>
             
             {/* QR Code and Check Icons */}
             <div className="flex space-x-4">
-              <button
+              <div
                 onClick={(e) => {
                   e.stopPropagation();
                   setLocation("/qrcode");
                 }}
-                className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200"
+                className="text-nxe-primary hover:text-nxe-primary/80 transition-colors duration-200 cursor-pointer p-1"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setLocation("/qrcode");
+                  }
+                }}
                 data-testid="button-qr"
               >
                 <QrCode className="h-6 w-6" />
-              </button>
+              </div>
               <div className="text-nxe-primary" data-testid="icon-check">
                 <CheckCircle className="h-6 w-6" />
               </div>
@@ -295,8 +304,8 @@ export default function Settings() {
               {item.icon}
             </div>
             <div className="flex-1 text-left">
-              <h3 className="text-nxe-text font-medium">{item.label}</h3>
-              <p className="text-nxe-text-secondary text-sm">{item.description}</p>
+              <h3 className="text-white font-medium">{item.label}</h3>
+              <p className="text-gray-400 text-sm">{item.description}</p>
             </div>
           </button>
         ))}
