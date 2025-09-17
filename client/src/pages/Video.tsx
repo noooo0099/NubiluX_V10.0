@@ -194,16 +194,26 @@ export default function Video() {
         <div className="fixed inset-0 z-50 bg-black">
           <div className="relative w-full h-full">
             {/* Video */}
-            <video 
-              controls 
-              autoPlay 
-              muted={isMuted}
-              className="w-full h-full object-cover"
-              src={activeVideo.videoUrl}
-            >
-              <source src={activeVideo.videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            {activeVideo.videoUrl ? (
+              <video 
+                controls 
+                autoPlay 
+                muted={isMuted}
+                className="w-full h-full object-cover"
+                src={activeVideo.videoUrl}
+              >
+                <source src={activeVideo.videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-white text-center">
+                  <div className="text-6xl mb-4">🎥</div>
+                  <div className="text-xl">Video not available</div>
+                  <div className="text-white/70 mt-2">This video cannot be played</div>
+                </div>
+              </div>
+            )}
 
             {/* Top Controls */}
             <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4">

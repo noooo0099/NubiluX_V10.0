@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let errorMessage = 'Invalid message format';
           if (error instanceof SyntaxError && error.message.includes('JSON')) {
             errorMessage = 'Invalid JSON format in message';
-          } else if (error.name === 'ZodError') {
+          } else if (error instanceof Error && error.name === 'ZodError') {
             errorMessage = 'Message validation failed';
           }
           
@@ -253,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ws.send(JSON.stringify({ 
               type: 'error', 
               message: errorMessage,
-              details: process.env.NODE_ENV === 'development' ? error.message : undefined
+              details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
             }));
           }
         } catch (sendError) {
