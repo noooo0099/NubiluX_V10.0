@@ -239,6 +239,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
+        
+        // Send error message back to client with specific error type
+        try {
+          let errorMessage = 'Invalid message format';
+          if (error instanceof SyntaxError && error.message.includes('JSON')) {
+            errorMessage = 'Invalid JSON format in message';
+          } else if (error.name === 'ZodError') {
+            errorMessage = 'Message validation failed';
+          }
+          
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ 
+              type: 'error', 
+              message: errorMessage,
+              details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            }));
+          }
+        } catch (sendError) {
+          console.error('Failed to send error message to client:', sendError);
+          // If we can't send error message, close the connection gracefully
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.close(1002, 'Protocol error');
+          }
+        }
       }
     });
 
