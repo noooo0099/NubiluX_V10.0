@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation, useRoute } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { Product } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,19 +28,7 @@ import {
   DollarSign
 } from "lucide-react";
 
-// Product interface for type safety
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: string;
-  category: string;
-  thumbnail: string;
-  rating: string;
-  isPremium: boolean;
-  seller: string;
-  createdAt: string;
-}
+// Product interface is now imported from shared schema
 
 // Game categories untuk filter
 const gameCategories = [
@@ -74,94 +64,121 @@ export default function ViewAll() {
   // Get type from URL params (products, categories, featured)
   const pageType = params?.type ?? "products";
 
-  // Demo products data - replace with real API integration
-  // Note: This component currently uses sample data for demonstration
-  // In production, integrate with backend API for real product data
+  // Fetch all products from API
+  const { data: allProducts = [], isLoading } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  // Demo products data for fallback - matches real API structure  
   const sampleProducts: Product[] = [
     {
       id: 1,
+      sellerId: 1,
       title: "Mobile Legends Epic Account - 54 Skins",
       description: "Mythic rank, all heroes unlocked, premium skins collection including limited editions",
-      price: "2500000",
+      price: "2500000.00",
       category: "mobile_legends",
       thumbnail: "https://images.unsplash.com/photo-1556438064-2d7646166914?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.9",
       isPremium: true,
-      seller: "GameMaster",
-      createdAt: "2024-01-15"
+      reviewCount: 12,
+      createdAt: new Date("2024-01-15")
     },
     {
       id: 2,
+      sellerId: 2,
       title: "PUBG Mobile Conqueror Account",
       description: "Season 20 Conqueror, rare outfits, maxed weapons, mythic items",
-      price: "1800000",
+      price: "1800000.00",
       category: "pubg_mobile",
       thumbnail: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.7",
       isPremium: false,
-      seller: "ProGamer",
-      createdAt: "2024-01-14"
+      reviewCount: 8,
+      createdAt: new Date("2024-01-14")
     },
     {
       id: 3,
+      sellerId: 3,
       title: "Free Fire Diamond Account 50K+",
       description: "50,000+ diamonds, elite pass maxed, rare bundles, pet evolution complete",
-      price: "450000",
+      price: "450000.00",
       category: "free_fire",
       thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.8",
       isPremium: true,
-      seller: "FFKing",
-      createdAt: "2024-01-13"
+      reviewCount: 15,
+      createdAt: new Date("2024-01-13")
     },
     {
       id: 4,
+      sellerId: 4,
       title: "Valorant Immortal Account Premium",
       description: "Immortal rank, Phantom/Vandal skins, battlepass completed, rare knife collection",
-      price: "3200000",
+      price: "3200000.00",
       category: "valorant",
       thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.9",
       isPremium: true,
-      seller: "ValoMaster",
-      createdAt: "2024-01-12"
+      reviewCount: 25,
+      createdAt: new Date("2024-01-12")
     },
     {
       id: 5,
+      sellerId: 5,
       title: "Genshin Impact AR 58 Whale Account",
       description: "Multiple 5-star characters C6, R5 weapons, abundant primogems, all regions 100%",
-      price: "4500000",
+      price: "4500000.00",
       category: "genshin_impact",
       thumbnail: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.9",
       isPremium: true,
-      seller: "GenshinWhale",
-      createdAt: "2024-01-11"
+      reviewCount: 18,
+      createdAt: new Date("2024-01-11")
     },
     {
       id: 6,
+      sellerId: 6,
       title: "Call of Duty Mobile Legendary",
       description: "Mythic weapons collection, legendary skins, maxed battle pass, rare camos",
-      price: "1200000",
+      price: "1200000.00",
       category: "call_of_duty",
       thumbnail: "https://images.unsplash.com/photo-1556438064-2d7646166914?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+      images: [],
+      gameData: {},
+      status: "active",
       rating: "4.6",
       isPremium: false,
-      seller: "CODLegend",
-      createdAt: "2024-01-10"
+      reviewCount: 9,
+      createdAt: new Date("2024-01-10")
     }
   ];
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let filtered = sampleProducts;
+    // Use real API data if available, fallback to sample data
+    let filtered = allProducts.length > 0 ? allProducts : sampleProducts;
 
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(product =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.seller.toLowerCase().includes(searchQuery.toLowerCase())
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -178,18 +195,24 @@ export default function ViewAll() {
         case "price_high":
           return parseInt(b.price) - parseInt(a.price);
         case "rating":
-          return parseFloat(b.rating) - parseFloat(a.rating);
+          const ratingA = parseFloat(a.rating || "0");
+          const ratingB = parseFloat(b.rating || "0");
+          return ratingB - ratingA;
         case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
         case "popular":
-          return parseFloat(b.rating) - parseFloat(a.rating); // For demo, use rating as popularity
+          const popRatingA = parseFloat(a.rating || "0");
+          const popRatingB = parseFloat(b.rating || "0");
+          return popRatingB - popRatingA; // For demo, use rating as popularity
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [allProducts, sampleProducts, searchQuery, selectedCategory, sortBy]);
 
   const formatPrice = (price: string) => {
     return new Intl.NumberFormat('id-ID', {
@@ -359,7 +382,18 @@ export default function ViewAll() {
 
       {/* Products Grid/List */}
       <div className="p-4">
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          /* Loading State */
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-nxe-primary mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Memuat produk...
+            </h3>
+            <p className="text-nxe-text">
+              Silakan tunggu sebentar
+            </p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           /* Empty State */
           <div className="text-center py-12">
             <Gamepad2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
