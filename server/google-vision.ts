@@ -183,11 +183,11 @@ export async function analyzeImage(
     if (options.safeSearch && result.safeSearchAnnotation) {
       const safeSearch = result.safeSearchAnnotation;
       analysis.safeSearch = {
-        adult: safeSearch.adult || 'UNKNOWN',
-        medical: safeSearch.medical || 'UNKNOWN',
-        spoofed: safeSearch.spoof || 'UNKNOWN',
-        violence: safeSearch.violence || 'UNKNOWN',
-        racy: safeSearch.racy || 'UNKNOWN'
+        adult: (safeSearch.adult?.toString() || 'UNKNOWN'),
+        medical: (safeSearch.medical?.toString() || 'UNKNOWN'),
+        spoofed: (safeSearch.spoof?.toString() || 'UNKNOWN'),
+        violence: (safeSearch.violence?.toString() || 'UNKNOWN'),
+        racy: (safeSearch.racy?.toString() || 'UNKNOWN')
       };
     }
 
