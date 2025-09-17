@@ -1,8 +1,8 @@
-import { db } from './db.js';
+import { db } from './db';
 import { sql } from 'drizzle-orm';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { seedDatabase } from './seed.js';
+import { seedDatabase } from './seed';
 
 const execAsync = promisify(exec);
 

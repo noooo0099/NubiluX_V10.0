@@ -4,7 +4,8 @@ import ws from "ws";
 import * as schema from "@shared/schema";
 
 // Check if we're in development environment (includes hosted environments like Replit)
-const isDevelopment = process.env.NODE_ENV === 'development';
+// More robust check that covers various development scenarios
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Configure WebSocket with SSL certificate handling
 class CustomWebSocket extends ws {
