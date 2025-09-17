@@ -168,46 +168,61 @@ export default function StatusUpdates() {
       {/* Status Section - Horizontal Scrollable */}
       <div className="px-0 py-4 border-b border-nxe-border/30">
         <h2 className="text-lg font-semibold text-white mb-4 px-4">Status</h2>
-        <div className="flex space-x-3 overflow-x-auto pb-2 px-4 scrollbar-hide">
+        <div className="flex space-x-4 overflow-x-auto pb-2 px-4 scrollbar-hide">
           {/* Add Status Button */}
           <div className="flex flex-col items-center min-w-max" data-testid="add-status-container">
             <button
               onClick={() => setShowCreateForm(true)}
-              className="w-16 h-16 rounded-lg bg-gradient-to-br from-nxe-surface to-nxe-card flex items-center justify-center border-2 border-dashed border-gray-600 hover:border-nxe-primary transition-colors"
+              className="w-16 h-16 rounded-full bg-nxe-dark border-2 border-nxe-primary/60 flex items-center justify-center hover:border-nxe-primary transition-all duration-300 relative overflow-hidden"
               data-testid="button-add-status"
             >
-              <Plus className="h-8 w-8 text-nxe-primary" />
+              <div className="absolute inset-0 bg-gradient-to-br from-nxe-primary/20 to-transparent"></div>
+              <Plus className="h-7 w-7 text-nxe-primary relative z-10" />
             </button>
-            <p className="text-xs text-gray-300 mt-2 text-center max-w-16 truncate">Tambah Status</p>
+            <p className="text-xs text-white mt-2 text-center max-w-16 truncate font-medium">Tambah Status</p>
           </div>
           
           {/* Status Updates */}
           {(statusUpdates as StatusUpdate[]).map((status) => (
             <div key={status.id} className="flex flex-col items-center min-w-max" data-testid={`status-item-${status.id}`}>
               <div className="relative">
-                <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-nxe-primary/50 hover:border-nxe-primary transition-colors">
-                  {status.media ? (
-                    status.mediaType === 'image' ? (
+                <button className="w-16 h-16 rounded-full overflow-hidden border-3 border-gradient-to-r from-nxe-primary to-nxe-accent p-0.5 hover:scale-105 transition-transform duration-300">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-nxe-dark">
+                    {status.media ? (
+                      status.mediaType === 'image' ? (
+                        <img
+                          src={status.media}
+                          alt={`Status by ${status.user.displayName || status.user.username}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={status.media}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                      )
+                    ) : status.user.profilePicture ? (
                       <img
-                        src={status.media}
-                        alt={`Status by ${status.user.displayName || status.user.username}`}
+                        src={status.user.profilePicture}
+                        alt={`${status.user.displayName || status.user.username}`}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <video
-                        src={status.media}
-                        className="w-full h-full object-cover"
-                        muted
-                      />
-                    )
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-nxe-primary/20 to-nxe-accent/20 flex items-center justify-center">
-                      <User className="h-6 w-6 text-white" />
-                    </div>
-                  )}
+                      <div className="w-full h-full bg-gradient-to-br from-nxe-primary/30 to-nxe-accent/30 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-nxe-primary/20 flex items-center justify-center">
+                          <span className="text-white font-bold text-lg">
+                            {(status.user.displayName || status.user.username).charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </button>
+                {/* Green status indicator */}
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-nxe-dark flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
-                {/* Status indicator - small dot */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-nxe-primary rounded-full border-2 border-nxe-dark"></div>
               </div>
               <p className="text-xs text-white mt-2 text-center max-w-16 truncate font-medium">
                 {status.user.displayName || status.user.username}
