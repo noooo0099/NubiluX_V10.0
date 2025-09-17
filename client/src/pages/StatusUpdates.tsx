@@ -306,8 +306,114 @@ export default function StatusUpdates() {
         </div>
       )}
 
-      {/* Content Area - placeholder for other content */}
+      {/* News of the Day Section */}
+      <div className="px-4 py-6 border-b border-nxe-border/30">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">Berita Gaming Hari Ini</h2>
+          <Button variant="ghost" size="sm" className="text-nxe-primary hover:text-nxe-primary/80">
+            Lihat Semua
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4 mb-4">
+          {/* Featured News */}
+          <Card className="bg-gradient-to-r from-nxe-surface to-nxe-card border-nxe-border overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex">
+                <div className="w-24 h-24 flex-shrink-0">
+                  <img 
+                    src="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200" 
+                    alt="Gaming news"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 p-4">
+                  <h3 className="text-sm font-semibold text-white mb-1 line-clamp-2">
+                    Update Terbaru Mobile Legends: Hero Baru dan Event Spesial
+                  </h3>
+                  <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                    Moonton merilis hero assassin terbaru dengan skill ultimate yang game-changing...
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-nxe-primary">Gaming Indonesia</span>
+                    <span className="text-xs text-gray-500">2 jam lalu</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* News Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="PUBG update"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  PUBG Season Baru: Map Sanhok Remastered
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  Peningkatan grafis dan gameplay yang menakjubkan
+                </p>
+                <span className="text-xs text-gray-500">4 jam lalu</span>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="Valorant tournament"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  Turnamen Valorant Regional Championship
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  8 tim terbaik Indonesia berkompetisi
+                </p>
+                <span className="text-xs text-gray-500">1 hari lalu</span>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Trending Gaming Topics */}
+      <div className="px-4 py-4 border-b border-nxe-border/30">
+        <h3 className="text-sm font-semibold text-white mb-3">Topik Trending</h3>
+        <div className="flex flex-wrap gap-2">
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #MobileLegendsUpdate
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #PUBGSeason
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #ValorantTournament
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #GamingSetup
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #ESports
+          </Badge>
+        </div>
+      </div>
+
+      {/* Status Updates Feed */}
       <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">Feed Status Update</h2>
+        </div>
+        
         {isLoading ? (
           <div className="flex justify-center items-center min-h-32" data-testid="status-updates-loading">
             <Loading variant="pulse" />
