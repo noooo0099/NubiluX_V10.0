@@ -155,30 +155,33 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-nxe-dark">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-nxe-dark/95 backdrop-blur-md border-b border-nxe-surface">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-6 py-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setLocation("/")}
-            className="p-2"
+            className="p-2 hover:bg-nxe-surface/50 rounded-full transition-colors"
+            data-testid="button-back"
           >
             <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLike}
-              className="p-2"
+              className="p-2 hover:bg-nxe-surface/50 rounded-full transition-colors"
+              data-testid="button-like"
             >
-              <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
+              <Heart className={`h-5 w-5 transition-colors ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleShare}
-              className="p-2"
+              className="p-2 hover:bg-nxe-surface/50 rounded-full transition-colors"
+              data-testid="button-share"
             >
               <CustomShareIcon className="text-gray-400" size={20} />
             </Button>
@@ -218,36 +221,36 @@ export default function ProductDetail() {
       </div>
 
       {/* Product Info */}
-      <div className="p-4 space-y-6">
+      <div className="p-6 space-y-6">
         {/* Title and Price */}
         <div>
-          <div className="flex items-start justify-between mb-2">
-            <h1 className="text-2xl font-bold text-white flex-1 mr-4">
+          <div className="flex items-start justify-between mb-3">
+            <h1 className="text-2xl font-bold text-white flex-1 mr-4 leading-tight">
               {product.title}
             </h1>
             <div className="text-right">
-              <p className="text-3xl font-bold text-nxe-accent">
+              <p className="text-2xl font-bold text-nxe-accent">
                 {formatCurrency(product.price)}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <Badge variant="outline" className="border-nxe-primary text-nxe-primary">
+          <div className="flex items-center justify-between">
+            <Badge variant="outline" className="border-nxe-primary text-nxe-primary px-3 py-1">
               {getCategoryDisplay(product.category)}
             </Badge>
             
             <div className="flex items-center space-x-1">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="text-white font-medium">{product.rating}</span>
-              <span className="text-gray-400">({product.reviewCount} reviews)</span>
+              <span className="text-gray-400">({product.reviewCount})</span>
             </div>
           </div>
         </div>
 
         {/* Seller Info */}
-        <Card className="bg-nxe-card border-nxe-surface">
-          <CardContent className="p-4">
+        <Card className="bg-nxe-card border-nxe-surface rounded-xl">
+          <CardContent className="p-5">
             <div className="flex items-center space-x-3">
               <Avatar className="w-12 h-12">
                 <AvatarImage 
@@ -315,18 +318,18 @@ export default function ProductDetail() {
 
         {/* Product Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-nxe-card border-nxe-surface">
-            <CardContent className="p-3 text-center">
-              <Eye className="h-5 w-5 mx-auto text-gray-400 mb-1" />
-              <p className="text-sm text-gray-400">Views</p>
+          <Card className="bg-nxe-card border-nxe-surface rounded-xl">
+            <CardContent className="p-4 text-center">
+              <Eye className="h-5 w-5 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-400 mb-1">Views</p>
               <p className="text-lg font-bold text-white">1,234</p>
             </CardContent>
           </Card>
           
-          <Card className="bg-nxe-card border-nxe-surface">
-            <CardContent className="p-3 text-center">
-              <Calendar className="h-5 w-5 mx-auto text-gray-400 mb-1" />
-              <p className="text-sm text-gray-400">Listed</p>
+          <Card className="bg-nxe-card border-nxe-surface rounded-xl">
+            <CardContent className="p-4 text-center">
+              <Calendar className="h-5 w-5 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-400 mb-1">Listed</p>
               <p className="text-sm font-medium text-white">
                 {formatDate(product.createdAt)}
               </p>
@@ -336,8 +339,8 @@ export default function ProductDetail() {
       </div>
 
       {/* Action Buttons */}
-      <div className="sticky bottom-0 bg-nxe-dark/95 backdrop-blur-md border-t border-nxe-surface p-4">
-        <div className="flex space-x-3">
+      <div className="sticky bottom-0 bg-nxe-dark/95 backdrop-blur-md border-t border-nxe-surface p-6">
+        <div className="flex space-x-4">
           <Button
             onClick={handleContactSeller}
             variant="outline"
