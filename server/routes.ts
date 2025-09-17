@@ -593,11 +593,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedSellerId = id;
       }
       
+      // Validate and set pagination limits
+      let validatedLimit = 12; // Default limit for better performance
+      let validatedOffset = 0; // Default offset
+      
+      if (limit) {
+        const parsedLimit = parseInt(limit as string);
+        if (!Number.isNaN(parsedLimit) && parsedLimit > 0) {
+          validatedLimit = Math.min(parsedLimit, 50); // Max 50 items per page
+        }
+      }
+      
+      if (offset) {
+        const parsedOffset = parseInt(offset as string);
+        if (!Number.isNaN(parsedOffset) && parsedOffset >= 0) {
+          validatedOffset = parsedOffset;
+        }
+      }
+      
       const products = await storage.getProducts({
         category: category as string,
         sellerId: validatedSellerId,
-        limit: limit ? parseInt(limit as string) : undefined,
-        offset: offset ? parseInt(offset as string) : undefined
+        limit: validatedLimit,
+        offset: validatedOffset
       });
       res.json(products);
     } catch (error) {

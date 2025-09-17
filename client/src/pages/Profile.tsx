@@ -60,9 +60,9 @@ export default function Profile() {
     enabled: Boolean(effectiveProfileId),
   });
 
-  // Fetch user's products
+  // Fetch user's products with pagination
   const { data: products = [], isLoading: isProductsLoading } = useQuery<Product[]>({
-    queryKey: [`/api/products`, { sellerId: Number(effectiveProfileId) }],
+    queryKey: [`/api/products`, { sellerId: Number(effectiveProfileId), limit: 12, offset: 0 }],
     enabled: Boolean(effectiveProfileId),
   });
 
@@ -99,11 +99,11 @@ export default function Profile() {
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      // Validate file size (max 300KB for better performance)
+      if (file.size > 300 * 1024) {
         toast({
           title: "File too large",
-          description: "Banner image must be less than 5MB",
+          description: "Banner image must be less than 300KB for optimal performance",
           variant: "destructive",
         });
         return;
@@ -119,13 +119,38 @@ export default function Profile() {
         return;
       }
 
-      // Convert to base64 for storage
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setBannerPreview(result);
+      // Compress and resize image before storage
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Set max dimensions (1200px width for banners)
+        const maxWidth = 1200;
+        const maxHeight = 400;
+        
+        let { width, height } = img;
+        
+        // Calculate new dimensions while maintaining aspect ratio
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress image
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressedImage = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+        setBannerPreview(compressedImage);
       };
-      reader.readAsDataURL(file);
+      
+      img.src = URL.createObjectURL(file);
     }
   };
 
