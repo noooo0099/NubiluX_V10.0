@@ -47,7 +47,19 @@ export function useWebSocket(userId: number | null, options: UseWebSocketOptions
       }
       
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host || 'localhost:5000'; // Fallback for development
+      // Use proper host logic that works in both development and production
+      let host = window.location.host;
+      
+      // Only apply localhost fallback for actual localhost environments
+      if (!host) {
+        host = 'localhost:5000';
+      } else {
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        if (isLocalhost && !host.includes(':')) {
+          host = window.location.hostname + ':5000';
+        }
+      }
+      
       const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
       
       const ws = new WebSocket(wsUrl);

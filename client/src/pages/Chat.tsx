@@ -119,7 +119,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
-  const currentUserId = user?.id || 0; // Get user ID from auth context
+  const currentUserId = user?.id || null; // Get user ID from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();

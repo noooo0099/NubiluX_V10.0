@@ -51,7 +51,21 @@ export class WebSocketManager {
 
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+      // Use proper host logic that works in both development and production
+      let host = window.location.host;
+      
+      // Only apply localhost fallback for actual localhost environments
+      if (!host) {
+        host = 'localhost:5000';
+      } else {
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        if (isLocalhost && !host.includes(':')) {
+          host = window.location.hostname + ':5000';
+        }
+      }
+      
+      const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
+      console.log('Connecting to WebSocket host:', host); // Don't log token for security
       
       const ws = new WebSocket(wsUrl);
       this.ws = ws;
