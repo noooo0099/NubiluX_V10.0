@@ -13,6 +13,7 @@ import {
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useConfirmation } from "@/contexts/ConfirmationContext";
 
 interface TopNavbarProps {
   onShowNotifications: () => void;
@@ -39,6 +40,7 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const { confirm } = useConfirmation();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLFormElement>(null);
 
@@ -96,9 +98,20 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    setLocation("/");
+  const handleLogout = async () => {
+    const confirmed = await confirm({
+      title: "Keluar dari Akun",
+      description: "Apakah Anda yakin ingin keluar dari akun? Anda perlu login kembali untuk mengakses fitur yang memerlukan autentikasi.",
+      confirmText: "Keluar",
+      cancelText: "Batal",
+      variant: "warning",
+      icon: "logout"
+    });
+    
+    if (confirmed) {
+      logout();
+      setLocation("/");
+    }
   };
 
   return (

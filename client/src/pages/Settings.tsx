@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useConfirmation } from "@/contexts/ConfirmationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -15,15 +16,29 @@ export default function Settings() {
   const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { confirm } = useConfirmation();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    if (confirm("Yakin ingin keluar dari akun?")) {
+  const handleLogout = async () => {
+    const confirmed = await confirm({
+      title: "Keluar dari Akun",
+      description: "Apakah Anda yakin ingin keluar dari akun? Anda perlu login kembali untuk mengakses fitur yang memerlukan autentikasi.",
+      confirmText: "Keluar",
+      cancelText: "Batal",
+      variant: "warning",
+      icon: "logout"
+    });
+    
+    if (confirmed) {
       logout();
       setLocation("/");
+      toast({
+        title: "Logout berhasil",
+        description: "Anda telah keluar dari akun dengan aman.",
+      });
     }
   };
 
@@ -155,6 +170,12 @@ export default function Settings() {
       label: "Feedback",
       description: "Berikan masukan untuk aplikasi",
       action: () => handleComingSoon("Feedback"),
+    },
+    {
+      icon: <LogOut className="h-6 w-6" />,
+      label: "Keluar",
+      description: "Keluar dari akun Anda",
+      action: handleLogout,
     },
   ];
 

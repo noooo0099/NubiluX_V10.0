@@ -38,6 +38,7 @@ import QRCodePage from "@/pages/QRCode";
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAuth } from "@/components/auth/ProtectedRoute";
+import { ConfirmationProvider } from "@/contexts/ConfirmationContext";
 
 // Theme context
 interface ThemeContextType {
@@ -259,12 +260,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <ThemeProvider>
-            <Toaster />
-            <Router />
-          </ThemeProvider>
-        </TooltipProvider>
+        <ConfirmationProvider>
+          <TooltipProvider>
+            <ThemeProvider>
+              <Toaster />
+              <Router />
+            </ThemeProvider>
+          </TooltipProvider>
+        </ConfirmationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
