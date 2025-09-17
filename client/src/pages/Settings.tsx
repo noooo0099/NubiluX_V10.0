@@ -98,86 +98,115 @@ export default function Settings() {
   };
 
 
-  const settingItems = [
+  const settingSections = [
     {
-      icon: <Lock className="h-6 w-6" />,
-      label: "Akun",
-      description: "Notifikasi keamanan, ganti nomor",
-      action: () => setLocation("/edit-account"),
+      title: "Akun & Keamanan",
+      items: [
+        {
+          icon: <Lock className="h-6 w-6" />,
+          label: "Akun",
+          description: "Notifikasi keamanan, ganti nomor",
+          action: () => setLocation("/edit-account"),
+        },
+        {
+          icon: <Shield className="h-6 w-6" />,
+          label: "Privasi",
+          description: "Blokir kontak, pesan sementara",
+          action: () => setLocation("/settings/privacy"),
+        },
+        {
+          icon: <UserPlus className="h-6 w-6" />,
+          label: "User Role",
+          description: "Kelola peran sebagai pembeli atau penjual",
+          action: () => setLocation("/settings/user-role"),
+        },
+      ]
     },
     {
-      icon: <Shield className="h-6 w-6" />,
-      label: "Privasi",
-      description: "Blokir kontak, pesan sementara",
-      action: () => setLocation("/settings/privacy"),
+      title: "Komunikasi & Notifikasi",
+      items: [
+        {
+          icon: <MessageCircle className="h-6 w-6" />,
+          label: "Chat",
+          description: "Tema, wallpaper, riwayat chat",
+          action: () => setLocation("/settings/chat"),
+        },
+        {
+          icon: <Bell className="h-6 w-6" />,
+          label: "Notifikasi",
+          description: "Pesan, grup & nada dering panggilan",
+          action: () => setLocation("/settings/notifications"),
+        },
+      ]
     },
     {
-      icon: <UserPlus className="h-6 w-6" />,
-      label: "User Role",
-      description: "Kelola peran sebagai pembeli atau penjual",
-      action: () => setLocation("/settings/user-role"),
+      title: "Tampilan & Bahasa",
+      items: [
+        {
+          icon: <Palette className="h-6 w-6" />,
+          label: "Theme Settings",
+          description: "Kustomisasi tampilan aplikasi",
+          action: () => setLocation("/settings/theme"),
+        },
+        {
+          icon: <Globe className="h-6 w-6" />,
+          label: "Ubah Bahasa",
+          description: "Ubah bahasa aplikasi",
+          action: () => setLocation("/settings/language"),
+        },
+      ]
     },
     {
-      icon: <Database className="h-6 w-6" />,
-      label: "Data & Storage",
-      description: "Kelola penyimpanan",
-      action: () => setLocation("/settings/data-storage"),
+      title: "Pembayaran & Keuangan",
+      items: [
+        {
+          icon: <CreditCard className="h-6 w-6" />,
+          label: "Kelola Pembayaran",
+          description: "Kelola metode pembayaran user",
+          action: () => setLocation("/settings/payment-management"),
+        },
+        {
+          icon: <Wallet className="h-6 w-6" />,
+          label: "Setting Akun E-Wallet",
+          description: "Pengaturan akun e-wallet",
+          action: () => setLocation("/settings/ewallet"),
+        },
+      ]
     },
     {
-      icon: <MessageCircle className="h-6 w-6" />,
-      label: "Chat",
-      description: "Tema, wallpaper, riwayat chat",
-      action: () => setLocation("/settings/chat"),
-    },
-    {
-      icon: <Palette className="h-6 w-6" />,
-      label: "Theme Settings",
-      description: "Kustomisasi tampilan aplikasi",
-      action: () => setLocation("/settings/theme"),
-    },
-    {
-      icon: <Bell className="h-6 w-6" />,
-      label: "Notifikasi",
-      description: "Pesan, grup & nada dering panggilan",
-      action: () => setLocation("/settings/notifications"),
-    },
-    {
-      icon: <Globe className="h-6 w-6" />,
-      label: "Ubah Bahasa",
-      description: "Ubah bahasa aplikasi",
-      action: () => setLocation("/settings/language"),
-    },
-    {
-      icon: <CreditCard className="h-6 w-6" />,
-      label: "Kelola Pembayaran",
-      description: "Kelola metode pembayaran user",
-      action: () => setLocation("/settings/payment-management"),
-    },
-    {
-      icon: <Wallet className="h-6 w-6" />,
-      label: "Setting Akun E-Wallet",
-      description: "Pengaturan akun e-wallet",
-      action: () => setLocation("/settings/ewallet"),
-    },
-    {
-      icon: <HelpCircle className="h-6 w-6" />,
-      label: "Help & Support",
-      description: "Dapatkan bantuan dan hubungi support",
-      action: () => setLocation("/help"),
-    },
-    {
-      icon: <MessageSquare className="h-6 w-6" />,
-      label: "Feedback",
-      description: "Berikan masukan untuk aplikasi",
-      action: () => setLocation("/settings/feedback"),
-    },
-    {
-      icon: <LogOut className="h-6 w-6" />,
-      label: "Keluar",
-      description: "Keluar dari akun Anda",
-      action: handleLogout,
-    },
+      title: "Data & Bantuan",
+      items: [
+        {
+          icon: <Database className="h-6 w-6" />,
+          label: "Data & Storage",
+          description: "Kelola penyimpanan",
+          action: () => setLocation("/settings/data-storage"),
+        },
+        {
+          icon: <HelpCircle className="h-6 w-6" />,
+          label: "Help & Support",
+          description: "Dapatkan bantuan dan hubungi support",
+          action: () => setLocation("/help"),
+        },
+        {
+          icon: <MessageSquare className="h-6 w-6" />,
+          label: "Feedback",
+          description: "Berikan masukan untuk aplikasi",
+          action: () => setLocation("/settings/feedback"),
+        },
+      ]
+    }
   ];
+
+  const logoutItem = {
+    icon: <LogOut className="h-6 w-6" />,
+    label: "Keluar",
+    description: "Keluar dari akun Anda",
+    action: handleLogout,
+  };
+
+  // Flatten all settings for search functionality
+  const settingItems = settingSections.flatMap(section => section.items).concat(logoutItem);
 
   // Filter settings based on search query
   const filteredSettings = settingItems.filter(item =>
@@ -313,27 +342,85 @@ export default function Settings() {
       </div>
 
       {/* Settings Items */}
-      <div className="bg-nxe-card rounded-xl overflow-hidden border border-nxe-surface/30">
-        {filteredSettings.map((item, index) => (
-          <button
-            key={index}
-            onClick={item.action}
-            className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface/50 transition-colors border-b border-nxe-border/30 last:border-b-0"
-            data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-          >
-            <div className="text-nxe-primary flex-shrink-0">
-              {item.icon}
+      {showSearch && searchQuery ? (
+        // Show filtered results when searching
+        <div className="bg-nxe-card rounded-xl overflow-hidden border border-nxe-surface/30">
+          {filteredSettings.map((item, index) => (
+            <button
+              key={index}
+              onClick={item.action}
+              className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface/50 transition-colors border-b border-nxe-border/30 last:border-b-0"
+              data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <div className="text-nxe-primary flex-shrink-0">
+                {item.icon}
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="text-white font-semibold leading-tight">{item.label}</h3>
+                <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.description}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <ChevronRight className="h-5 w-5 text-gray-500" />
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        // Show organized sections when not searching
+        <div className="space-y-6">
+          {settingSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="space-y-3">
+              {/* Section Header */}
+              <h2 className="text-sm font-medium text-gray-400 px-2 uppercase tracking-wide">
+                {section.title}
+              </h2>
+              
+              {/* Section Items */}
+              <div className="bg-nxe-card rounded-xl overflow-hidden border border-nxe-surface/30">
+                {section.items.map((item, itemIndex) => (
+                  <button
+                    key={itemIndex}
+                    onClick={item.action}
+                    className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface/50 transition-colors border-b border-nxe-border/30 last:border-b-0"
+                    data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    <div className="text-nxe-primary flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="text-white font-semibold leading-tight">{item.label}</h3>
+                      <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.description}</p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <ChevronRight className="h-5 w-5 text-gray-500" />
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex-1 text-left">
-              <h3 className="text-white font-semibold leading-tight">{item.label}</h3>
-              <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.description}</p>
-            </div>
-            <div className="flex-shrink-0">
-              <ChevronRight className="h-5 w-5 text-gray-500" />
-            </div>
-          </button>
-        ))}
-      </div>
+          ))}
+          
+          {/* Logout Section - Separate */}
+          <div className="bg-nxe-card rounded-xl overflow-hidden border border-nxe-surface/30">
+            <button
+              onClick={logoutItem.action}
+              className="w-full p-4 flex items-center space-x-4 hover:bg-red-500/10 transition-colors"
+              data-testid={`button-setting-${logoutItem.label.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <div className="text-red-500 flex-shrink-0">
+                {logoutItem.icon}
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="text-white font-semibold leading-tight">{logoutItem.label}</h3>
+                <p className="text-gray-400 text-sm mt-1 leading-relaxed">{logoutItem.description}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <ChevronRight className="h-5 w-5 text-gray-500" />
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
