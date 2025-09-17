@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "wouter";
-import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck, Users, Megaphone, Star, Mail, Settings, UserCheck, Smartphone } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, ArrowLeft, User, Camera, Search, Paperclip, FileText, Download, Check, CheckCheck, Users, Megaphone, Star, Mail, Settings, UserCheck, Smartphone, Bell, Eye, Shield, Timer, Lock, UserPlus, Heart, UserMinus, Flag, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -118,6 +118,15 @@ export default function Chat() {
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [chatSettings, setChatSettings] = useState({
+    notifications: true,
+    mediaVisibility: true,
+    encryption: true,
+    temporaryMessages: false,
+    chatLock: false,
+    isFavorite: false,
+    isBlocked: false
+  });
   const { user } = useAuth();
   const currentUserId = user?.id || null; // Get user ID from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -762,7 +771,19 @@ export default function Chat() {
               <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
             
-            <div className="relative">
+            {/* Clickable User Profile Area */}
+            <div 
+              className="relative cursor-pointer hover:bg-gray-700/30 rounded-lg p-1 transition-colors"
+              onClick={() => {
+                const otherUserId = chatDetails ? 
+                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerId : chatDetails.buyerId) : 
+                  null;
+                if (otherUserId) {
+                  setLocation(`/profile/${otherUserId}`);
+                }
+              }}
+              data-testid="user-profile-clickable"
+            >
               <Avatar className="w-10 h-10">
                 <AvatarImage src={chatDetails ? 
                   (currentUserId === chatDetails.buyerId ? 
@@ -788,7 +809,18 @@ export default function Chat() {
               )}
             </div>
             
-            <div className="flex-1 min-w-0">
+            <div 
+              className="flex-1 min-w-0 cursor-pointer hover:bg-gray-700/30 rounded-lg p-1 transition-colors"
+              onClick={() => {
+                const otherUserId = chatDetails ? 
+                  (currentUserId === chatDetails.buyerId ? chatDetails.sellerId : chatDetails.buyerId) : 
+                  null;
+                if (otherUserId) {
+                  setLocation(`/profile/${otherUserId}`);
+                }
+              }}
+              data-testid="user-info-clickable"
+            >
               <div className="flex items-center space-x-2">
                 <p className="text-white font-medium truncate">
                   {chatDetails ? 
@@ -852,15 +884,195 @@ export default function Chat() {
               </>
             )}
             
-            <Button variant="ghost" size="sm" className="p-2">
+            <Button variant="ghost" size="sm" className="p-2" data-testid="button-voice-call">
               <Phone className="h-4 w-4 text-gray-400" />
             </Button>
-            <Button variant="ghost" size="sm" className="p-2">
+            <Button variant="ghost" size="sm" className="p-2" data-testid="button-video-call">
               <Video className="h-4 w-4 text-gray-400" />
             </Button>
-            <Button variant="ghost" size="sm" className="p-2">
-              <MoreVertical className="h-4 w-4 text-gray-400" />
-            </Button>
+            
+            {/* WhatsApp-style Chat Options Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2" data-testid="button-chat-options">
+                  <MoreVertical className="h-4 w-4 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64 bg-nxe-surface border border-gray-600 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+                {/* Primary Actions */}
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-send-message"
+                >
+                  <MessageSquare className="h-4 w-4 text-gray-300" />
+                  <span className="text-white">Kirim pesan</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-voice-call"
+                >
+                  <Phone className="h-4 w-4 text-gray-300" />
+                  <span className="text-white">Panggilan</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-video-call"
+                >
+                  <Video className="h-4 w-4 text-gray-300" />
+                  <span className="text-white">Video</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="bg-gray-600" />
+                
+                {/* Chat Settings */}
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between px-4 py-3"
+                  onClick={() => setChatSettings(prev => ({ ...prev, notifications: !prev.notifications }))}
+                  data-testid="menu-notifications"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Bell className="h-4 w-4 text-gray-300" />
+                    <span className="text-white">Notifikasi</span>
+                  </div>
+                  <div className={`w-4 h-4 rounded ${chatSettings.notifications ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-media-visibility"
+                >
+                  <Eye className="h-4 w-4 text-gray-300" />
+                  <div>
+                    <div className="text-white">Visibilitas media</div>
+                    <div className="text-xs text-gray-400">Media bisa dilihat</div>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-encryption"
+                >
+                  <Shield className="h-4 w-4 text-gray-300" />
+                  <div>
+                    <div className="text-white">Enkripsi</div>
+                    <div className="text-xs text-gray-400">Pesan dan panggilan terenkripsi secara end-to-end. Ketuk untuk memverifikasi.</div>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  onClick={() => setChatSettings(prev => ({ ...prev, temporaryMessages: !prev.temporaryMessages }))}
+                  data-testid="menu-temporary-messages"
+                >
+                  <Timer className="h-4 w-4 text-gray-300" />
+                  <div>
+                    <div className="text-white">Pesan sementara</div>
+                    <div className="text-xs text-gray-400">{chatSettings.temporaryMessages ? 'Aktif' : 'Mati'}</div>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between px-4 py-3"
+                  onClick={() => setChatSettings(prev => ({ ...prev, chatLock: !prev.chatLock }))}
+                  data-testid="menu-chat-lock"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Lock className="h-4 w-4 text-gray-300" />
+                    <div>
+                      <div className="text-white">Kunci chat</div>
+                      <div className="text-xs text-gray-400">Kunci dan sembunyikan chat ini di perangkat ini.</div>
+                    </div>
+                  </div>
+                  <div className={`w-8 h-4 rounded-full ${chatSettings.chatLock ? 'bg-green-500' : 'bg-gray-500'} relative transition-colors`}>
+                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform duration-200 ${chatSettings.chatLock ? 'translate-x-4' : 'translate-x-0.5'}`}></div>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-privacy"
+                >
+                  <Shield className="h-4 w-4 text-gray-300" />
+                  <div>
+                    <div className="text-white">Privasi chat tingkat lanjut</div>
+                    <div className="text-xs text-gray-400">Mati</div>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="bg-gray-600" />
+                
+                {/* Group & Social Actions */}
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-create-group"
+                >
+                  <Users className="h-4 w-4 text-green-400" />
+                  <span className="text-white">
+                    Buat grup dengan {chatDetails ? 
+                      (currentUserId === chatDetails.buyerId ? 
+                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
+                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
+                      ) : 'pengguna ini'
+                    }
+                  </span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  onClick={() => setChatSettings(prev => ({ ...prev, isFavorite: !prev.isFavorite }))}
+                  data-testid="menu-add-favorite"
+                >
+                  <Heart className={`h-4 w-4 ${chatSettings.isFavorite ? 'text-red-400 fill-current' : 'text-gray-300'}`} />
+                  <span className="text-white">
+                    {chatSettings.isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+                  </span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-add-contact"
+                >
+                  <UserPlus className="h-4 w-4 text-gray-300" />
+                  <span className="text-white">Tambah ke daftar</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="bg-gray-600" />
+                
+                {/* Warning Actions */}
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  onClick={() => setChatSettings(prev => ({ ...prev, isBlocked: !prev.isBlocked }))}
+                  data-testid="menu-block-user"
+                >
+                  <UserMinus className="h-4 w-4 text-red-400" />
+                  <span className="text-red-400">
+                    {chatSettings.isBlocked ? 'Buka blokir' : 'Blokir'} {chatDetails ? 
+                      (currentUserId === chatDetails.buyerId ? 
+                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
+                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
+                      ) : 'pengguna ini'
+                    }
+                  </span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-gray-700 transition-colors duration-150 flex items-center space-x-3 px-4 py-3"
+                  data-testid="menu-report-user"
+                >
+                  <Flag className="h-4 w-4 text-red-400" />
+                  <span className="text-red-400">
+                    Laporkan {chatDetails ? 
+                      (currentUserId === chatDetails.buyerId ? 
+                        (chatDetails.sellerDisplayName || chatDetails.sellerUsername || 'pengguna ini') :
+                        (chatDetails.buyerDisplayName || chatDetails.buyerUsername || 'pengguna ini')
+                      ) : 'pengguna ini'
+                    }
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
