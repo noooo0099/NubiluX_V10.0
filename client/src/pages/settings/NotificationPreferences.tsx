@@ -65,7 +65,7 @@ export default function NotificationPreferences() {
   const togglePreference = (key: string) => {
     setPreferences(prev => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key as keyof typeof preferences]
     }));
   };
 
@@ -90,107 +90,86 @@ export default function NotificationPreferences() {
       </div>
 
       <div className="p-6">
-        {/* General Settings */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-nxe-text mb-4">Pengaturan Umum</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-nxe-card rounded-xl">
-              <div>
-                <h3 className="font-medium text-nxe-text">Push Notifications</h3>
-                <p className="text-sm text-nxe-text-secondary">Terima notifikasi push di perangkat</p>
-              </div>
+        {/* General Settings - Simplified */}
+        <div className="mb-6">
+          <h2 className="text-base text-nxe-text mb-3">Pengaturan Umum</h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-nxe-text">Push Notifications</span>
               <button
                 onClick={() => togglePreference('pushNotifications')}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  preferences.pushNotifications ? 'bg-nxe-primary' : 'bg-nxe-border'
+                className={`w-9 h-5 rounded-full transition-colors ${
+                  preferences.pushNotifications ? 'bg-nxe-primary' : 'bg-gray-600'
                 }`}
               >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  preferences.pushNotifications ? 'translate-x-6' : 'translate-x-0.5'
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  preferences.pushNotifications ? 'translate-x-4' : 'translate-x-0.5'
                 }`} />
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-nxe-card rounded-xl">
-              <div>
-                <h3 className="font-medium text-nxe-text">Email Notifications</h3>
-                <p className="text-sm text-nxe-text-secondary">Terima notifikasi via email</p>
-              </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-nxe-text">Email Notifications</span>
               <button
                 onClick={() => togglePreference('emailNotifications')}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  preferences.emailNotifications ? 'bg-nxe-primary' : 'bg-nxe-border'
+                className={`w-9 h-5 rounded-full transition-colors ${
+                  preferences.emailNotifications ? 'bg-nxe-primary' : 'bg-gray-600'
                 }`}
               >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  preferences.emailNotifications ? 'translate-x-6' : 'translate-x-0.5'
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  preferences.emailNotifications ? 'translate-x-4' : 'translate-x-0.5'
                 }`} />
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-nxe-card rounded-xl">
-              <div>
-                <h3 className="font-medium text-nxe-text">Suara Notifikasi</h3>
-                <p className="text-sm text-nxe-text-secondary">Putar suara saat ada notifikasi</p>
-              </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-nxe-text">Suara</span>
               <button
                 onClick={() => togglePreference('soundEnabled')}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  preferences.soundEnabled ? 'bg-nxe-primary' : 'bg-nxe-border'
+                className={`w-9 h-5 rounded-full transition-colors ${
+                  preferences.soundEnabled ? 'bg-nxe-primary' : 'bg-gray-600'
                 }`}
               >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  preferences.soundEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  preferences.soundEnabled ? 'translate-x-4' : 'translate-x-0.5'
                 }`} />
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-nxe-card rounded-xl">
-              <div>
-                <h3 className="font-medium text-nxe-text">Getaran</h3>
-                <p className="text-sm text-nxe-text-secondary">Getarkan perangkat saat notifikasi</p>
-              </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-nxe-text">Getaran</span>
               <button
                 onClick={() => togglePreference('vibrationEnabled')}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  preferences.vibrationEnabled ? 'bg-nxe-primary' : 'bg-nxe-border'
+                className={`w-9 h-5 rounded-full transition-colors ${
+                  preferences.vibrationEnabled ? 'bg-nxe-primary' : 'bg-gray-600'
                 }`}
               >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  preferences.vibrationEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  preferences.vibrationEnabled ? 'translate-x-4' : 'translate-x-0.5'
                 }`} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Notification Types */}
+        {/* Notification Types - Simplified */}
         <div>
-          <h2 className="text-lg font-semibold text-nxe-text mb-4">Jenis Notifikasi</h2>
-          <div className="space-y-4">
+          <h2 className="text-base text-nxe-text mb-3">Jenis Notifikasi</h2>
+          <div className="space-y-2">
             {notificationTypes.map((type) => {
-              const Icon = type.icon;
               const isEnabled = preferences[type.id as keyof typeof preferences];
               
               return (
-                <div key={type.id} className="flex items-center justify-between p-4 bg-nxe-card rounded-xl">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-nxe-surface rounded-full">
-                      <Icon className="w-5 h-5 text-nxe-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-nxe-text">{type.title}</h3>
-                      <p className="text-sm text-nxe-text-secondary">{type.description}</p>
-                    </div>
-                  </div>
+                <div key={type.id} className="flex items-center justify-between py-2">
+                  <span className="text-sm text-nxe-text">{type.title}</span>
                   <button
                     onClick={() => togglePreference(type.id)}
-                    className={`w-12 h-6 rounded-full transition-colors ${
-                      isEnabled ? 'bg-nxe-primary' : 'bg-nxe-border'
+                    className={`w-9 h-5 rounded-full transition-colors ${
+                      isEnabled ? 'bg-nxe-primary' : 'bg-gray-600'
                     }`}
                   >
-                    <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                      isEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                      isEnabled ? 'translate-x-4' : 'translate-x-0.5'
                     }`} />
                   </button>
                 </div>
