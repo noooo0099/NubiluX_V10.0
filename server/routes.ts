@@ -10,7 +10,7 @@ import { storage } from "./storage";
 import { 
   insertProductSchema, insertChatSchema, insertMessageSchema, 
   insertUserSchema, insertPosterGenerationSchema, userRegisterSchema,
-  insertEscrowTransactionSchema, escrowPublicCreateSchema
+  insertEscrowTransactionSchema, escrowPublicCreateSchema, insertRepostSchema
 } from "@shared/schema";
 import { generatePoster, processAdminMention } from "./deepseek";
 import { seedDatabase } from "./seed";
@@ -635,12 +635,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/products/:id', async (req, res) => {
     try {
-      const product = await storage.getProduct(parseInt(req.params.id));
+      const productId = parseInt(req.params.id);
+      const product = await storage.getProduct(productId);
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
       }
-      res.json(product);
+
+      // Get repost metadata
+      const repostCount = await storage.getRepostCountByProduct(productId);
+      const isReposted = req.userId ? !!(await storage.getRepost(req.userId, productId)) : false;
+
+      // Add repost metadata to product
+      const productWithReposts = {
+        ...product,
+        repostCount,
+        isReposted
+      };
+
+      res.json(productWithReposts);
     } catch (error) {
+      console.error('Get product error:', error);
       res.status(500).json({ error: 'Server error' });
     }
   });
@@ -707,6 +721,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Delete product error:', error);
       res.status(500).json({ error: 'Failed to delete product' });
+    }
+  });
+
+  // Repost routes
+  app.post('/api/reposts', requireAuth, async (req, res) => {
+    try {
+      const { productId, statusId, comment } = req.body;
+      const userId = req.userId!;
+      
+      // Validate that either productId or statusId is provided, not both
+      if ((!productId && !statusId) || (productId && statusId)) {
+        return res.status(400).json({ error: 'Must provide either productId or statusId, not both' });
+      }
+      
+      // Check if already reposted
+      const existingRepost = await storage.getRepost(userId, productId, statusId);
+      if (existingRepost) {
+        // Delete the existing repost (toggle off)
+        await storage.deleteRepost(userId, productId, statusId);
+        return res.json({ message: 'Repost removed successfully', isReposted: false });
+      }
+      
+      // If reposting a product, check if it exists and user is not the owner
+      if (productId) {
+        const product = await storage.getProduct(productId);
+        if (!product) {
+          return res.status(404).json({ error: 'Product not found' });
+        }
+        if (product.sellerId === userId) {
+          return res.status(400).json({ error: 'Cannot repost your own product' });
+        }
+      }
+      
+      // Create the repost
+      const repostData = insertRepostSchema.parse({
+        userId,
+        productId: productId || null,
+        statusId: statusId || null,
+        comment: comment || null
+      });
+      
+      const repost = await storage.createRepost(repostData);
+      res.json({ message: 'Reposted successfully', repost, isReposted: true });
+    } catch (error) {
+      console.error('Repost error:', error);
+      res.status(500).json({ error: 'Failed to create repost' });
+    }
+  });
+
+  app.delete('/api/reposts', requireAuth, async (req, res) => {
+    try {
+      const { productId, statusId } = req.query;
+      const userId = req.userId!;
+      
+      if ((!productId && !statusId) || (productId && statusId)) {
+        return res.status(400).json({ error: 'Must provide either productId or statusId, not both' });
+      }
+      
+      await storage.deleteRepost(userId, parseInt(productId as string), parseInt(statusId as string));
+      res.json({ message: 'Repost removed successfully' });
+    } catch (error) {
+      console.error('Delete repost error:', error);
+      res.status(500).json({ error: 'Failed to remove repost' });
+    }
+  });
+
+  app.get('/api/reposts/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const reposts = await storage.getRepostsByUser(userId);
+      res.json(reposts);
+    } catch (error) {
+      console.error('Get reposts error:', error);
+      res.status(500).json({ error: 'Failed to get reposts' });
     }
   });
 

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "wouter";
-import { ArrowLeft, Star, Heart, MessageCircle, Shield, Eye, Calendar } from "lucide-react";
+import { ArrowLeft, Star, Heart, MessageCircle, Shield, Eye, Calendar, Repeat } from "lucide-react";
 import { CustomShareIcon } from "@/components/icons/CustomShareIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,6 +27,8 @@ interface ProductDetail {
   rating: string;
   reviewCount: number;
   createdAt: string;
+  repostCount: number;
+  isReposted: boolean;
   seller?: {
     id: number;
     username: string;
@@ -35,6 +37,10 @@ interface ProductDetail {
     isVerified: boolean;
     rating?: string;
   };
+  repostedBy?: {
+    username: string;
+    displayName?: string;
+  };
 }
 
 export default function ProductDetail() {
@@ -42,6 +48,8 @@ export default function ProductDetail() {
   const [, setLocation] = useLocation();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isReposted, setIsReposted] = useState(false);
+  const [repostCount, setRepostCount] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -49,6 +57,14 @@ export default function ProductDetail() {
   const { data: product, isLoading } = useQuery<ProductDetail>({
     queryKey: [`/api/products/${productId}`],
   });
+
+  // Update local state when product data changes
+  useEffect(() => {
+    if (product) {
+      setIsReposted(product.isReposted || false);
+      setRepostCount(product.repostCount || 0);
+    }
+  }, [product]);
 
   // Create chat mutation
   const createChatMutation = useMutation({
@@ -110,6 +126,44 @@ export default function ProductDetail() {
         description: "Product link copied to clipboard",
       });
     }
+  };
+
+  // Repost mutation
+  const repostMutation = useMutation({
+    mutationFn: async () => {
+      if (!product) throw new Error("Product not found");
+      return apiRequest('/api/reposts', {
+        method: 'POST',
+        body: JSON.stringify({
+          productId: product.id,
+          comment: null
+        })
+      });
+    },
+    onSuccess: () => {
+      setIsReposted(!isReposted);
+      setRepostCount(prev => isReposted ? prev - 1 : prev + 1);
+      toast({
+        title: isReposted ? "Repost dibatalkan" : "Produk direpost!",
+        description: isReposted 
+          ? "Produk dihapus dari status Anda" 
+          : "Produk ditambahkan ke status Anda",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+    },
+    onError: () => {
+      toast({
+        title: "Gagal repost",
+        description: "Silakan coba lagi nanti",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleRepost = () => {
+    if (!product) return;
+    repostMutation.mutate();
   };
 
   const formatCurrency = (amount: string) => {
@@ -179,6 +233,16 @@ export default function ProductDetail() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={handleRepost}
+              className="p-2 hover:bg-nxe-surface/50 rounded-full transition-colors"
+              data-testid="button-repost"
+              disabled={repostMutation.isPending}
+            >
+              <Repeat className={`h-5 w-5 transition-colors ${isReposted ? 'text-nxe-primary' : 'text-gray-400'}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleShare}
               className="p-2 hover:bg-nxe-surface/50 rounded-full transition-colors"
               data-testid="button-share"
@@ -219,6 +283,16 @@ export default function ProductDetail() {
           </div>
         )}
       </div>
+
+      {/* Repost Indicator */}
+      {product?.repostedBy && (
+        <div className="px-6 py-3 border-b border-nxe-surface/30">
+          <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <Repeat className="h-4 w-4" />
+            <span>Diposting ulang oleh <span className="text-white font-medium">{product.repostedBy.displayName || product.repostedBy.username}</span></span>
+          </div>
+        </div>
+      )}
 
       {/* Product Info */}
       <div className="p-6 space-y-6">

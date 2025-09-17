@@ -241,16 +241,16 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Profile Info - Mobile optimized */}
-        <div className="relative px-3 md:px-4 pb-4 md:pb-6">
-          <div className="flex items-end space-x-3 md:space-x-4 -mt-10 md:-mt-16">
-            <div className="relative flex-shrink-0">
-              <Avatar className="w-20 h-20 md:w-32 md:h-32 border-3 md:border-4 border-nxe-dark">
+        {/* Profile Info - Mobile optimized with extended background */}
+        <div className="relative px-4 md:px-6 pb-6 md:pb-8 bg-gradient-to-b from-nxe-dark/80 via-nxe-dark to-nxe-dark">
+          <div className="flex flex-col items-center -mt-16 md:-mt-20">
+            <div className="relative flex-shrink-0 mb-4">
+              <Avatar className="w-28 h-28 md:w-36 md:h-36 border-4 md:border-6 border-nxe-dark shadow-2xl">
                 <AvatarImage 
                   src={profile.profilePicture || `https://images.unsplash.com/photo-${1500 + profile.id}?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200`} 
                   alt={profile.username}
                 />
-                <AvatarFallback className="text-lg md:text-2xl">
+                <AvatarFallback className="text-2xl md:text-3xl">
                   {profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -258,59 +258,60 @@ export default function Profile() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute -bottom-1 -right-1 bg-nxe-primary hover:bg-nxe-primary/90 rounded-full p-1.5 h-7 w-7 shadow-lg border-2 border-nxe-dark"
+                  className="absolute -bottom-1 -right-1 bg-nxe-primary hover:bg-nxe-primary/90 rounded-full p-2 h-8 w-8 shadow-lg border-2 border-nxe-dark"
                   data-testid="button-edit-avatar"
                 >
-                  <Camera className="h-3 w-3 text-white" />
+                  <Camera className="h-4 w-4 text-white" />
                 </Button>
               )}
             </div>
 
-            <div className="flex-1 min-w-0 pb-2 md:pb-4 relative">
-              {/* Glassmorphism background for text */}
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-xl -z-10" />
-              <div className="p-3">
-                <div className="flex items-center space-x-2 mb-2">
-                  <h1 className="text-xl md:text-3xl font-bold text-white truncate drop-shadow-lg">
-                    {profile.displayName || profile.username}
-                  </h1>
-                  {profile.isVerified && (
-                    <div className="relative">
-                      <Shield className="h-5 w-5 md:h-6 md:w-6 text-blue-400 flex-shrink-0 drop-shadow-lg" />
-                      <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-sm animate-pulse" />
-                    </div>
-                  )}
-                </div>
-                
-                <p className="text-gray-200 mb-3 text-sm md:text-base drop-shadow-sm">@{profile.username}</p>
-                
-                <div className="flex items-center space-x-3 mb-3 flex-wrap gap-2">
-                  <Badge 
-                    variant={profile.role === 'seller' ? 'default' : 'secondary'}
-                    className={`${profile.role === 'seller' ? 'bg-gradient-to-r from-nxe-primary to-green-600 border-0 shadow-lg' : 'bg-gradient-to-r from-gray-600 to-gray-700 border-0'} text-xs font-medium px-3 py-1`}
-                  >
-                    {profile.role === 'seller' ? (
-                      <><Sparkles className="h-3 w-3 mr-1" /> Seller</>
-                    ) : (
-                      <><UserPlus className="h-3 w-3 mr-1" /> Buyer</>
-                    )}
-                  </Badge>
-                  <span className="text-gray-300 text-xs md:text-sm bg-black/30 px-2 py-1 rounded-full">
-                    Joined {formatDate(profile.createdAt)}
-                  </span>
-                </div>
-
-                {profile.bio && (
-                  <p className="text-gray-200 text-sm md:text-base mb-2 line-clamp-2 md:line-clamp-3 drop-shadow-sm leading-relaxed">
-                    {profile.bio}
-                  </p>
+            {/* Centered Profile Information */}
+            <div className="text-center w-full max-w-md">
+              {/* Name and Verification */}
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+                  {profile.displayName || profile.username}
+                </h1>
+                {profile.isVerified && (
+                  <div className="relative">
+                    <Shield className="h-6 w-6 md:h-7 md:w-7 text-blue-400 flex-shrink-0 drop-shadow-lg" />
+                    <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-sm animate-pulse" />
+                  </div>
                 )}
               </div>
+              
+              {/* Username */}
+              <p className="text-gray-200 mb-4 text-sm md:text-base drop-shadow-sm">@{profile.username}</p>
+              
+              {/* Role Badge and Join Date */}
+              <div className="flex items-center justify-center space-x-3 mb-4 flex-wrap gap-2">
+                <Badge 
+                  variant={profile.role === 'seller' ? 'default' : 'secondary'}
+                  className={`${profile.role === 'seller' ? 'bg-gradient-to-r from-nxe-primary to-green-600 border-0 shadow-lg' : 'bg-gradient-to-r from-gray-600 to-gray-700 border-0'} text-xs font-medium px-3 py-1`}
+                >
+                  {profile.role === 'seller' ? (
+                    <><Sparkles className="h-3 w-3 mr-1" /> Seller</>
+                  ) : (
+                    <><UserPlus className="h-3 w-3 mr-1" /> Buyer</>
+                  )}
+                </Badge>
+                <span className="text-gray-300 text-xs md:text-sm bg-black/30 px-3 py-1 rounded-full">
+                  Joined {formatDate(profile.createdAt)}
+                </span>
+              </div>
+
+              {/* Bio */}
+              {profile.bio && (
+                <p className="text-gray-200 text-sm md:text-base mb-4 leading-relaxed drop-shadow-sm max-w-sm mx-auto">
+                  {profile.bio}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Modern action buttons */}
-          <div className="mt-4 px-3">
+            {/* Action buttons - centered */}
+            <div className="mt-6 w-full max-w-sm mx-auto px-2">
             {isOwnProfile ? (
               <Button
                 onClick={() => setIsEditing(true)}

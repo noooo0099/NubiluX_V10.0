@@ -1,11 +1,11 @@
 import { 
   users, products, chats, messages, transactions, walletTransactions, 
-  statusUpdates, notifications, posterGenerations, escrowTransactions,
+  statusUpdates, notifications, posterGenerations, escrowTransactions, reposts,
   type User, type InsertUser, type Product, type InsertProduct,
   type Chat, type InsertChat, type Message, type InsertMessage,
   type Transaction, type InsertTransaction, type StatusUpdate, type InsertStatusUpdate,
   type Notification, type InsertNotification, type PosterGeneration, type InsertPosterGeneration,
-  type EscrowTransaction, type InsertEscrowTransaction
+  type EscrowTransaction, type InsertEscrowTransaction, type Repost, type InsertRepost
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, or, gt, lt } from "drizzle-orm";
@@ -68,6 +68,14 @@ export interface IStorage {
   createEscrowTransaction(escrow: InsertEscrowTransaction): Promise<EscrowTransaction>;
   updateEscrowTransaction(id: number, updates: Partial<EscrowTransaction>): Promise<EscrowTransaction | undefined>;
   getEscrowStats(): Promise<{ pending: number; active: number; completed: number; disputed: number }>;
+  
+  // Repost operations
+  getRepost(userId: number, productId?: number, statusId?: number): Promise<Repost | undefined>;
+  createRepost(repost: InsertRepost): Promise<Repost>;
+  deleteRepost(userId: number, productId?: number, statusId?: number): Promise<void>;
+  getRepostsByUser(userId: number): Promise<Repost[]>;
+  getRepostCountByProduct(productId: number): Promise<number>;
+  getRepostCountByStatus(statusId: number): Promise<number>;
   
   // Session store for authentication
   sessionStore: Store;
@@ -489,6 +497,58 @@ export class DatabaseStorage implements IStorage {
       disputed: db.$count(escrowTransactions, eq(escrowTransactions.status, "disputed"))
     }).from(escrowTransactions);
     return stats || { pending: 0, active: 0, completed: 0, disputed: 0 };
+  }
+
+  async getRepost(userId: number, productId?: number, statusId?: number): Promise<Repost | undefined> {
+    const conditions = [eq(reposts.userId, userId)];
+    
+    if (productId) {
+      conditions.push(eq(reposts.productId, productId));
+    }
+    if (statusId) {
+      conditions.push(eq(reposts.statusId, statusId));
+    }
+    
+    const [repost] = await db.select().from(reposts)
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions));
+    return repost || undefined;
+  }
+
+  async createRepost(repost: InsertRepost): Promise<Repost> {
+    const [newRepost] = await db.insert(reposts).values(repost).returning();
+    return newRepost;
+  }
+
+  async deleteRepost(userId: number, productId?: number, statusId?: number): Promise<void> {
+    const conditions = [eq(reposts.userId, userId)];
+    
+    if (productId) {
+      conditions.push(eq(reposts.productId, productId));
+    }
+    if (statusId) {
+      conditions.push(eq(reposts.statusId, statusId));
+    }
+    
+    await db.delete(reposts)
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions));
+  }
+
+  async getRepostsByUser(userId: number): Promise<Repost[]> {
+    return await db.select().from(reposts)
+      .where(eq(reposts.userId, userId))
+      .orderBy(desc(reposts.createdAt));
+  }
+
+  async getRepostCountByProduct(productId: number): Promise<number> {
+    const [result] = await db.select({ count: db.$count(reposts) }).from(reposts)
+      .where(eq(reposts.productId, productId));
+    return result?.count || 0;
+  }
+
+  async getRepostCountByStatus(statusId: number): Promise<number> {
+    const [result] = await db.select({ count: db.$count(reposts) }).from(reposts)
+      .where(eq(reposts.statusId, statusId));
+    return result?.count || 0;
   }
 }
 

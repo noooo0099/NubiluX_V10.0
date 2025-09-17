@@ -18,7 +18,8 @@ import {
   MessageCircle,
   Share,
   Camera,
-  X
+  X,
+  Search
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -139,21 +140,80 @@ export default function StatusUpdates() {
 
   return (
     <div className="min-h-screen bg-nxe-dark">
-      {/* Header */}
-      <div className="p-4 border-b border-nxe-border">
+      {/* Header - Mobile style */}
+      <div className="px-4 py-3 border-b border-nxe-border">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Status Update</h1>
-            <p className="text-nxe-text">Bagikan momen gaming Anda - hilang dalam 24 jam</p>
+            <h1 className="text-2xl font-bold text-white">Pembaruan</h1>
           </div>
-          <Button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-nxe-primary hover:bg-nxe-primary/80 text-white"
-            data-testid="button-create-status"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Buat Status
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-nxe-surface/50 rounded-full p-2"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-nxe-surface/50 rounded-full p-2"
+            >
+              <MessageCircle className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Section - Horizontal Scrollable */}
+      <div className="px-0 py-4 border-b border-nxe-border/30">
+        <h2 className="text-lg font-semibold text-white mb-4 px-4">Status</h2>
+        <div className="flex space-x-3 overflow-x-auto pb-2 px-4 scrollbar-hide">
+          {/* Add Status Button */}
+          <div className="flex flex-col items-center min-w-max" data-testid="add-status-container">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="w-16 h-16 rounded-lg bg-gradient-to-br from-nxe-surface to-nxe-card flex items-center justify-center border-2 border-dashed border-gray-600 hover:border-nxe-primary transition-colors"
+              data-testid="button-add-status"
+            >
+              <Plus className="h-8 w-8 text-nxe-primary" />
+            </button>
+            <p className="text-xs text-gray-300 mt-2 text-center max-w-16 truncate">Tambah Status</p>
+          </div>
+          
+          {/* Status Updates */}
+          {(statusUpdates as StatusUpdate[]).map((status) => (
+            <div key={status.id} className="flex flex-col items-center min-w-max" data-testid={`status-item-${status.id}`}>
+              <div className="relative">
+                <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-nxe-primary/50 hover:border-nxe-primary transition-colors">
+                  {status.media ? (
+                    status.mediaType === 'image' ? (
+                      <img
+                        src={status.media}
+                        alt={`Status by ${status.user.displayName || status.user.username}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <video
+                        src={status.media}
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                    )
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-nxe-primary/20 to-nxe-accent/20 flex items-center justify-center">
+                      <User className="h-6 w-6 text-white" />
+                    </div>
+                  )}
+                </div>
+                {/* Status indicator - small dot */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-nxe-primary rounded-full border-2 border-nxe-dark"></div>
+              </div>
+              <p className="text-xs text-white mt-2 text-center max-w-16 truncate font-medium">
+                {status.user.displayName || status.user.username}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -246,19 +306,19 @@ export default function StatusUpdates() {
         </div>
       )}
 
-      {/* Status Updates List */}
+      {/* Content Area - placeholder for other content */}
       <div className="p-4">
         {isLoading ? (
-          <div className="flex justify-center items-center min-h-64" data-testid="status-updates-loading">
+          <div className="flex justify-center items-center min-h-32" data-testid="status-updates-loading">
             <Loading variant="pulse" />
           </div>
         ) : (statusUpdates as StatusUpdate[]).length === 0 ? (
-          <div className="text-center py-12">
-            <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+          <div className="text-center py-8">
+            <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-white mb-2">
               Belum ada status update
             </h3>
-            <p className="text-nxe-text mb-4">
+            <p className="text-gray-400 text-sm mb-4">
               Jadilah yang pertama membagikan momen gaming Anda!
             </p>
             <Button

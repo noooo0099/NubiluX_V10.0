@@ -200,7 +200,7 @@ export default function Settings() {
               <ChevronRight className="h-6 w-6 rotate-180" />
             </button>
             
-            <h1 className="text-xl font-medium text-white text-center flex-1">Pengaturan</h1>
+            <h1 className="text-xl font-semibold text-white text-center flex-1">Pengaturan</h1>
             
             <button 
               onClick={handleSearchToggle}
@@ -247,10 +247,10 @@ export default function Settings() {
       </div>
 
       {/* Profile Section */}
-      <div className="bg-nxe-card rounded-xl mb-6 overflow-hidden">
+      <div className="bg-nxe-card rounded-xl mb-6 overflow-hidden border border-nxe-surface/30">
         <button
           onClick={() => setLocation("/profile")}
-          className="w-full p-4 text-left hover:bg-nxe-surface transition-colors duration-200"
+          className="w-full p-5 text-left hover:bg-nxe-surface/40 transition-colors duration-200"
           data-testid="button-profile-container"
         >
           <div className="flex items-center space-x-4">
@@ -272,13 +272,13 @@ export default function Settings() {
             
             {/* User Info */}
             <div className="flex-1">
-              <h2 className="text-lg font-medium text-white" data-testid="text-username">
+              <h2 className="text-lg font-semibold text-white" data-testid="text-username">
                 {user?.displayName || user?.username || "Pengguna"}
               </h2>
-              <p className="text-gray-400 text-sm" data-testid="text-contact">
+              <p className="text-gray-300 text-sm" data-testid="text-contact">
                 {user?.email || "Belum ada kontak"}
               </p>
-              <p className="text-gray-400 text-sm" data-testid="text-status">
+              <p className="text-gray-400 text-xs" data-testid="text-status">
                 {user?.role === 'admin' ? 'Administrator' : user?.role === 'owner' ? 'Pemilik' : 'Pengguna'}
               </p>
             </div>
@@ -313,20 +313,23 @@ export default function Settings() {
       </div>
 
       {/* Settings Items */}
-      <div className="bg-nxe-card rounded-xl overflow-hidden">
+      <div className="bg-nxe-card rounded-xl overflow-hidden border border-nxe-surface/30">
         {filteredSettings.map((item, index) => (
           <button
             key={index}
             onClick={item.action}
-            className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface transition-colors border-b border-nxe-border last:border-b-0"
+            className="w-full p-4 flex items-center space-x-4 hover:bg-nxe-surface/50 transition-colors border-b border-nxe-border/30 last:border-b-0"
             data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
           >
-            <div className="text-nxe-primary">
+            <div className="text-nxe-primary flex-shrink-0">
               {item.icon}
             </div>
             <div className="flex-1 text-left">
-              <h3 className="text-white font-medium">{item.label}</h3>
-              <p className="text-gray-400 text-sm">{item.description}</p>
+              <h3 className="text-white font-semibold leading-tight">{item.label}</h3>
+              <p className="text-gray-400 text-sm mt-1 leading-relaxed">{item.description}</p>
+            </div>
+            <div className="flex-shrink-0">
+              <ChevronRight className="h-5 w-5 text-gray-500" />
             </div>
           </button>
         ))}

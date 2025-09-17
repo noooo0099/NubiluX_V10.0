@@ -149,6 +149,19 @@ export const posterGenerations = pgTable("poster_generations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const reposts = pgTable("reposts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  productId: integer("product_id").references(() => products.id),
+  statusId: integer("status_id").references(() => statusUpdates.id),
+  comment: text("comment"), // optional comment when reposting
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  // Ensure a user can only repost once per item
+  uniqueUserProduct: index("unique_user_product_repost").on(table.userId, table.productId),
+  uniqueUserStatus: index("unique_user_status_repost").on(table.userId, table.statusId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   products: many(products),
@@ -160,6 +173,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   walletTransactions: many(walletTransactions),
   buyerEscrowTransactions: many(escrowTransactions, { relationName: "buyer" }),
   sellerEscrowTransactions: many(escrowTransactions, { relationName: "seller" }),
+  reposts: many(reposts),
   approvedAdmins: many(users, { relationName: "approved_by_owner" }),
   approvedByOwner: one(users, {
     fields: [users.approvedByOwnerId],
@@ -176,6 +190,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   chats: many(chats),
   transactions: many(transactions),
   escrowTransactions: many(escrowTransactions),
+  reposts: many(reposts),
 }));
 
 export const escrowTransactionsRelations = relations(escrowTransactions, ({ one }) => ({
@@ -230,6 +245,29 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     fields: [messages.senderId],
     references: [users.id],
   }),
+}));
+
+export const repostsRelations = relations(reposts, ({ one }) => ({
+  user: one(users, {
+    fields: [reposts.userId],
+    references: [users.id],
+  }),
+  product: one(products, {
+    fields: [reposts.productId],
+    references: [products.id],
+  }),
+  status: one(statusUpdates, {
+    fields: [reposts.statusId],
+    references: [statusUpdates.id],
+  }),
+}));
+
+export const statusUpdatesRelations = relations(statusUpdates, ({ one, many }) => ({
+  user: one(users, {
+    fields: [statusUpdates.userId],
+    references: [users.id],
+  }),
+  reposts: many(reposts),
 }));
 
 // Zod schemas
@@ -318,6 +356,11 @@ export const insertPosterGenerationSchema = createInsertSchema(posterGenerations
   createdAt: true,
 });
 
+export const insertRepostSchema = createInsertSchema(reposts).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -339,3 +382,5 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type PosterGeneration = typeof posterGenerations.$inferSelect;
 export type InsertPosterGeneration = z.infer<typeof insertPosterGenerationSchema>;
+export type Repost = typeof reposts.$inferSelect;
+export type InsertRepost = z.infer<typeof insertRepostSchema>;
