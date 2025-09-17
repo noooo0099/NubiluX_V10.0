@@ -3,7 +3,6 @@ import { Search, Bell, MessageCircle, X, LogIn, User, MoreVertical, Settings, Lo
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -180,13 +179,15 @@ export default function TopNavbar({ onShowNotifications }: TopNavbarProps) {
                   <div className="relative">
                     <Bell className="h-5 w-5 text-gray-300 hover:text-white transition-colors duration-200" />
                     
-                    {/* Subtle notification indicator - only show when there are unread notifications */}
+                    {/* Small green notification dot - only show when there are unread notifications */}
                     {unreadCount > 0 && (
-                      <div className="absolute -top-1 -right-1">
-                        {/* Simple notification badge with subtle design */}
-                        <div className="min-w-[16px] h-[16px] bg-blue-500 text-white text-[10px] font-medium rounded-full flex items-center justify-center border border-nxe-surface">
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </div>
+                      <div className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+                        {/* Tiny green dot indicator */}
+                        <div 
+                          className="w-2 h-2 bg-green-500 rounded-full border border-nxe-dark animate-pulse"
+                          data-testid="status-notifications-unread-dot"
+                          aria-label="You have unread notifications"
+                        ></div>
                       </div>
                     )}
                   </div>
