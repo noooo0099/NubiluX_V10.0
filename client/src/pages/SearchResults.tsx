@@ -148,14 +148,14 @@ export default function SearchResults() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              className="w-full h-12 pl-12 pr-20 bg-gray-700/90 border-0 rounded-full text-white placeholder-gray-400 focus:outline-none focus:bg-gray-600/90 focus:ring-0 transition-all duration-300"
+              className="w-full h-12 pl-12 pr-12 bg-gray-700/90 border-0 rounded-full text-white placeholder-gray-400 focus:outline-none focus:bg-gray-600/90 focus:ring-0 transition-all duration-300"
               data-testid="input-search"
             />
             {searchQuery && (
               <Button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-14 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-gray-500/20 rounded-full transition-all duration-200"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-gray-500/20 rounded-full transition-all duration-200"
                 variant="ghost"
                 size="sm"
                 data-testid="button-clear-search"
@@ -163,13 +163,6 @@ export default function SearchResults() {
                 <X className="h-4 w-4 text-gray-400" />
               </Button>
             )}
-            <Button 
-              type="submit" 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-nxe-primary hover:bg-nxe-primary/80 rounded-full h-8 w-8 p-0 transition-all duration-200"
-              data-testid="button-search"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
           </div>
         </form>
         
