@@ -44,6 +44,7 @@ interface StatusUpdate {
 
 export default function StatusUpdates() {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [content, setContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -91,6 +92,15 @@ export default function StatusUpdates() {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
+  };
+
+  const handleCameraCapture = (file: File) => {
+    setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setShowCamera(false);
+    // Automatically show the create form when camera capture is done
+    setShowCreateForm(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
