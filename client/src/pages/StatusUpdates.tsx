@@ -52,11 +52,86 @@ export default function StatusUpdates() {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Sample status updates for demonstration
+  const sampleStatusUpdates: StatusUpdate[] = [
+    {
+      id: 999,
+      userId: 999,
+      content: "Akhirnya dapet Mythic rank di Mobile Legends! 🔥 Thanks buat semua yang udah support journey aku dari Epic! 💪",
+      media: "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+      mediaType: 'image',
+      isPublic: true,
+      viewCount: 124,
+      expiresAt: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      user: {
+        username: "proPlayerML",
+        displayName: "Teh Anis",
+        profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        isVerified: true
+      }
+    },
+    {
+      id: 998,
+      userId: 998,
+      content: "Squad PUBG kita menang Chicken Dinner! 🐔 Gameplay seru banget tadi, clutch 1v4 di final circle 😎",
+      media: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+      mediaType: 'image',
+      isPublic: true,
+      viewCount: 87,
+      expiresAt: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      user: {
+        username: "arhanGamer",
+        displayName: "Arhan",
+        profilePicture: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        isVerified: false
+      }
+    },
+    {
+      id: 997,
+      userId: 997,
+      content: "Setup gaming baru udah ready! RTX 4070 + Ryzen 7 7700X = perfect combo untuk streaming 🎮✨",
+      media: null,
+      mediaType: null,
+      isPublic: true,
+      viewCount: 156,
+      expiresAt: new Date(Date.now() + 15 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      user: {
+        username: "techEna",
+        displayName: "ena",
+        profilePicture: "https://images.unsplash.com/photo-1494790108755-2616b612b634?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+        isVerified: false
+      }
+    },
+    {
+      id: 996,
+      userId: 996,
+      content: "Jual akun Mobile Legends Mythic 100⭐ lengkap dengan 200+ skin rare! Harga nego, serious buyer only 💎",
+      media: "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+      mediaType: 'image',
+      isPublic: true,
+      viewCount: 203,
+      expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+      user: {
+        username: "sellML2025",
+        displayName: "D",
+        profilePicture: undefined,
+        isVerified: false
+      }
+    }
+  ];
+
   // Fetch active status updates
-  const { data: statusUpdates = [], isLoading } = useQuery({
+  const { data: apiStatusUpdates = [], isLoading } = useQuery<StatusUpdate[]>({
     queryKey: ['/api/status'],
     refetchInterval: 30000 // Refresh setiap 30 detik
   });
+
+  // Use API data if available, otherwise use sample data
+  const statusUpdates = apiStatusUpdates.length > 0 ? apiStatusUpdates : sampleStatusUpdates;
 
   // Create status mutation
   const createStatusMutation = useMutation({
@@ -344,10 +419,10 @@ export default function StatusUpdates() {
                 </div>
                 <div className="flex-1 p-4">
                   <h3 className="text-sm font-semibold text-white mb-1 line-clamp-2">
-                    Update Terbaru Mobile Legends: Hero Baru dan Event Spesial
+                    🔥 Update Terbesar Mobile Legends 2025: Hero Cecilion Revamp
                   </h3>
                   <p className="text-xs text-gray-400 mb-2 line-clamp-2">
-                    Moonton merilis hero assassin terbaru dengan skill ultimate yang game-changing...
+                    Moonton merilis revamp besar-besaran untuk Hero Cecilion dengan skill ultimate baru yang dapat mengubah alur pertandingan dalam sekali cast...
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-nxe-primary">Gaming Indonesia</span>
@@ -370,10 +445,10 @@ export default function StatusUpdates() {
                   />
                 </div>
                 <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
-                  PUBG Season Baru: Map Sanhok Remastered
+                  🎮 PUBG Season 31: Map Sanhok 2.0 Hadir!
                 </h4>
                 <p className="text-xs text-gray-400 line-clamp-2 mb-2">
-                  Peningkatan grafis dan gameplay yang menakjubkan
+                  Map favorit dengan visual yang lebih realistis dan weapon baru yang overpowered
                 </p>
                 <span className="text-xs text-gray-500">4 jam lalu</span>
               </CardContent>
@@ -389,12 +464,88 @@ export default function StatusUpdates() {
                   />
                 </div>
                 <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
-                  Turnamen Valorant Regional Championship
+                  🏆 VCT Indonesia: RRQ vs BOOM Esports
                 </h4>
                 <p className="text-xs text-gray-400 line-clamp-2 mb-2">
-                  8 tim terbaik Indonesia berkompetisi
+                  Grand Final yang dinanti-nanti! Siapa yang akan mewakili Indonesia?
+                </p>
+                <span className="text-xs text-gray-500">6 jam lalu</span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1556438064-2d7646166914?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="Free Fire news"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  ⚡ Free Fire: Event Tahun Baru Cina 2025
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  Bundle skin eksklusif dan diamond gratis! Jangan sampai kelewatan
+                </p>
+                <span className="text-xs text-gray-500">8 jam lalu</span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="Genshin Impact news"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  🌟 Genshin Impact: Karakter 5-Star Terbaru
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  Xianyun debut sebagai karakter Anemo dengan kemampuan support terbaik
+                </p>
+                <span className="text-xs text-gray-500">12 jam lalu</span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1574227567175-ad9ea3cf8b16?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="COD Mobile news"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  🎯 COD Mobile: Ranked Season 11 Dimulai
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  Map baru Blackout 2.0 dan senjata Mythic CR-56 AMAX tersedia
                 </p>
                 <span className="text-xs text-gray-500">1 hari lalu</span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-nxe-surface border-nxe-border/30">
+              <CardContent className="p-3">
+                <div className="aspect-video mb-2 rounded overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                    alt="Gaming peripherals"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
+                  💻 Rekomendasi HP Gaming Terbaik 2025
+                </h4>
+                <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  Budget 3-15 juta untuk performa maksimal di semua game mobile
+                </p>
+                <span className="text-xs text-gray-500">2 hari lalu</span>
               </CardContent>
             </Card>
           </div>
@@ -409,16 +560,31 @@ export default function StatusUpdates() {
             #MobileLegendsUpdate
           </Badge>
           <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
-            #PUBGSeason
+            #PUBGSeason31
           </Badge>
           <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
-            #ValorantTournament
+            #VCTIndonesia
           </Badge>
           <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
-            #GamingSetup
+            #FreeFire2025
           </Badge>
           <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
-            #ESports
+            #GenshinImpact
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #CODMobile
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #GamingSetup2025
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #ESportsIndonesia
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #MythicAccount
+          </Badge>
+          <Badge className="bg-nxe-surface border border-nxe-border text-gray-300 hover:bg-nxe-primary hover:text-white cursor-pointer">
+            #JualAkun
           </Badge>
         </div>
       </div>
