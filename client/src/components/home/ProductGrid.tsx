@@ -29,7 +29,7 @@ export default function ProductGrid({ category }: ProductGridProps) {
 
   return (
     <section className="px-4 py-4">
-      <h2 className="text-lg font-semibold text-white mb-4">Latest Products</h2>
+      <h2 className="text-lg font-semibold text-white mb-4">New Posting</h2>
       
       <div className="grid grid-cols-2 gap-4">
         {products.map((product) => (
