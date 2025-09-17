@@ -293,6 +293,24 @@ export const userRegisterSchema = createInsertSchema(users).omit({
   adminRequestAt: true,
 });
 
+// SECURE: User profile update schema - only allows safe fields to be updated
+export const userUpdateSchema = z.object({
+  displayName: z.string().min(1, "Display name is required").max(50, "Display name must be less than 50 characters").optional(),
+  bio: z.string().max(150, "Bio must be less than 150 characters").optional(),
+  profilePicture: z.string().optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(6, "Password must be at least 6 characters").optional(),
+}).refine((data) => {
+  // If new password is provided, current password must also be provided
+  if (data.newPassword && !data.currentPassword) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Current password is required when setting a new password",
+  path: ["currentPassword"],
+});
+
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
@@ -365,6 +383,7 @@ export const insertRepostSchema = createInsertSchema(reposts).omit({
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UserRegister = z.infer<typeof userRegisterSchema>;
+export type UserUpdate = z.infer<typeof userUpdateSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Chat = typeof chats.$inferSelect;

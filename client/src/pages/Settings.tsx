@@ -103,7 +103,7 @@ export default function Settings() {
       icon: <Lock className="h-6 w-6" />,
       label: "Akun",
       description: "Notifikasi keamanan, ganti nomor",
-      action: () => setLocation("/profile"),
+      action: () => setLocation("/edit-account"),
     },
     {
       icon: <Shield className="h-6 w-6" />,

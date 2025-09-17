@@ -34,6 +34,7 @@ import SellerDashboard from "@/pages/SellerDashboard";
 import Help from "@/pages/Help";
 import ViewAll from "@/pages/ViewAll";
 import QRCodePage from "@/pages/QRCode";
+import EditAccount from "@/pages/EditAccount";
 
 // Auth components
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -91,8 +92,8 @@ function Router() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [location] = useLocation();
   
-  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, search page, and chat page
-  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/qrcode' || location.startsWith('/search') || location === '/chat' || location.startsWith('/chat/');
+  // Hide TopNavbar on auth pages (login/register), upload/posting page, settings page, QR code page, search page, chat page, and edit account page
+  const hideTopNavbar = location === '/auth' || location === '/upload' || location === '/settings' || location === '/edit-account' || location === '/qrcode' || location.startsWith('/search') || location === '/chat' || location.startsWith('/chat/');
 
   return (
     <div className="min-h-screen bg-nxe-dark">
@@ -147,6 +148,13 @@ function Router() {
             {() => (
               <RequireAuth>
                 <Settings />
+              </RequireAuth>
+            )}
+          </Route>
+          <Route path="/edit-account">
+            {() => (
+              <RequireAuth>
+                <EditAccount />
               </RequireAuth>
             )}
           </Route>

@@ -7,6 +7,7 @@ interface User {
   email: string;
   displayName?: string;
   profilePicture?: string;
+  bio?: string;
   role: 'owner' | 'admin' | 'user';
   isVerified: boolean;
   walletBalance: string;
@@ -20,6 +21,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 interface RegisterData {
@@ -109,6 +111,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...updates } : null);
+  };
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -116,7 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
+    updateUser
   };
 
   return (
