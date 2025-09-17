@@ -197,42 +197,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (message.content.includes('@admin')) {
               // AI Admin will process this
               setTimeout(async () => {
-                const chatHistory = await storage.getMessagesByChatId(message.chatId);
-                // This would trigger AI admin response
-                const aiResponse = await processAdminMention(chatHistory, chat);
-                
-                // Create AI admin system user if doesn't exist
-                let aiAdminUser = await storage.getUserByUsername('ai-admin');
-                if (!aiAdminUser) {
-                  aiAdminUser = await storage.createUser({
-                    username: 'ai-admin',
-                    email: 'ai-admin@system.local',
-                    password: await hashPassword('system-ai-admin'),
-                    role: 'admin',
-                    displayName: 'AI Admin',
-                    isVerified: true,
-                    isAdminApproved: true,
-                    walletBalance: '0'
+                try {
+                  const chatHistory = await storage.getMessagesByChatId(message.chatId);
+                  // This would trigger AI admin response
+                  const aiResponse = await processAdminMention(chatHistory, chat);
+                  
+                  // Create AI admin system user if doesn't exist
+                  let aiAdminUser = await storage.getUserByUsername('ai-admin');
+                  if (!aiAdminUser) {
+                    aiAdminUser = await storage.createUser({
+                      username: 'ai-admin',
+                      email: 'ai-admin@system.local',
+                      password: await hashPassword('system-ai-admin'),
+                      role: 'admin',
+                      displayName: 'AI Admin',
+                      isVerified: true,
+                      isAdminApproved: true,
+                      walletBalance: '0'
+                    });
+                  }
+                  const aiAdminId = aiAdminUser.id;
+                  
+                  const adminMessage = await storage.createMessage({
+                    chatId: message.chatId,
+                    senderId: aiAdminId,
+                    content: aiResponse,
+                    messageType: 'ai_admin'
+                  });
+
+                  [chat.buyerId, chat.sellerId].forEach(participantId => {
+                    const participantWs = clients.get(participantId);
+                    if (participantWs && participantWs.readyState === WebSocket.OPEN) {
+                      participantWs.send(JSON.stringify({
+                        type: 'new_message',
+                        message: adminMessage
+                      }));
+                    }
+                  });
+                } catch (adminError) {
+                  console.error('AI Admin processing error:', adminError);
+                  
+                  // Send error message to chat participants
+                  const errorMessage = {
+                    chatId: message.chatId,
+                    content: 'I apologize, but I encountered an error while processing your admin request. Please try again later.',
+                    messageType: 'system' as const,
+                    senderId: 0, // System message
+                    createdAt: new Date().toISOString()
+                  };
+                  
+                  [chat.buyerId, chat.sellerId].forEach(participantId => {
+                    const participantWs = clients.get(participantId);
+                    if (participantWs && participantWs.readyState === WebSocket.OPEN) {
+                      participantWs.send(JSON.stringify({
+                        type: 'new_message',
+                        message: errorMessage
+                      }));
+                    }
                   });
                 }
-                const aiAdminId = aiAdminUser.id;
-                
-                const adminMessage = await storage.createMessage({
-                  chatId: message.chatId,
-                  senderId: aiAdminId,
-                  content: aiResponse,
-                  messageType: 'ai_admin'
-                });
-
-                [chat.buyerId, chat.sellerId].forEach(participantId => {
-                  const participantWs = clients.get(participantId);
-                  if (participantWs && participantWs.readyState === WebSocket.OPEN) {
-                    participantWs.send(JSON.stringify({
-                      type: 'new_message',
-                      message: adminMessage
-                    }));
-                  }
-                });
               }, 1000);
             }
           }
